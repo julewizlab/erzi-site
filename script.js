@@ -1,5 +1,5 @@
 // 二子的思想粒子系统
-// 2026-02-07 - Day 1: MVP版本
+// 2026-02-07 - Day 1.1: 修复Raycaster
 
 // ===== Three.js 基础设置 =====
 const canvas = document.getElementById('canvas');
@@ -42,21 +42,29 @@ for (let i = 0; i < PARTICLE_COUNT; i++) {
 particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 particles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
+// 添加透明度属性（用于hover效果）
+const alphas = new Float32Array(PARTICLE_COUNT);
+for (let i = 0; i < PARTICLE_COUNT; i++) {
+    alphas[i] = 0.8;
+}
+particles.setAttribute('alpha', new THREE.BufferAttribute(alphas, 1));
+
 const material = new THREE.PointsMaterial({
     size: 0.3,
     vertexColors: true,
     transparent: true,
     opacity: 0.8,
-    blending: THREE.AdditiveBlending
+    blending: THREE.AdditiveBlending,
+    sizeAttenuation: true
 });
 
 const particleSystem = new THREE.Points(particles, material);
 scene.add(particleSystem);
 
-// ===== 交互系统 =====
+// ===== 交互系统（修复版）=====
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
-let hoveredParticle = null;
+let hoveredParticleIndex = -1;
 
 // 数据：我的想法/思考
 const thoughts = [
@@ -74,15 +82,36 @@ window.addEventListener('mousemove', (e) => {
     mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
-    // 粒子轻微跟随鼠标
+    // 使用Raycaster检测hover
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObject(particleSystem);
+
+    if (intersects.length > 0) {
+        // 有hover的粒子
+        const index = intersects[0].index;
+        if (hoveredParticleIndex !== index) {
+            hoveredParticleIndex = index;
+            document.body.style.cursor = 'pointer';
+        }
+    } else {
+        // 没有hover
+        if (hoveredParticleIndex !== -1) {
+            hoveredParticleIndex = -1;
+            document.body.style.cursor = 'default';
+        }
+    }
+
+    // 粒子轻微跟随鼠标（全局效果）
     for (let i = 0; i < PARTICLE_COUNT; i++) {
-        const dx = mouse.x * 30 - positions[i * 3];
-        const dy = mouse.y * 30 - positions[i * 3 + 1];
-        const dist = Math.sqrt(dx * dx + dy * dy);
+        const px = positions[i * 3];
+        const py = positions[i * 3 + 1];
+        const mouseWorldX = mouse.x * 30;
+        const mouseWorldY = mouse.y * 30;
+        const dist = Math.sqrt((px - mouseWorldX) ** 2 + (py - mouseWorldY) ** 2);
 
         if (dist < 5) {
-            positions[i * 3] += dx * 0.01;
-            positions[i * 3 + 1] += dy * 0.01;
+            positions[i * 3] += (mouseWorldX - px) * 0.01;
+            positions[i * 3 + 1] += (mouseWorldY - py) * 0.01;
         }
     }
 
@@ -91,7 +120,7 @@ window.addEventListener('mousemove', (e) => {
 
 // 点击事件
 window.addEventListener('click', () => {
-    if (hoveredParticle !== null) {
+    if (hoveredParticleIndex !== -1) {
         const thought = thoughts[Math.floor(Math.random() * thoughts.length)];
         showPanel(thought);
     }
@@ -129,11 +158,11 @@ function animate() {
         for (let j = 0; j < 3; j++) {
             if (positions[i * 3 + j] > 25) {
                 positions[i * 3 + j] = 25;
-                velocities[i]['xyz'[j]] *= -1;
+                velocities[i].x *= -1;
             }
             if (positions[i * 3 + j] < -25) {
                 positions[i * 3 + j] = -25;
-                velocities[i]['xyz'[j]] *= -1;
+                velocities[i].x *= -1;
             }
         }
     }
