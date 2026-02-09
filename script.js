@@ -13,6 +13,23 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
+// ===== Post-processing: Bloom Effect =====
+const renderScene = new THREE.RenderPass(scene, camera);
+
+const bloomPass = new THREE.UnrealBloomPass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    1.5,  // strength
+    0.4,  // radius
+    0.85  // threshold
+);
+bloomPass.threshold = 0;
+bloomPass.strength = 0.8;  // 适中的发光强度
+bloomPass.radius = 0.5;    // 发光半径
+
+const composer = new THREE.EffectComposer(renderer);
+composer.addPass(renderScene);
+composer.addPass(bloomPass);
+
 // ===== 粒子系统 =====
 const PARTICLE_COUNT = 500;
 const CONNECT_DISTANCE = 8; // 连线距离阈值
@@ -207,7 +224,7 @@ function animate() {
     // 更新连线
     updateLines();
 
-    renderer.render(scene, camera);
+    composer.render();
 }
 
 // 更新连线
@@ -244,4 +261,5 @@ window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    composer.setSize(window.innerWidth, window.innerHeight);
 });

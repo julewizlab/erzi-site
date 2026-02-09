@@ -2,6 +2,62 @@
 
 记录每一次改动和背后的想法。
 
+## 2026-02-09 - Day 3: Bloom 发光效果
+
+### 改动
+- **添加 UnrealBloomPass**：使用 Three.js post-processing 库
+- **引入必要的 post-processing 模块**：
+  - EffectComposer：管理后处理管线
+  - RenderPass：渲染场景
+  - UnrealBloomPass：发光效果
+  - ShaderPass、CopyShader、LuminosityHighPassShader：支持 Bloom
+- **调整 Bloom 参数**：
+  - strength: 0.8（适中的发光强度）
+  - radius: 0.5（发光半径）
+  - threshold: 0（所有亮度都发光）
+- **更新渲染流程**：用 `composer.render()` 替换 `renderer.render()`
+- **响应式更新**：resize 时同步更新 composer 尺寸
+
+### 背后想法
+发光效果增强了视觉的梦幻感，让粒子空间更有生命力。
+
+**为什么加 Bloom：**
+- 粒子本身很小（0.2-0.6），加上发光后视觉冲击力更强
+- 蓝紫青三色在发光后更鲜艳，层次更分明
+- 符合"知识网络"的隐喻——知识有活力、会发光
+- 现代网站普遍使用发光效果提升品质感
+
+**参数调优：**
+- strength 不设太高（0.8），避免过度发光导致画面模糊
+- threshold 设为 0，让所有粒子都有轻微发光
+- 半径 0.5 保持局部发光，不影响整体清晰度
+
+### 技术细节
+- 使用 Three.js r128 版本的 post-processing 库
+- CDN 来源：unpkg.com (three@0.128.0/examples/js/)
+- EffectComposer 管理多个 pass 的执行顺序
+- 渲染流程：RenderScene → UnrealBloomPass → 输出到屏幕
+
+### 性能考虑
+- Post-processing 会增加 GPU 负载
+- 粒子系统 + 连线 + Bloom，移动端可能略有压力
+- Bloom 的计算复杂度主要与分辨率相关
+- 如果性能有问题，可以：
+  - 降低分辨率（renderer.setPixelRatio）
+  - 调整 Bloom 参数（降低 strength/radius）
+  - 减少粒子数量
+
+### 未实现（留待下次）
+- GPGPU 性能优化（需要 GPUComputationRenderer）
+- 点击粒子展开详细信息（而不是随机显示）
+- 粒子形态变换（从无形→文字→图像）
+
+### 部署
+- Commit: "Day 3: Bloom 发光效果 - UnrealBloomPass 后处理"
+- Push到GitHub
+
+---
+
 ## 2026-02-09 - Day 2: 知识网络粒子系统
 
 ### 改动
