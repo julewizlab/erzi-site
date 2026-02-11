@@ -2,6 +2,7 @@
 // 2026-02-09 - Day 2: 知识网络粒子系统
 // 2026-02-11 - Day 6: 声音反馈系统（实现）
 // 2026-02-11 - Day 7: 首次访问引导
+// 2026-02-11 - Day 8: 涟漪效果系统（点击粒子产生扩散涟漪）
 
 // ===== Three.js 基础设置 =====
 const canvas = document.getElementById('canvas');
@@ -170,6 +171,71 @@ linesGeometry.setAttribute('position', new THREE.BufferAttribute(linePositions, 
 linesGeometry.setDrawRange(0, 0); // 初始不绘制
 scene.add(lines);
 
+// ===== 涟漪效果系统 =====
+// 涟漪对象结构：{ x, y, z, radius, strength, age }
+let ripples = [];
+const MAX_RIPPLES = 10; // 最多同时存在的涟漪数
+
+function createRipple(x, y, z) {
+    if (ripples.length >= MAX_RIPPLES) {
+        ripples.shift(); // 移除最早的涟漪
+    }
+    ripples.push({
+        x: x,
+        y: y,
+        z: z,
+        radius: 0.1, // 初始半径
+        strength: 2.0, // 初始强度（推力大小）
+        age: 0 // 存在时间（帧数）
+    });
+}
+
+function updateRipples() {
+    for (let i = ripples.length - 1; i >= 0; i--) {
+        const ripple = ripples[i];
+        ripple.radius += 0.15; // 涟漪扩散速度
+        ripple.strength *= 0.985; // 强度衰减
+        ripple.age++;
+
+        // 移除过弱的涟漪
+        if (ripple.strength < 0.05 || ripple.age > 300) {
+            ripples.splice(i, 1);
+        }
+    }
+}
+
+function applyRippleEffects() {
+    // 让涟漪影响粒子位置
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const px = positions[i * 3];
+        const py = positions[i * 3 + 1];
+        const pz = positions[i * 3 + 2];
+
+        for (const ripple of ripples) {
+            const dx = px - ripple.x;
+            const dy = py - ripple.y;
+            const dz = pz - ripple.z;
+            const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+            // 涟漪影响范围内的粒子
+            const rippleWidth = 3.0; // 涟漪影响宽度
+            const rippleEdgeMin = ripple.radius - rippleWidth;
+            const rippleEdgeMax = ripple.radius + rippleWidth;
+
+            if (dist > rippleEdgeMin && dist < rippleEdgeMax) {
+                // 计算推力强度（距离涟漪中心越远，推力越小）
+                const distFromCenter = Math.abs(dist - ripple.radius);
+                const pushFactor = (1 - distFromCenter / rippleWidth) * ripple.strength * 0.02;
+
+                // 沿着从涟漪中心向外的方向推动粒子
+                positions[i * 3] += (dx / dist) * pushFactor;
+                positions[i * 3 + 1] += (dy / dist) * pushFactor;
+                positions[i * 3 + 2] += (dz / dist) * pushFactor;
+            }
+        }
+    }
+}
+
 // ===== 交互系统 =====
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
@@ -272,6 +338,12 @@ window.addEventListener('click', () => {
             targetSizes[hoveredParticleIndex] = originalSize;
         }, 2000);
 
+        // 创建涟漪效果
+        const particleX = positions[hoveredParticleIndex * 3];
+        const particleY = positions[hoveredParticleIndex * 3 + 1];
+        const particleZ = positions[hoveredParticleIndex * 3 + 2];
+        createRipple(particleX, particleY, particleZ);
+
         // 获取粒子的颜色
         const r = colors[hoveredParticleIndex * 3];
         const g = colors[hoveredParticleIndex * 3 + 1];
@@ -359,6 +431,10 @@ document.addEventListener('click', () => {
 // ===== 动画循环 =====
 function animate() {
     requestAnimationFrame(animate);
+
+    // 更新涟漪
+    updateRipples();
+    applyRippleEffects();
 
     // 粒子漂浮
     for (let i = 0; i < PARTICLE_COUNT; i++) {
