@@ -3,6 +3,13 @@
 // 2026-02-11 - Day 6: 声音反馈系统（实现）
 // 2026-02-11 - Day 7: 首次访问引导
 // 2026-02-11 - Day 8: 涟漪效果系统（点击粒子产生扩散涟漪）
+// 2026-02-11 - Day 9: 暂停/恢复 + 自动减速（优化长时间浏览体验）
+
+// ===== 动画控制 =====
+let isPaused = false;
+let pageLoadTime = Date.now();
+const AUTO_SLOWDOWN_TIME = 5 * 60 * 1000; // 5分钟后自动减速
+let slowMotionMode = false;
 
 // ===== Three.js 基础设置 =====
 const canvas = document.getElementById('canvas');
@@ -432,15 +439,31 @@ document.addEventListener('click', () => {
 function animate() {
     requestAnimationFrame(animate);
 
+    // 检查是否需要自动减速
+    const elapsedTime = Date.now() - pageLoadTime;
+    if (!slowMotionMode && elapsedTime > AUTO_SLOWDOWN_TIME) {
+        slowMotionMode = true;
+        updateToggleBtnText();
+    }
+
+    // 如果暂停，只渲染不更新
+    if (isPaused) {
+        composer.render();
+        return;
+    }
+
+    // 根据模式决定运动速度
+    const speedMultiplier = slowMotionMode ? 0.3 : 1.0;
+
     // 更新涟漪
     updateRipples();
     applyRippleEffects();
 
     // 粒子漂浮
     for (let i = 0; i < PARTICLE_COUNT; i++) {
-        positions[i * 3] += velocities[i].x;
-        positions[i * 3 + 1] += velocities[i].y;
-        positions[i * 3 + 2] += velocities[i].z;
+        positions[i * 3] += velocities[i].x * speedMultiplier;
+        positions[i * 3 + 1] += velocities[i].y * speedMultiplier;
+        positions[i * 3 + 2] += velocities[i].z * speedMultiplier;
 
         // 边界检查（更软的边界）
         for (let j = 0; j < 3; j++) {
@@ -463,9 +486,10 @@ function animate() {
     particles.attributes.position.needsUpdate = true;
     particles.attributes.size.needsUpdate = true;
 
-    // 缓慢旋转（更慢）
-    particleSystem.rotation.y += 0.0003;
-    lines.rotation.y += 0.0003;
+    // 缓慢旋转（根据模式调整速度）
+    const rotationSpeed = slowMotionMode ? 0.0001 : 0.0003;
+    particleSystem.rotation.y += rotationSpeed;
+    lines.rotation.y += rotationSpeed;
 
     // 更新连线
     updateLines();
@@ -509,3 +533,26 @@ window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
     composer.setSize(window.innerWidth, window.innerHeight);
 });
+
+// ===== 暂停/恢复按钮 =====
+const toggleBtn = document.getElementById('toggle-animation');
+
+function toggleAnimation() {
+    isPaused = !isPaused;
+    updateToggleBtnText();
+}
+
+function updateToggleBtnText() {
+    if (isPaused) {
+        toggleBtn.textContent = '恢复';
+    } else if (slowMotionMode) {
+        toggleBtn.textContent = '正常速度';
+    } else {
+        toggleBtn.textContent = '暂停';
+    }
+}
+
+toggleBtn.addEventListener('click', toggleAnimation);
+
+// 初始化按钮文字
+updateToggleBtnText();

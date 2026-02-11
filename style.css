@@ -39,6 +39,33 @@ body {
     padding: 2rem;
 }
 
+/* 暂停/恢复按钮 */
+.toggle-btn {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    background: rgba(102, 126, 234, 0.2);
+    border: 1px solid rgba(102, 126, 234, 0.4);
+    color: #667eea;
+    padding: 0.6rem 1.2rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.toggle-btn:hover {
+    background: rgba(102, 126, 234, 0.3);
+    border-color: rgba(102, 126, 234, 0.6);
+    transform: scale(1.05);
+}
+
+.toggle-btn:active {
+    transform: scale(0.95);
+}
+
 /* Header */
 header {
     text-align: left;
