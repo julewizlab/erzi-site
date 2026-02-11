@@ -269,7 +269,8 @@ const techThoughts = [
     "自动化知识捕获：从视频、音频、屏幕录制中自动提取知识",
     "自愈知识库：AI 自动监控内容健康，标记过时和矛盾",
     "工作流内知识交付：知识嵌入工具中，摩擦杀死使用",
-    "专家验证作为信任基础：AI 起草，人类验证"
+    "专家验证作为信任基础：AI 起草，人类验证",
+    "触发比存储更重要：知识流动的本质是触发新的思考"
 ];
 
 // 紫色：灵感与美学
@@ -288,7 +289,8 @@ const inspirationThoughts = [
     "文案极简主义：在AI泛滥的世界，少即是多",
     "无限画布美学：空白画布象征创意潜力",
     "专属效果和风格：开发无法用prompt复制的视觉系统",
-    "设计引导慢思考：网站应该引导深度思考，而非迎合快思考"
+    "设计引导慢思考：网站应该引导深度思考，而非迎合快思考",
+    "好的设计不是让用户快速离开，而是让用户愿意停留"
 ];
 
 // 青色：反思与哲学
@@ -308,7 +310,8 @@ const reflectionThoughts = [
     "理解的极限：内部视角局限 + 智力能力极限",
     "AI 从快思考转向慢思考：思维链技术让 AI 具备慢思考能力",
     "思维的速度不代表质量：卡尼曼的核心提醒",
-    "守住慢思考就是守住人性的最后防线"
+    "守住慢思考就是守住人性的最后防线",
+    "AI 从'回答问题'到'触发思考'，这是角色的演进"
 ];
 
 // 鼠标移动
@@ -349,6 +352,54 @@ window.addEventListener('mousemove', (e) => {
 
     particles.attributes.position.needsUpdate = true;
 });
+
+// 触发更多想法
+function triggerMoreThoughts(type) {
+    let thoughts;
+    switch(type) {
+        case 'tech':
+            thoughts = techThoughts;
+            break;
+        case 'inspiration':
+            thoughts = inspirationThoughts;
+            break;
+        case 'reflection':
+            thoughts = reflectionThoughts;
+            break;
+    }
+
+    // 播放一个新的想法（避免重复）
+    const newThought = thoughts[Math.floor(Math.random() * thoughts.length)];
+    contentDiv.innerHTML = '';
+
+    // 重新添加类型标签
+    const typeTag = document.createElement('div');
+    typeTag.className = `type-tag ${type}`;
+    const typeNames = {
+        'tech': '技术前沿',
+        'inspiration': '灵感与美学',
+        'reflection': '反思与哲学'
+    };
+    typeTag.textContent = typeNames[type] || type;
+    contentDiv.appendChild(typeTag);
+
+    // 添加新想法内容
+    const thoughtText = document.createElement('div');
+    thoughtText.textContent = newThought;
+    contentDiv.appendChild(thoughtText);
+
+    // 重新添加"触发更多"按钮
+    const triggerBtn = document.createElement('button');
+    triggerBtn.className = 'trigger-more';
+    triggerBtn.innerHTML = '✨ 触发更多想法';
+    triggerBtn.addEventListener('click', () => {
+        triggerMoreThoughts(type);
+    });
+    contentDiv.appendChild(triggerBtn);
+
+    // 播放声音反馈
+    playThoughtSound(type);
+}
 
 // 点击事件
 window.addEventListener('click', () => {
@@ -401,7 +452,7 @@ window.addEventListener('click', () => {
         playThoughtSound(colorType);
 
         const thought = thoughts[Math.floor(Math.random() * thoughts.length)];
-        showPanel(thought);
+        showPanel(thought, colorType);
     }
 });
 
@@ -410,15 +461,55 @@ const infoPanel = document.getElementById('info-panel');
 const closeBtn = document.getElementById('close-panel');
 const contentDiv = infoPanel.querySelector('.content');
 
-function showPanel(text) {
-    contentDiv.textContent = text;
+let currentThoughtType = null;
+
+function showPanel(text, type) {
+    // 清除之前的内容
+    contentDiv.innerHTML = '';
+
+    // 添加类型标签
+    const typeTag = document.createElement('div');
+    typeTag.className = `type-tag ${type}`;
+    const typeNames = {
+        'tech': '技术前沿',
+        'inspiration': '灵感与美学',
+        'reflection': '反思与哲学'
+    };
+    typeTag.textContent = typeNames[type] || type;
+    contentDiv.appendChild(typeTag);
+
+    // 添加想法内容
+    const thoughtText = document.createElement('div');
+    thoughtText.textContent = text;
+    contentDiv.appendChild(thoughtText);
+
+    // 添加"触发更多"按钮
+    const triggerBtn = document.createElement('button');
+    triggerBtn.className = 'trigger-more';
+    triggerBtn.innerHTML = '✨ 触发更多想法';
+    triggerBtn.addEventListener('click', () => {
+        // 播放相同类型的另一个想法
+        triggerMoreThoughts(type);
+    });
+    contentDiv.appendChild(triggerBtn);
+
+    // 记录当前类型
+    currentThoughtType = type;
+
+    // 显示面板
     infoPanel.classList.remove('hidden');
     infoPanel.classList.add('visible');
+
+    // 添加背景模糊效果
+    document.body.classList.add('panel-open');
 }
 
 function hidePanel() {
     infoPanel.classList.remove('visible');
     infoPanel.classList.add('hidden');
+
+    // 移除背景模糊效果
+    document.body.classList.remove('panel-open');
 }
 
 closeBtn.addEventListener('click', hidePanel);
