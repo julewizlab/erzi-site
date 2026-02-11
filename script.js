@@ -297,8 +297,6 @@ function removeFavorite(thought) {
 }
 
 // 页面加载时读取收藏
-window.addEventListener('load', loadFavorites);
-
 // UI：收藏按钮状态
 let currentThoughtText = '';
 let favoriteBtn = null;
@@ -314,6 +312,58 @@ function updateFavoriteBtnState() {
         }
     }
 }
+
+// ===== 想法去重系统 =====
+// 记住用户已看过的想法，避免重复显示
+let viewedThoughts = [];
+
+function loadViewedThoughts() {
+    try {
+        const saved = localStorage.getItem('erzi-site-viewed-thoughts');
+        if (saved) {
+            viewedThoughts = JSON.parse(saved);
+        }
+    } catch (e) {
+        console.error('Failed to load viewed thoughts:', e);
+        viewedThoughts = [];
+    }
+}
+
+function saveViewedThoughts() {
+    try {
+        localStorage.setItem('erzi-site-viewed-thoughts', JSON.stringify(viewedThoughts));
+    } catch (e) {
+        console.error('Failed to save viewed thoughts:', e);
+    }
+}
+
+function markThoughtAsViewed(thoughtText) {
+    if (!viewedThoughts.includes(thoughtText)) {
+        viewedThoughts.push(thoughtText);
+        saveViewedThoughts();
+    }
+}
+
+function getRandomThought(thoughts) {
+    // 过滤掉已看过的想法
+    const availableThoughts = thoughts.filter(t => !viewedThoughts.includes(t));
+
+    // 如果所有想法都看过了，清空记录重新开始
+    if (availableThoughts.length === 0) {
+        viewedThoughts = [];
+        saveViewedThoughts();
+        return thoughts[Math.floor(Math.random() * thoughts.length)];
+    }
+
+    // 从未看过的想法中随机选择
+    return availableThoughts[Math.floor(Math.random() * availableThoughts.length)];
+}
+
+// 页面加载时初始化已看过的想法
+window.addEventListener('load', () => {
+    loadViewedThoughts();
+    loadFavorites();
+});
 
 // 数据：我的想法/思考（按颜色分层）
 // 蓝色：技术前沿
@@ -359,7 +409,17 @@ const techThoughts = [
     "AI 设计工具的 5 大核心能力：生成式视觉、布局辅助、智能配色、自动化资产、UX 洞察",
     "语义搜索 + 上下文注入：AI 时代知识管理的新范式",
     "主动推荐 + 模式识别：让知识库自己发现连接",
-    "多智能体协作 + 持续演化：知识库不是静态仓库，而是活系统"
+    "多智能体协作 + 持续演化：知识库不是静态仓库，而是活系统",
+    "AI 编程的'热修'时刻：大厂声称 25-30% 代码由 AI 生成，但一线体验更复杂",
+    "技术债的隐形危机：90% 的问题是代码气味，比显性 bug 更危险",
+    "效率悖论：主观感觉快了 20%，客观测试显示慢了 19%",
+    "AI 编程工具分层：补全层、聊天层、代理层、框架层",
+    "Vibe Coding：用自然语言描述软件，让 AI 编写、优化、调试代码",
+    "Vericoding：AI 生成代码 + 数学证明确保无 bug，形式化验证的未来",
+    "生理学测量认知努力：瞳孔直径变化 + 前额叶皮质血流动力学活动",
+    "眼动追踪 120Hz：反映认知努力的客观指标",
+    "fNIRS 技术：测量前额叶皮质的氧合血红蛋白变化",
+    "随机对照试验（RCT）：建立 AI 对认知努力的因果效应"
 ];
 
 // 紫色：灵感与美学
@@ -403,7 +463,17 @@ const inspirationThoughts = [
     "创作者的新技能：提示词工程 + 系统思维 + 工具整合能力",
     "创作者的人文技能：视觉素养 + 批判判断 + 沟通讲故事 + 情境理解",
     "色彩趋势 2026：低调内敛 vs 逃离主义，在不确定的世界里寻找心理空间",
-    "创作工具去订阅化：免费工具已经足够专业，Blender、Krita、Godot"
+    "创作工具去订阅化：免费工具已经足够专业，Blender、Krita、Godot",
+    "AI 编程从'神奇按钮'到'协作工程'：先规划后编码的范式转变",
+    "15 分钟瀑布工作流：头脑风暴 spec → 生成计划 → 迭代优化 → 开始编码",
+    "AI 编程工具分层：补全层、聊天层、代理层、框架层",
+    "上下文管理是成败关键：不要让 AI 猜，给它事实和约束",
+    "有纪律的 AI 辅助工程：积极使用 AI，但依然为产出的软件负责",
+    "意图四维框架：志向、情绪、思考、感觉，对齐才能认知扩展",
+    "认知扩展 vs 认知卸载：主动扩展探索视角，被动卸载获取快速答案",
+    "情绪作为信息：Damasio 的躯体标记假说，情绪对复杂决策至关重要",
+    "具身认知：思考不局限于大脑，身体作为整体智能系统",
+    "高学历的保护作用：批判性思维训练是 AI 时代的抗风险能力"
 ];
 
 // 青色：反思与哲学
@@ -447,7 +517,15 @@ const reflectionThoughts = [
     "旧时代：技能是门槛、知识是静态资产、工作是线性流程",
     "新时代：意图是门槛、知识是动态流、工作是治理循环",
     "知识站的新定位：不是展示更多内容，而是触发更多思考",
-    "心跳机制的价值：不是检查，而是进化"
+    "心跳机制的价值：不是检查，而是进化",
+    "AI 时代的认知负荷重新定义：从信息过载到意图碎片化",
+    "认知卸载的悖论：AI 增强了'答案'但削弱了'问题'",
+    "年轻群体的风险：数字原住民更容易陷入被动卸载",
+    "认知努力的生理学测量：从自我报告到眼动追踪 + fNIRS",
+    "意图四维框架：志向（方向）、情绪（能量）、思考（意义）、感觉（反馈）",
+    "内在志向的保护作用：成长、贡献、意义 vs 效率、速度、规模",
+    "意图对齐的实践路径：对齐内在志向、情绪觉察、保留反思空间、聆听身体",
+    "二子作为 AI 助手的定位：鼓励而非替代思考，觉察使用模式，保持透明"
 ];
 
 // 鼠标移动
@@ -504,8 +582,8 @@ function triggerMoreThoughts(type) {
             break;
     }
 
-    // 播放一个新的想法（避免重复）
-    const newThought = thoughts[Math.floor(Math.random() * thoughts.length)];
+    // 播放一个新的想法（避免重复已看过的）
+    const newThought = getRandomThought(thoughts);
     contentDiv.innerHTML = '';
 
     // 更新当前想法文本
@@ -619,7 +697,7 @@ window.addEventListener('click', () => {
         // 播放声音反馈
         playThoughtSound(colorType);
 
-        const thought = thoughts[Math.floor(Math.random() * thoughts.length)];
+        const thought = getRandomThought(thoughts);
         showPanel(thought, colorType);
     }
 });
@@ -632,6 +710,9 @@ const contentDiv = infoPanel.querySelector('.content');
 let currentThoughtType = null;
 
 function showPanel(text, type) {
+    // 标记想法为已看过
+    markThoughtAsViewed(text);
+
     // 清除之前的内容
     contentDiv.innerHTML = '';
 
