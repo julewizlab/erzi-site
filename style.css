@@ -531,15 +531,35 @@ h1 {
     text-align: center;
 }
 
+.favorite-type-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.type-icon {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.type-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #b0b0c8;
+}
+
 #favorites-panel .type-tag {
     display: inline-block;
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     letter-spacing: 0.12rem;
     text-transform: uppercase;
-    padding: 0.25rem 0.6rem;
-    border-radius: 4px;
-    margin-bottom: 0.5rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
     font-weight: 600;
+    margin-left: auto;
 }
 
 #favorites-panel .type-tag.tech {

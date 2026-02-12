@@ -1438,16 +1438,39 @@ function renderFavoritesList() {
             const favItem = document.createElement('div');
             favItem.className = 'favorite-item';
 
-            // 类型标签
-            const typeTag = document.createElement('div');
-            typeTag.className = `type-tag ${fav.type}`;
+            // 类型标签头部
+            const typeHeader = document.createElement('div');
+            typeHeader.className = 'favorite-type-header';
+
+            // 类型图标
+            const typeIcon = document.createElement('span');
+            typeIcon.className = 'type-icon';
+            const typeIcons = {
+                'tech': '💻',
+                'inspiration': '✨',
+                'reflection': '🤔'
+            };
+            typeIcon.textContent = typeIcons[fav.type] || '💡';
+
+            // 类型名称
+            const typeName = document.createElement('span');
+            typeName.className = 'type-name';
             const typeNames = {
                 'tech': '技术前沿',
                 'inspiration': '灵感与美学',
                 'reflection': '反思与哲学'
             };
-            typeTag.textContent = typeNames[fav.type] || fav.type;
-            favItem.appendChild(typeTag);
+            typeName.textContent = typeNames[fav.type] || fav.type;
+
+            // 类型标签
+            const typeTag = document.createElement('span');
+            typeTag.className = `type-tag ${fav.type}`;
+            typeTag.textContent = fav.type;
+
+            typeHeader.appendChild(typeIcon);
+            typeHeader.appendChild(typeName);
+            typeHeader.appendChild(typeTag);
+            favItem.appendChild(typeHeader);
 
             // 想法内容
             const thoughtText = document.createElement('div');
