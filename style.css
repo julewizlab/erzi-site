@@ -440,6 +440,51 @@ h1 {
     font-weight: 300;
 }
 
+/* 想法详情 */
+.detail-section {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 3px solid rgba(102, 126, 234, 0.4);
+    border-radius: 0 8px 8px 0;
+    transition: all 0.3s ease;
+}
+
+.detail-section.hidden {
+    display: none;
+}
+
+.detail-content {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: rgba(232, 232, 240, 0.85);
+    font-weight: 300;
+}
+
+/* 展开/收起按钮 */
+.toggle-detail-btn {
+    margin-top: 0.8rem;
+    background: rgba(102, 126, 234, 0.08);
+    border: 1px solid rgba(102, 126, 234, 0.25);
+    color: rgba(232, 232, 240, 0.8);
+    padding: 0.4rem 1rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-block;
+}
+
+.toggle-detail-btn:hover {
+    background: rgba(102, 126, 234, 0.15);
+    border-color: rgba(102, 126, 234, 0.4);
+    transform: translateY(-2px);
+}
+
+.toggle-detail-btn:active {
+    transform: translateY(0);
+}
+
 /* 相关想法 */
 .related-section {
     margin-top: 1.2rem;
