@@ -100,8 +100,10 @@ function playThoughtSound(colorType) {
 }
 
 // ===== 粒子系统 =====
-const PARTICLE_COUNT = 500;
-const CONNECT_DISTANCE = 8; // 连线距离阈值
+// 移动端检测：减少粒子数量以提升性能
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+const PARTICLE_COUNT = isMobile ? 150 : 500; // 移动端 150 个粒子，桌面端 500 个
+const CONNECT_DISTANCE = isMobile ? 6 : 8; // 移动端连线距离减少，减少计算量
 const particles = new THREE.BufferGeometry();
 const positions = new Float32Array(PARTICLE_COUNT * 3);
 const colors = new Float32Array(PARTICLE_COUNT * 3);
@@ -681,8 +683,10 @@ const reflectionThoughts = [
     "第二阶效应：AI让工作变得'更高效但更无意义'，意义感降低抵消效率提升 - 从AI时代创意工作流设计",
 ];
 
-// 鼠标移动
+// 鼠标移动（桌面端）
 window.addEventListener('mousemove', (e) => {
+    if (isMobile) return; // 移动端跳过鼠标事件
+
     mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
@@ -719,6 +723,69 @@ window.addEventListener('mousemove', (e) => {
 
     particles.attributes.position.needsUpdate = true;
 });
+
+// 触摸事件（移动端）
+window.addEventListener('touchstart', (e) => {
+    if (!isMobile) return;
+
+    const touch = e.touches[0];
+    mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+
+    // 使用Raycaster检测触摸
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObject(particleSystem);
+
+    if (intersects.length > 0) {
+        hoveredParticleIndex = intersects[0].index;
+        // 触摸时立即显示信息面板（不需要hover）
+        if (hoveredParticleIndex !== -1) {
+            // 初始化音频（第一次点击时）
+            initAudio();
+
+            // 视觉反馈：放大粒子
+            const originalSize = originalSizes[hoveredParticleIndex];
+            targetSizes[hoveredParticleIndex] = originalSize * 4;
+
+            // 2秒后恢复
+            setTimeout(() => {
+                targetSizes[hoveredParticleIndex] = originalSize;
+            }, 2000);
+
+            // 创建涟漪效果
+            const particleX = positions[hoveredParticleIndex * 3];
+            const particleY = positions[hoveredParticleIndex * 3 + 1];
+            const particleZ = positions[hoveredParticleIndex * 3 + 2];
+            createRipple(particleX, particleY, particleZ);
+
+            // 获取粒子的颜色
+            const r = colors[hoveredParticleIndex * 3];
+            const g = colors[hoveredParticleIndex * 3 + 1];
+            const b = colors[hoveredParticleIndex * 3 + 2];
+
+            // 根据颜色判断类型
+            let thoughts;
+            let colorType;
+
+            if (b > r && b > g && r > g) {
+                thoughts = inspirationThoughts;
+                colorType = 'inspiration';
+            } else if (g > r || g > b) {
+                thoughts = reflectionThoughts;
+                colorType = 'reflection';
+            } else {
+                thoughts = techThoughts;
+                colorType = 'tech';
+            }
+
+            // 播放声音反馈
+            playThoughtSound(colorType);
+
+            const thought = getRandomThought(thoughts);
+            showPanel(thought, colorType);
+        }
+    }
+}, { passive: true });
 
 // 触发更多想法
 function triggerMoreThoughts(type) {
@@ -909,8 +976,11 @@ function findRelatedThoughts(currentThought, currentType, count = 3) {
     return related.slice(0, count);
 }
 
-// 点击事件
-window.addEventListener('click', () => {
+// 点击事件（桌面端）
+window.addEventListener('click', (e) => {
+    // 移动端跳过点击事件（由 touchstart 处理）
+    if (isMobile) return;
+
     if (hoveredParticleIndex !== -1) {
         // 初始化音频（第一次点击时）
         initAudio();

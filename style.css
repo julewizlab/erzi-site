@@ -810,14 +810,129 @@ footer small {
 @media (max-width: 768px) {
     h1 {
         font-size: 2rem;
+        letter-spacing: 0.3rem;
     }
 
+    .subtitle {
+        font-size: 0.75rem;
+    }
+
+    /* 移动端：信息面板全屏显示 */
     #info-panel {
-        width: 85%;
-        padding: 1.5rem;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        transform: translate(0, 100%);
+        width: 100%;
+        max-width: 100%;
+        border-radius: 0;
+        padding: 5rem 1.5rem 1.5rem 1.5rem;
+        max-height: 100%;
+        overflow-y: auto;
+    }
+
+    #info-panel.hidden {
+        transform: translate(0, 100%);
+    }
+
+    #info-panel.visible {
+        transform: translate(0, 0);
+    }
+
+    #info-panel .content {
+        font-size: 1.1rem;
+        line-height: 1.7;
+    }
+
+    /* 暂停/恢复按钮 - 移动端调整 */
+    .toggle-btn {
+        top: 1rem;
+        right: 1rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.75rem;
+    }
+
+    /* 收藏图标入口 - 移动端调整 */
+    .favorites-trigger {
+        top: 3.5rem;
+        right: 1rem;
+        padding: 0.5rem 0.8rem;
+        font-size: 0.75rem;
     }
 
     #ui-layer {
         padding: 1.5rem;
+    }
+
+    .close-btn {
+        top: 1rem;
+        right: 1rem;
+        font-size: 1.8rem;
+    }
+
+    /* 移动端搜索结果 */
+    .search-results {
+        max-height: 200px;
+    }
+
+    /* 移动端 Footer */
+    footer {
+        display: none; /* 移动端隐藏 footer，避免遮挡 */
+    }
+
+    /* 移动端 Guide Toast */
+    #guide-toast {
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        padding: 0.7rem 1.2rem;
+        font-size: 0.85rem;
+        width: 85%;
+        text-align: center;
+    }
+
+    /* 移动端相关想法 */
+    .related-item {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.7rem;
+    }
+
+    /* 移动端收藏列表面板 */
+    #favorites-panel {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        transform: translate(0, 100%);
+        width: 100%;
+        max-width: 100%;
+        border-radius: 0;
+        padding: 4rem 1.5rem 1.5rem 1.5rem;
+        max-height: 100%;
+    }
+
+    #favorites-panel.hidden {
+        transform: translate(0, 100%);
+    }
+
+    #favorites-panel.visible {
+        transform: translate(0, 0);
+    }
+
+    #favorites-panel h2 {
+        font-size: 1.2rem;
+        margin-bottom: 1.2rem;
+    }
+
+    /* 移动端提示改为点击 */
+    footer .hint {
+        display: none;
+    }
+
+    #last-updated {
+        display: none;
     }
 }
