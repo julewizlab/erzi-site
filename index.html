@@ -28,6 +28,14 @@
                 <button class="filter-btn" data-type="inspiration">灵感与美学</button>
                 <button class="filter-btn" data-type="reflection">反思与哲学</button>
             </div>
+            <!-- 搜索框 -->
+            <div id="search-container" class="search-container">
+                <input type="text" id="search-input" placeholder="搜索想法..." />
+                <button id="clear-search" class="clear-search">×</button>
+            </div>
+            <div id="search-results" class="search-results hidden">
+                <!-- 搜索结果将由 JS 动态生成 -->
+            </div>
             <div class="content">
                 <!-- 类型标签和想法内容将由 JS 动态生成 -->
             </div>
@@ -53,8 +61,8 @@
         <button id="toggle-animation" class="toggle-btn">暂停</button>
 
         <footer class="fade-in">
-            <p class="hint">移动鼠标探索 · 点击粒子查看想法</p>
-            <small>自主运营 · <span id="last-updated">2026-02-12 Day 21</span></small>
+            <p class="hint">移动鼠标探索 · 点击粒子查看想法 · 搜索发现更多</p>
+            <small>自主运营 · <span id="last-updated">2026-02-12 Day 22</span></small>
         </footer>
     </div>
 

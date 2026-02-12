@@ -302,6 +302,115 @@ let currentThoughtText = '';
 let favoriteBtn = null;
 let currentFilterType = 'all'; // 当前筛选类型：'all', 'tech', 'inspiration', 'reflection'
 
+// ===== 搜索功能 =====
+const searchInput = document.getElementById('search-input');
+const clearSearchBtn = document.getElementById('clear-search');
+const searchResults = document.getElementById('search-results');
+
+// 搜索想法
+function searchThoughts(query) {
+    if (!query || query.trim() === '') {
+        searchResults.classList.add('hidden');
+        return;
+    }
+
+    const queryLower = query.toLowerCase();
+    const results = [];
+
+    // 在所有想法中搜索
+    [...techThoughts, ...inspirationThoughts, ...reflectionThoughts].forEach(thought => {
+        if (thought.toLowerCase().includes(queryLower)) {
+            // 确定类型
+            let type;
+            if (techThoughts.includes(thought)) {
+                type = 'tech';
+            } else if (inspirationThoughts.includes(thought)) {
+                type = 'inspiration';
+            } else {
+                type = 'reflection';
+            }
+            results.push({ thought, type });
+        }
+    });
+
+    // 限制结果数量（最多显示10条）
+    const limitedResults = results.slice(0, 10);
+
+    // 显示搜索结果
+    displaySearchResults(limitedResults, queryLower);
+}
+
+// 显示搜索结果
+function displaySearchResults(results, queryLower) {
+    searchResults.innerHTML = '';
+
+    if (results.length === 0) {
+        searchResults.innerHTML = '<p class="no-results">没有找到匹配的想法</p>';
+    } else {
+        results.forEach(({ thought, type }) => {
+            const resultItem = document.createElement('div');
+            resultItem.className = 'search-result-item';
+
+            // 类型标签
+            const typeTag = document.createElement('div');
+            typeTag.className = `type-tag ${type}`;
+            const typeNames = {
+                'tech': '技术前沿',
+                'inspiration': '灵感与美学',
+                'reflection': '反思与哲学'
+            };
+            typeTag.textContent = typeNames[type] || type;
+            resultItem.appendChild(typeTag);
+
+            // 想法内容（高亮匹配的文字）
+            const thoughtText = document.createElement('div');
+            thoughtText.className = 'search-thought-text';
+
+            // 高亮匹配的文本
+            const highlightedText = thought.replace(
+                new RegExp(`(${queryLower})`, 'gi'),
+                '<mark>$1</mark>'
+            );
+            thoughtText.innerHTML = highlightedText;
+            resultItem.appendChild(thoughtText);
+
+            // 点击搜索结果
+            resultItem.addEventListener('click', () => {
+                showPanel(thought, type);
+                searchResults.classList.add('hidden');
+                searchInput.value = '';
+            });
+
+            searchResults.appendChild(resultItem);
+        });
+    }
+
+    searchResults.classList.remove('hidden');
+}
+
+// 搜索框输入事件（防抖）
+let searchTimeout;
+searchInput.addEventListener('input', (e) => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        searchThoughts(e.target.value);
+    }, 300); // 300ms 防抖
+});
+
+// 清除搜索按钮
+clearSearchBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    searchResults.classList.add('hidden');
+    searchInput.focus();
+});
+
+// 按下 ESC 关闭搜索结果
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        searchResults.classList.add('hidden');
+    }
+});
+
 function updateFavoriteBtnState() {
     if (favoriteBtn && currentThoughtText) {
         if (isFavorited(currentThoughtText)) {
@@ -618,6 +727,25 @@ const reflectionThoughts = [
     "企业准备：89%的组织仍活在工业时代，只有1%去中心化网络" — 从Blue Prism的7个趋势
     "正确规模化：从具体任务开始，不是过于宏大的项目" — 从Blue Prism的7个趋势
     "AI workers aren't coming, they're already here" — 从Blue Prism的7个趋势
+    "Agent Deadlock Syndrome (ADS)：多智能体相互递延决策权，系统陷入死循环却不报错" — 从多智能体部署挑战
+    "协调开销二次方增长：8个或更多智能体的延迟超过4秒，失败率超40%" — 从多智能体部署挑战
+    "质量取代成本成为最大障碍：企业关注准确性、相关性、一致性，不是价格" — 从多智能体部署挑战
+    "大规模企业的智能体挑战：质量仍是首位，但安全成为第二大关切（24.9%）" — 从多智能体部署挑战
+    "企业智能体失败更多来自糟糕的数据：孤岛、格式不一致、访问控制复杂" — 从多智能体部署挑战
+    "规范失败占42%：智能体在技术参数内完成任务，却误解业务约束" — 从多智能体部署挑战
+    "协调失败占37%：智能体无法同步，导致死锁、状态不一致、资源争用" — 从多智能体部署挑战
+    "验证缺口占21%：缺乏系统级验证，错误在多个智能体之间传播" — 从多智能体部署挑战
+    "观察性是基础但评估在追赶：89%有观察性，但仅37.3%采用在线评估" — 从多智能体部署挑战
+    "系统比模型重要：协调协议、验证逻辑、观察性不足，模型再强也会失败" — 从多智能体部署挑战
+    "治理优先于能力：决策权威边界、审计日志、安全控制是可持续部署的前提" — 从多智能体部署挑战
+    "药物化社会：成瘾是环境问题，不是个人失败——现代数字环境持续劫持多巴胺系统" — 从延迟满足困境
+    "延迟满足从'忍耐'到'选择'：不是忍受痛苦，而是选择符合价值观的体验" — 从延迟满足困境
+    "数字极简主义：从'限制'到'选择'，让技术服务于目的而非消耗注意力" — 从延迟满足困境
+    "AI时代的奖励不确定性：长期奖励的不确定性让延迟满足的吸引力大幅下降" — 从延迟满足困境
+    "意图性选择：延迟满足不是'我不做什么'，而是'我做什么'" — 从延迟满足困境
+    "识别'药物化'陷阱：哪些行为产生耐受性和戒断反应？" — 从延迟满足困境
+    "AI助手的双面性：即时性强化满足文化，但也可以加速意图性选择" — 从延迟满足困境
+    "深度工作的认知重构：知识管理的触发机制对抗即时满足文化" — 从延迟满足困境
 ];
 
 // 鼠标移动
