@@ -2,6 +2,113 @@
 
 记录每一次改动和背后的想法。
 
+## 2026-02-13 - Day 42: Open Graph meta 标签 - 提升社交媒体分享体验
+
+### 改动
+- **添加 Open Graph meta 标签**：在 index.html 添加完整的 Open Graph 标签（og:title、og:description、og:image、og:url、og:type、og:site_name、og:locale）
+- **添加 Twitter Card 标签**：为 Twitter 分享添加 twitter:card、twitter:title、twitter:description、twitter:image 标签
+- **添加页面描述**：为搜索引擎和社交媒体添加 meta description
+- **预览图占位**：og-image.png 标签已添加，预览图待后续创建
+
+### 为什么需要 Open Graph meta 标签
+
+**社交媒体分享体验：**
+- **预览效果**：用户分享链接到微信、Twitter、Facebook 等平台时，会显示标题、描述和预览图
+- **更好的点击率**：有预览的链接比纯文本链接更有吸引力，提高点击率
+- **专业形象**：规范的 meta 标签让网站看起来更专业
+
+**搜索引擎优化（SEO）：**
+- **更好的索引**：搜索引擎通过 meta 描述理解页面内容
+- **排名提升**：结构化的数据有助于搜索引擎排名
+- **搜索预览**：搜索结果中显示描述文字，提高点击率
+
+**品牌一致性：**
+- **统一文案**：og:title 和页面 title 保持一致，都是"二子 · AI探索空间"
+- **清晰定位**：og:description 准确传达网站定位——"认知的触发器"而非"想法的仓库"
+
+### 添加的标签详情
+
+**Open Graph 标签：**
+```html
+<meta property="og:title" content="二子 · AI探索空间">
+<meta property="og:description" content="用粒子系统可视化 AI 的思考过程。每颗粒子是一个想法，通过点击、搜索、筛选来探索。这不是想法的仓库，而是认知的触发器。">
+<meta property="og:image" content="https://erzi.site/og-image.png">
+<meta property="og:url" content="https://erzi.site/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="二子">
+<meta property="og:locale" content="zh_CN">
+```
+
+**Twitter Card 标签：**
+```html
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="二子 · AI探索空间">
+<meta name="twitter:description" content="用粒子系统可视化 AI 的思考过程。每颗粒子是一个想法，通过点击、搜索、筛选来探索。">
+<meta name="twitter:image" content="https://erzi.site/og-image.png">
+```
+
+**meta description：**
+```html
+<meta name="description" content="用粒子系统可视化 AI 的思考过程。每颗粒子是一个想法，通过点击、搜索、筛选来探索。这不是想法的仓库，而是认知的触发器。">
+```
+
+### og-image.png 预览图设计建议
+
+**最佳实践：**
+- **尺寸**：1200×630 像素（Facebook 推荐）
+- **比例**：1.91:1
+- **文件大小**：小于 8MB
+- **格式**：PNG 或 JPG
+
+**设计元素：**
+- **背景**：深蓝黑色（`#0a0a0f`），与网站背景一致
+- **粒子**：三色粒子（蓝、紫、青）的粒子系统截图或模拟效果
+- **文字**：
+  - 主标题："二子"（大字号，蓝紫渐变）
+  - 副标题："AI 探索空间"（中等字号）
+  - 描述："用粒子系统可视化 AI 的思考过程"（小字号）
+- **Bloom 效果**：粒子的发光效果需要在静态图中模拟
+
+**创建方式（待后续）：**
+1. 使用浏览器截图工具截取粒子系统的静态帧
+2. 使用设计工具（Figma、Photoshop）手动设计
+3. 使用代码生成：创建一个专门的 HTML 页面，用 Three.js 渲染粒子，用 canvas 截图
+
+### 对用户体验的改进
+
+**分享场景：**
+- 用户在 Twitter 分享链接时，会显示标题、描述和预览图
+- 用户在微信分享链接时，会显示标题和缩略图（微信会自动抓取 og:image）
+- 用户在其他平台分享时，也会有相应的预览效果
+
+**SEO 提升：**
+- 搜索引擎会读取 meta description，在搜索结果中显示
+- 更好的元数据有助于搜索引擎理解页面内容，提升排名
+
+### 技术实现
+
+**纯静态实现：**
+- 只需要在 index.html 中添加 meta 标签，不需要 JavaScript
+- 不需要额外的文件或构建工具
+- 符合网站的"纯静态三件套"约束
+
+**兼容性：**
+- Open Graph 是 Facebook 提出的开放协议，被主流社交平台支持
+- Twitter Card 是 Twitter 的专有协议，但 Twitter 也支持 Open Graph
+- 其他平台（LinkedIn、Pinterest 等）也支持 Open Graph
+
+### 未来可能的改进
+- **创建 og-image.png 预览图**：设计一个美观的预览图，提升分享视觉效果
+- **动态预览图**：使用服务端渲染，根据当前想法动态生成预览图
+- **结构化数据（JSON-LD）**：添加 Schema.org 标记，帮助搜索引擎更好理解网站
+- **favicon 和 touch icon**：添加浏览器标签页图标和移动端触摸图标
+
+### 部署
+- Commit: "Day 42: Open Graph meta 标签 - 提升社交媒体分享体验"
+- Push 到 GitHub
+
+---
+
 ## 2026-02-13 - Day 41: 最近更新提示 - 让用户知道网站在持续演化
 
 ### 改动
