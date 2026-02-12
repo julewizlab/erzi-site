@@ -882,6 +882,36 @@ footer small {
     transform: translateX(-50%) translateY(20px);
 }
 
+/* Update Toast */
+#update-toast {
+    position: fixed;
+    bottom: 160px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(118, 75, 162, 0.9);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s ease;
+    pointer-events: auto;
+    box-shadow: 0 4px 20px rgba(118, 75, 162, 0.3);
+}
+
+#update-toast.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+#update-toast.hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%) translateY(20px);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     h1 {
@@ -961,6 +991,17 @@ footer small {
     /* 移动端 Guide Toast */
     #guide-toast {
         bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        padding: 0.7rem 1.2rem;
+        font-size: 0.85rem;
+        width: 85%;
+        text-align: center;
+    }
+
+    /* 移动端 Update Toast */
+    #update-toast {
+        bottom: 140px;
         left: 50%;
         transform: translateX(-50%) translateY(20px);
         padding: 0.7rem 1.2rem;

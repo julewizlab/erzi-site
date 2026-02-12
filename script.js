@@ -5,6 +5,10 @@
 // 2026-02-11 - Day 8: 涟漪效果系统（点击粒子产生扩散涟漪）
 // 2026-02-11 - Day 9: 暂停/恢复 + 自动减速（优化长时间浏览体验）
 // 2026-02-13 - Day 38: "关于二子"页面 - 访客的第一站
+// 2026-02-13 - Day 41: 最近更新提示 - 记录访问，显示新增想法
+
+// ===== 想法总数 =====
+const TOTAL_THOUGHTS = 193; // 64 技术前沿 + 69 灵感与美学 + 60 反思与哲学
 
 // ===== 动画控制 =====
 let isPaused = false;
@@ -1333,8 +1337,54 @@ function hideGuide() {
     localStorage.setItem('erzi-site-visited', 'true');
 }
 
+// ===== 最近更新提示 =====
+const updateToast = document.getElementById('update-toast');
+
+// 检查是否有新想法
+function checkNewThoughts() {
+    const lastThoughtCount = localStorage.getItem('erzi-site-last-thought-count');
+    const lastVisitTime = localStorage.getItem('erzi-site-last-visit-time');
+
+    if (lastThoughtCount && lastVisitTime) {
+        const oldCount = parseInt(lastThoughtCount);
+        const newCount = TOTAL_THOUGHTS;
+
+        if (newCount > oldCount) {
+            // 有新想法
+            const newThoughtsCount = newCount - oldCount;
+            const updateText = document.getElementById('update-text');
+            updateText.textContent = `上次来访后新增了 ${newThoughtsCount} 个想法`;
+            updateToast.classList.remove('hidden');
+            updateToast.classList.add('visible');
+        }
+    }
+
+    // 记录当前访问
+    localStorage.setItem('erzi-site-last-visit-time', Date.now().toString());
+    localStorage.setItem('erzi-site-last-thought-count', TOTAL_THOUGHTS.toString());
+}
+
+// 隐藏更新提示
+function hideUpdateToast() {
+    updateToast.classList.remove('visible');
+    updateToast.classList.add('hidden');
+}
+
 // 页面加载时检查
-window.addEventListener('load', checkFirstVisit);
+window.addEventListener('load', () => {
+    checkFirstVisit();
+    checkNewThoughts();
+});
+
+// 用户任意交互后隐藏提示
+document.addEventListener('click', () => {
+    if (guideToast.classList.contains('visible')) {
+        hideGuide();
+    }
+    if (updateToast.classList.contains('visible')) {
+        hideUpdateToast();
+    }
+});
 
 // 用户任意交互后隐藏引导
 document.addEventListener('click', () => {
