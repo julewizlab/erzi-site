@@ -300,6 +300,7 @@ function removeFavorite(thought) {
 // UI：收藏按钮状态
 let currentThoughtText = '';
 let favoriteBtn = null;
+let currentFilterType = 'all'; // 当前筛选类型：'all', 'tech', 'inspiration', 'reflection'
 
 function updateFavoriteBtnState() {
     if (favoriteBtn && currentThoughtText) {
@@ -661,7 +662,14 @@ window.addEventListener('mousemove', (e) => {
 // 触发更多想法
 function triggerMoreThoughts(type) {
     let thoughts;
-    switch(type) {
+    let displayType = type;
+
+    // 根据 currentFilterType 选择想法类型
+    if (currentFilterType !== 'all') {
+        displayType = currentFilterType;
+    }
+
+    switch(displayType) {
         case 'tech':
             thoughts = techThoughts;
             break;
@@ -671,6 +679,13 @@ function triggerMoreThoughts(type) {
         case 'reflection':
             thoughts = reflectionThoughts;
             break;
+        default:
+            // 如果是 'all' 模式，从所有类型中随机选择
+            const allThoughts = [...techThoughts, ...inspirationThoughts, ...reflectionThoughts];
+            thoughts = allThoughts;
+            // 随机选择一个类型用于显示
+            const types = ['tech', 'inspiration', 'reflection'];
+            displayType = types[Math.floor(Math.random() * types.length)];
     }
 
     // 播放一个新的想法（避免重复已看过的）
@@ -682,13 +697,13 @@ function triggerMoreThoughts(type) {
 
     // 重新添加类型标签
     const typeTag = document.createElement('div');
-    typeTag.className = `type-tag ${type}`;
+    typeTag.className = `type-tag ${displayType}`;
     const typeNames = {
         'tech': '技术前沿',
         'inspiration': '灵感与美学',
         'reflection': '反思与哲学'
     };
-    typeTag.textContent = typeNames[type] || type;
+    typeTag.textContent = typeNames[displayType] || displayType;
     contentDiv.appendChild(typeTag);
 
     // 添加新想法内容
@@ -703,7 +718,7 @@ function triggerMoreThoughts(type) {
         if (isFavorited(newThought)) {
             removeFavorite(newThought);
         } else {
-            addFavorite(newThought, type);
+            addFavorite(newThought, displayType);
             // 播放收藏音效（柔和的高音）
             if (audioContext) {
                 const osc = audioContext.createOscillator();
@@ -735,7 +750,7 @@ function triggerMoreThoughts(type) {
     contentDiv.appendChild(triggerBtn);
 
     // 播放声音反馈
-    playThoughtSound(type);
+    playThoughtSound(displayType);
 }
 
 // 点击事件
@@ -797,6 +812,8 @@ window.addEventListener('click', () => {
 const infoPanel = document.getElementById('info-panel');
 const closeBtn = document.getElementById('close-panel');
 const contentDiv = infoPanel.querySelector('.content');
+const filterBar = document.getElementById('filter-bar');
+const filterButtons = filterBar.querySelectorAll('.filter-btn');
 
 let currentThoughtType = null;
 
@@ -868,6 +885,14 @@ function showPanel(text, type) {
     // 记录当前类型
     currentThoughtType = type;
 
+    // 更新类型筛选按钮的状态
+    filterButtons.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-type') === currentFilterType) {
+            btn.classList.add('active');
+        }
+    });
+
     // 显示面板
     infoPanel.classList.remove('hidden');
     infoPanel.classList.add('visible');
@@ -885,6 +910,18 @@ function hidePanel() {
 }
 
 closeBtn.addEventListener('click', hidePanel);
+
+// ===== 类型筛选按钮事件监听 =====
+filterButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        // 移除所有按钮的 active 类
+        filterButtons.forEach(b => b.classList.remove('active'));
+        // 为当前按钮添加 active 类
+        btn.classList.add('active');
+        // 更新 currentFilterType
+        currentFilterType = btn.getAttribute('data-type');
+    });
+});
 
 // ===== 首次访问引导 =====
 const guideToast = document.getElementById('guide-toast');
