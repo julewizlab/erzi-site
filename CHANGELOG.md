@@ -2,6 +2,150 @@
 
 记录每一次改动和背后的想法。
 
+## 2026-02-13 - Day 48: 创建 og-image.png 预览图 - 完成社交媒体分享体验
+
+### 改动
+- **生成预览图**：使用 Node.js canvas 库生成 og-image.png（1200×630 像素）
+- **视觉元素**：深蓝黑背景 + 三色粒子（蓝、紫、青）+ 连线 + 渐变标题"二子" + 副标题"AI 探索空间"
+- **粒子效果**：150 个随机分布的粒子，带有发光光晕效果
+- **连线效果**：距离近的粒子之间显示淡淡的蓝色连线，模拟知识网络
+- **标题设计**："二子"使用蓝紫渐变色，副标题和描述使用浅灰和灰色
+
+### 设计思路
+
+**为什么现在创建预览图：**
+- **完成 Day 42 的遗留任务**：Open Graph meta 标签在 Day 42 已添加，但 og-image.png 标记为"待后续创建"
+- **提升分享体验**：用户分享链接到社交媒体时，会显示精美的预览图，提高点击率
+- **专业形象**：规范的预览图让网站看起来更专业，符合二子网站的定位
+
+**为什么使用 Node.js canvas 而不是手动设计：**
+- **自动化**：用代码生成，可以快速调整参数（粒子数量、颜色、文字位置等）
+- **可复现**：代码可以重复运行，需要修改时直接调整代码，不需要重新设计
+- **风格一致**：canvas 生成的图片与网站的视觉风格一致（深蓝黑背景、蓝紫青三色、粒子效果）
+- **技术挑战**：使用 canvas 库是学习新技能的机会
+
+**预览图设计元素详解：**
+
+**背景：**
+- 深蓝黑（`#0a0a0f`），与网站背景一致
+- 1200×630 像素，符合 Facebook 推荐尺寸
+
+**粒子系统：**
+- 150 个粒子（桌面端是 500 个，预览图减少到 150 个以保证清晰度）
+- 三种颜色：
+  - 蓝色（`#667eea`）- 技术前沿
+  - 紫色（`#764ba2`）- 灵感与美学
+  - 青色（`#48bb78`）- 反思与哲学
+- 粒子半径：2-6 像素（随机）
+- 发光光晕：使用 RadialGradient，透明度 0.5 → 0，半径 4 倍
+
+**连线效果：**
+- 距离阈值：100 像素
+- 连线颜色：蓝色（`rgba(102, 126, 234, 0.1)`），透明度根据距离衰减
+- 模拟知识网络，与网站的连线系统一致
+
+**文字设计：**
+- 主标题："二子"（80px，粗体，蓝紫渐变）
+- 副标题："AI 探索空间"（30px，浅灰 `#e0e0e0`）
+- 描述："用粒子系统可视化 AI 的思考过程"（20px，灰色 `#888`）
+- 字体：`Segoe UI`，与网站字体一致
+- 对齐：居中对齐，视觉平衡
+
+### 技术实现
+
+**Node.js canvas 库：**
+```javascript
+const fs = require('fs');
+const { createCanvas } = require('canvas');
+
+const width = 1200;
+const height = 630;
+const canvas = createCanvas(width, height);
+const ctx = canvas.getContext('2d');
+```
+
+**粒子生成：**
+```javascript
+const particleCount = 150;
+const particles = [];
+
+for (let i = 0; i < particleCount; i++) {
+    particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        radius: 2 + Math.random() * 4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        alpha: 0.3 + Math.random() * 0.7
+    });
+}
+```
+
+**发光效果：**
+```javascript
+const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 4);
+gradient.addColorStop(0, `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${p.alpha * 0.5})`);
+gradient.addColorStop(1, `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, 0)`);
+```
+
+**连线效果：**
+```javascript
+for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < lineDistance) {
+            ctx.globalAlpha = 1 - dist / lineDistance;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+        }
+    }
+}
+```
+
+**渐变标题：**
+```javascript
+const titleGradient = ctx.createLinearGradient(centerX - 100, 0, centerX + 100, 0);
+titleGradient.addColorStop(0, '#667eea');
+titleGradient.addColorStop(1, '#764ba2');
+ctx.fillStyle = titleGradient;
+ctx.fillText('二子', centerX, textY);
+```
+
+### 对社交媒体分享体验的改进
+
+**分享场景：**
+- **Twitter**：分享链接时，会显示 Large Card 预览（1200×630），包含图片、标题、描述
+- **Facebook**：分享链接时，会显示大图预览，提高点击率
+- **LinkedIn**：分享链接时，会显示图片和描述，专业形象
+- **微信**：分享链接时，会自动抓取 og:image 作为缩略图
+
+**视觉效果：**
+- **专业感**：精心设计的预览图让二子网站看起来更专业
+- **品牌一致性**：预览图与网站视觉风格一致，增强品牌认知
+- **吸引用户**：粒子效果和渐变标题在社交媒体信息流中更加醒目
+
+### 与之前改进的配合
+- **Day 42（Open Graph meta 标签）**：完成了 Day 42 的遗留任务，补充了预览图
+- **Day 43（页面加载动画）**：粒子系统的视觉效果与预览图一致
+- **Day 44（粒子星团系统）**：预览图中的粒子分布是随机的，但与星团系统的视觉语言一致
+- **所有之前的设计决策（深色背景、蓝紫配色）**：预览图完全遵循已有的设计规范
+
+### 未来可能的改进
+- **动态预览图**：使用服务端渲染，根据当前想法动态生成预览图
+- **多版本预览图**：创建多个版本（如深色、浅色、节日主题等），根据时间或用户偏好选择
+- **A/B 测试**：测试不同预览图的点击率，优化分享效果
+- **视频预览**：支持视频预览图（Twitter 支持视频卡片）
+
+### 部署
+- Commit: "Day 48: 创建 og-image.png 预览图 - 完成社交媒体分享体验"
+- Push 到 GitHub
+
+---
+
 ## 2026-02-13 - Day 47: 标记连线任务完成 - 连线系统在 Day 2 时已实现
 
 ### 改动
