@@ -116,12 +116,24 @@ const sizes = new Float32Array(PARTICLE_COUNT); // 粒子大小
 const originalSizes = new Float32Array(PARTICLE_COUNT); // 原始大小
 const targetSizes = new Float32Array(PARTICLE_COUNT); // 目标大小
 const velocities = [];
+const targetPositions = new Float32Array(PARTICLE_COUNT * 3); // 加载动画目标位置
+
+// 加载动画控制
+let isLoadingAnimation = true;
+let loadAnimationStartTime = Date.now();
+const LOAD_ANIMATION_DURATION = 2500; // 加载动画持续 2.5 秒
 
 // 初始化粒子
 for (let i = 0; i < PARTICLE_COUNT; i++) {
-    positions[i * 3] = (Math.random() - 0.5) * 60;  // x
-    positions[i * 3 + 1] = (Math.random() - 0.5) * 60; // y
-    positions[i * 3 + 2] = (Math.random() - 0.5) * 60; // z
+    // 初始位置都在中心 (0, 0, 0)
+    positions[i * 3] = 0;  // x
+    positions[i * 3 + 1] = 0; // y
+    positions[i * 3 + 2] = 0; // z
+
+    // 目标位置是随机分布的（加载动画完成后会扩散到这里）
+    targetPositions[i * 3] = (Math.random() - 0.5) * 60;  // x
+    targetPositions[i * 3 + 1] = (Math.random() - 0.5) * 60; // y
+    targetPositions[i * 3 + 2] = (Math.random() - 0.5) * 60; // z
 
     // 随机颜色（蓝紫青渐变）
     const colorChoice = Math.random();
@@ -1396,6 +1408,37 @@ document.addEventListener('click', () => {
 // ===== 动画循环 =====
 function animate() {
     requestAnimationFrame(animate);
+
+    // 加载动画：粒子从中心向外扩散
+    if (isLoadingAnimation) {
+        const animElapsed = Date.now() - loadAnimationStartTime;
+        const progress = Math.min(animElapsed / LOAD_ANIMATION_DURATION, 1);
+
+        // 使用 easeOutCubic 缓动函数：1 - Math.pow(1 - progress, 3)
+        const easedProgress = 1 - Math.pow(1 - progress, 3);
+
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+            // 从中心 (0,0,0) 扩散到目标位置
+            positions[i * 3] = targetPositions[i * 3] * easedProgress;
+            positions[i * 3 + 1] = targetPositions[i * 3 + 1] * easedProgress;
+            positions[i * 3 + 2] = targetPositions[i * 3 + 2] * easedProgress;
+        }
+
+        particles.attributes.position.needsUpdate = true;
+
+        // 动画完成后进入正常模式
+        if (progress >= 1) {
+            isLoadingAnimation = false;
+            // 将目标位置复制到当前位置
+            for (let i = 0; i < PARTICLE_COUNT * 3; i++) {
+                positions[i] = targetPositions[i];
+            }
+        }
+
+        // 加载动画期间仍然渲染
+        composer.render();
+        return;
+    }
 
     // 检查是否需要自动减速
     const elapsedTime = Date.now() - pageLoadTime;
