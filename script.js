@@ -292,6 +292,7 @@ function applyRippleEffects() {
 
 // ===== 交互系统 =====
 const raycaster = new THREE.Raycaster();
+raycaster.params.Points.threshold = 0.5; // 增大检测容差,确保粒子能被正确点击
 const mouse = new THREE.Vector2();
 let hoveredParticleIndex = -1;
 
