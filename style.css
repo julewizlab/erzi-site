@@ -219,6 +219,32 @@ h1 {
     transform: translate(-50%, -50%) translateY(0) scale(1);
 }
 
+/* 今日推荐标签 */
+#info-panel .recommend-tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    letter-spacing: 0.12rem;
+    text-transform: uppercase;
+    padding: 0.35rem 0.9rem;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.2));
+    color: #ffd700;
+    border: 1px solid rgba(255, 215, 0, 0.4);
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+    }
+    to {
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    }
+}
+
 #info-panel .type-tag {
     display: inline-block;
     font-size: 0.7rem;

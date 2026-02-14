@@ -744,6 +744,36 @@ const reflectionThoughts = [
     "从'存储思维'到'触发思维'：知识的价值在于触发新的思考，而非静态存储",
 ];
 
+// ===== 每日推荐想法 =====
+// 基于当天日期（Date hash）每天固定选一个想法作为"今日推荐"
+function getDailyRecommendation() {
+    // 获取今天的日期（格式：YYYY-MM-DD）
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+    // 使用日期字符串计算 hash（同一天内固定）
+    let hash = 0;
+    for (let i = 0; i < dateStr.length; i++) {
+        const char = dateStr.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+
+    // 将 hash 映射到所有想法
+    const allThoughts = [
+        ...techThoughts.map(t => ({ text: t, type: 'tech' })),
+        ...inspirationThoughts.map(t => ({ text: t, type: 'inspiration' })),
+        ...reflectionThoughts.map(t => ({ text: t, type: 'reflection' }))
+    ];
+
+    // 使用 hash 选择一个想法（同一天内固定）
+    const index = Math.abs(hash) % allThoughts.length;
+    return allThoughts[index];
+}
+
+// 获取今日推荐想法
+const dailyRecommendation = getDailyRecommendation();
+
 // ===== 想法详情数据 =====
 // 为部分想法添加更详细的分析（2-3句话）
 const thoughtDetails = {
@@ -1210,6 +1240,17 @@ function showPanel(text, type) {
 
     // 记录当前想法文本
     currentThoughtText = text;
+
+    // 检查是否是今日推荐
+    const isDailyRecommendation = (text === dailyRecommendation.text && type === dailyRecommendation.type);
+
+    // 如果是今日推荐，添加推荐标签
+    if (isDailyRecommendation) {
+        const recommendTag = document.createElement('div');
+        recommendTag.className = 'recommend-tag';
+        recommendTag.textContent = '✦ 今日推荐';
+        contentDiv.appendChild(recommendTag);
+    }
 
     // 添加类型标签
     const typeTag = document.createElement('div');
