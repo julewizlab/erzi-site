@@ -1511,18 +1511,18 @@ function animate() {
         positions[i * 3 + 2] += velocities[i].z * speedMultiplier;
 
         // 边界检查（更软的边界）
+        const axisKeys = ['x', 'y', 'z']; // j=0 对应 x 轴，j=1 对应 y 轴，j=2 对应 z 轴
         for (let j = 0; j < 3; j++) {
             const bound = 30;
             if (positions[i * 3 + j] > bound) {
                 positions[i * 3 + j] = bound;
-                velocities[i].x *= -1;
+                velocities[i][axisKeys[j]] *= -1; // 翻转对应轴的速度
             }
             if (positions[i * 3 + j] < -bound) {
                 positions[i * 3 + j] = -bound;
-                velocities[i].x *= -1;
+                velocities[i][axisKeys[j]] *= -1; // 翻转对应轴的速度
             }
         }
-
         // 平滑过渡到目标大小
         const diff = targetSizes[i] - sizes[i];
         sizes[i] += diff * 0.1; // 0.1 是平滑系数，越小越慢
