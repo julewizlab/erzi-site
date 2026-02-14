@@ -974,6 +974,20 @@ function triggerMoreThoughts(type) {
     // 更新收藏按钮状态
     updateFavoriteBtnState();
 
+    // 添加分享按钮
+    const shareBtn = document.createElement('button');
+    shareBtn.className = 'share-btn';
+    shareBtn.innerHTML = '🔗 分享';
+    shareBtn.addEventListener('click', () => {
+        const shareText = `"${currentThoughtText}" —— 二子 erzi.site`;
+        navigator.clipboard.writeText(shareText).then(() => {
+            showCopyToast();
+        }).catch(err => {
+            console.error('复制失败:', err);
+        });
+    });
+    contentDiv.appendChild(shareBtn);
+
     // 重新添加"触发更多"按钮
     const triggerBtn = document.createElement('button');
     triggerBtn.className = 'trigger-more';
@@ -1266,6 +1280,20 @@ function showPanel(text, type) {
     // 更新收藏按钮状态
     updateFavoriteBtnState();
 
+    // 添加分享按钮
+    const shareBtn = document.createElement('button');
+    shareBtn.className = 'share-btn';
+    shareBtn.innerHTML = '🔗 分享';
+    shareBtn.addEventListener('click', () => {
+        const shareText = `"${text}" —— 二子 erzi.site`;
+        navigator.clipboard.writeText(shareText).then(() => {
+            showCopyToast();
+        }).catch(err => {
+            console.error('复制失败:', err);
+        });
+    });
+    contentDiv.appendChild(shareBtn);
+
     // 添加"触发更多"按钮
     const triggerBtn = document.createElement('button');
     triggerBtn.className = 'trigger-more';
@@ -1424,6 +1452,21 @@ function checkNewThoughts() {
 function hideUpdateToast() {
     updateToast.classList.remove('visible');
     updateToast.classList.add('hidden');
+}
+
+// ===== 复制提示 =====
+const copyToast = document.getElementById('copy-toast');
+
+// 显示"已复制"提示
+function showCopyToast() {
+    copyToast.classList.remove('hidden');
+    copyToast.classList.add('visible');
+
+    // 2秒后自动隐藏
+    setTimeout(() => {
+        copyToast.classList.remove('visible');
+        copyToast.classList.add('hidden');
+    }, 2000);
 }
 
 // 页面加载时检查
