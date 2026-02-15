@@ -87,6 +87,26 @@ body {
     }
 }
 
+/* 第一次访问提示 */
+.hint {
+    position: fixed;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(224, 224, 224, 0.5);
+    font-size: 0.9rem;
+    font-weight: 300;
+    letter-spacing: 0.15em;
+    transition: opacity 1.5s ease;
+    z-index: 100;
+    pointer-events: none;
+    text-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+}
+
+.hint.hidden {
+    opacity: 0;
+}
+
 /* 隐藏所有UI元素（不是网站，是存在空间） */
 /* 没有"关于"、"暂停"、"主题切换"等按钮 */
 /* 没有统计、推荐、收藏等功能 */

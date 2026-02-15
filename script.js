@@ -134,6 +134,9 @@ async function init() {
     
     // 启动主动展示
     setInterval(checkActiveDisplay, CONFIG.ACTIVE_DISPLAY_INTERVAL);
+    
+    // U1: 第一次访问提示
+    showFirstVisitHint();
 }
 
 // 加载想法数据
@@ -508,8 +511,14 @@ function onTouch(event) {
     if (intersects.length > 0) {
         const particleIndex = intersects[0].index;
         
-        // 65% 概率响应
-        if (Math.random() < CONFIG.TOUCH_RESPONSE_PROB) {
+        // U3: 渐进式响应概率（第一次100%，后续65%）
+        const hasTouchedBefore = sessionStorage.getItem('erzi-has-touched');
+        const responseProb = hasTouchedBefore ? CONFIG.TOUCH_RESPONSE_PROB : 1.0;
+        
+        if (Math.random() < responseProb) {
+            // 标记已触碰过
+            sessionStorage.setItem('erzi-has-touched', 'true');
+            
             // 响应：涟漪效果 + 展示窥视窗口
             showPeekWindow(particleIndex);
             activateParticle(particleIndex, CONFIG.ACTIVE_DISPLAY_DURATION);
@@ -519,11 +528,14 @@ function onTouch(event) {
                 activateRelatedParticles(particleIndex);
             }
         } else {
-            // 无视：轻微波动
+            // U2: 无视时的反馈（轻微涟漪，但不展示内容）
             const velocities = particleGeometry.userData.velocities;
             velocities[particleIndex].x += (Math.random() - 0.5) * 0.1;
             velocities[particleIndex].y += (Math.random() - 0.5) * 0.1;
             velocities[particleIndex].z += (Math.random() - 0.5) * 0.1;
+            
+            // 轻微涟漪反馈（视觉语言："我看到了，但现在不想说话"）
+            createSubtleRipple();
         }
     }
 }
@@ -628,11 +640,44 @@ function createRipple() {
     }, 100);
 }
 
+// U2: 轻微涟漪（无视时的反馈）
+function createSubtleRipple() {
+    // 比正常涟漪更轻微（1.02 vs 1.05）
+    const originalScale = particles.scale.x;
+    particles.scale.set(originalScale * 1.02, originalScale * 1.02, originalScale * 1.02);
+    
+    setTimeout(() => {
+        particles.scale.set(originalScale, originalScale, originalScale);
+    }, 80);
+}
+
 // 窗口大小变化
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+// U1: 第一次访问提示
+function showFirstVisitHint() {
+    // 检查是否已显示过
+    if (localStorage.getItem('erzi-visited')) return;
+    
+    const hint = document.getElementById('first-visit-hint');
+    if (!hint) return;
+    
+    // 3秒后淡入
+    setTimeout(() => {
+        hint.classList.remove('hidden');
+    }, 3000);
+    
+    // 5秒后淡出（3秒延迟 + 2秒显示）
+    setTimeout(() => {
+        hint.classList.add('hidden');
+    }, 5000);
+    
+    // 标记已显示
+    localStorage.setItem('erzi-visited', 'true');
 }
 
 // 启动
