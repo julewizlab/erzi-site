@@ -422,6 +422,11 @@ function animate() {
     const velocities = particleGeometry.userData.velocities;
     
     for (let i = 0; i < positions.length / 3; i++) {
+        // 速度阻尼（防止累积加速）
+        velocities[i].x *= 0.98;
+        velocities[i].y *= 0.98;
+        velocities[i].z *= 0.98;
+        
         // 基础移动
         positions[i * 3] += velocities[i].x;
         positions[i * 3 + 1] += velocities[i].y;
@@ -441,8 +446,9 @@ function animate() {
             const distance = Math.sqrt(dx * dx + dy * dy);
             
             if (distance < CONFIG.PERTURB_RADIUS && distance > 0) {
-                const reaction = Math.random();
-                const strength = 0.05 * (1 - distance / CONFIG.PERTURB_RADIUS);
+                // 降低扰动力度，使用粒子的 index 决定反应（稳定，不抖动）
+                const reaction = (i * 0.618) % 1; // 黄金比例分布
+                const strength = 0.008 * (1 - distance / CONFIG.PERTURB_RADIUS);
                 
                 if (reaction < CONFIG.PERTURB_ATTRACT_PROB) {
                     // 靠近
