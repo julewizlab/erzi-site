@@ -142,7 +142,7 @@ async function init() {
 // 加载想法数据
 async function loadThoughts() {
     try {
-        const response = await fetch('thoughts.json');
+        const response = await fetch('thoughts-silicon.json');
         const data = await response.json();
         thoughts = data;
         console.log('想法数据已加载:', {
