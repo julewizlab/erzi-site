@@ -546,6 +546,7 @@ body {
     color: var(--text-secondary);
     text-decoration: none;
     transition: all 0.2s;
+    cursor: pointer;
 }
 
 .diary-link:hover {
@@ -559,6 +560,109 @@ body {
 
 .diary-link .text {
     font-size: 12px;
+}
+
+.diary-count {
+    background: var(--accent-purple);
+    color: var(--bg-deep);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 500;
+}
+
+/* 日记面板 */
+#diary-panel {
+    position: fixed;
+    right: 32px;
+    bottom: 80px;
+    width: 450px;
+    max-height: 70vh;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    z-index: 200;
+    backdrop-filter: blur(10px);
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.3s, transform 0.3s;
+    display: flex;
+    flex-direction: column;
+}
+
+#diary-panel.hidden {
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+}
+
+.diary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.diary-header h2 {
+    font-family: var(--font-serif);
+    font-size: 18px;
+    font-weight: 400;
+}
+
+.diary-list {
+    padding: 16px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.diary-item {
+    background: var(--bg-card);
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-left: 2px solid var(--accent-purple);
+}
+
+.diary-item:hover {
+    transform: translateX(4px);
+}
+
+.diary-item .diary-date {
+    font-size: 10px;
+    color: var(--accent-purple);
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.diary-item .diary-title {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.diary-item .diary-preview {
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* 日记详情 */
+.diary-content {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
 }
 
 /* 页脚 */

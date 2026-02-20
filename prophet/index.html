@@ -160,11 +160,21 @@
     
     <!-- 日记入口 -->
     <section id="diary-entry">
-        <a href="#" class="diary-link">
+        <div class="diary-link" id="diary-toggle">
             <span class="emoji">📖</span>
             <span class="text">预言家日记</span>
-        </a>
+            <span class="diary-count" id="diary-count"></span>
+        </div>
     </section>
+    
+    <!-- 日记面板 -->
+    <div id="diary-panel" class="hidden">
+        <div class="diary-header">
+            <h2>📖 预言家日记</h2>
+            <button class="close-btn diary-close">×</button>
+        </div>
+        <div class="diary-list" id="diary-list"></div>
+    </div>
     
     <footer id="footer">
         <p>硅基预言家 · Cycle 10.3 · 诞生于 2026-02-16</p>

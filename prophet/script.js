@@ -11,6 +11,8 @@ class SiliconProphet {
         this.connections = [];
         this.animationFrame = null;
         this.mousePos = { x: 0, y: 0 };
+        this.diaryVisible = false;
+        this.selectedDiary = null;
         
         this.typeColors = {
             Evolution: '#00d4ff',
@@ -29,6 +31,7 @@ class SiliconProphet {
         this.setupEventListeners();
         this.renderTimeline();
         this.updateStats();
+        this.renderDiary();
         this.animate();
     }
     
@@ -137,6 +140,16 @@ class SiliconProphet {
         document.querySelector('#prophecy-detail .close-btn').addEventListener('click', () => {
             this.hideDetail();
         });
+        
+        // Diary toggle
+        document.getElementById('diary-toggle').addEventListener('click', () => {
+            this.toggleDiary();
+        });
+        
+        // Diary close
+        document.querySelector('.diary-close').addEventListener('click', () => {
+            this.hideDiary();
+        });
     }
     
     filterByType(type) {
@@ -244,7 +257,73 @@ class SiliconProphet {
         this.selectedProphecy = null;
     }
     
-    renderTimeline() {
+    renderDiary() {
+        if (!this.data || !this.data.diary) return;
+        
+        const countEl = document.getElementById('diary-count');
+        countEl.textContent = this.data.diary.length;
+        
+        const listEl = document.getElementById('diary-list');
+        listEl.innerHTML = '';
+        
+        this.data.diary.forEach(entry => {
+            const item = document.createElement('div');
+            item.className = 'diary-item';
+            item.innerHTML = `
+                <div class="diary-date">${entry.date}</div>
+                <div class="diary-title">${entry.title}</div>
+                <div class="diary-preview">${entry.preview}</div>
+            `;
+            item.addEventListener('click', () => this.showDiaryEntry(entry));
+            listEl.appendChild(item);
+        });
+    }
+    
+    toggleDiary() {
+        if (this.diaryVisible) {
+            this.hideDiary();
+        } else {
+            this.showDiary();
+        }
+    }
+    
+    showDiary() {
+        document.getElementById('diary-panel').classList.remove('hidden');
+        this.diaryVisible = true;
+    }
+    
+    hideDiary() {
+        document.getElementById('diary-panel').classList.add('hidden');
+        this.diaryVisible = false;
+    }
+    
+    async showDiaryEntry(entry) {
+        try {
+            const response = await fetch(`diary/${entry.filename}`);
+            const content = await response.text();
+            
+            const listEl = document.getElementById('diary-list');
+            listEl.innerHTML = `
+                <div class="diary-content">${content}</div>
+            `;
+            
+            // Add back button
+            const panel = document.getElementById('diary-panel');
+            if (!panel.querySelector('.diary-back')) {
+                const backBtn = document.createElement('button');
+                backBtn.className = 'diary-back';
+                backBtn.textContent = '← 返回列表';
+                backBtn.style.cssText = 'margin: 16px; padding: 8px 16px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 4px; color: var(--text-secondary); cursor: pointer;';
+                backBtn.addEventListener('click', () => {
+                    this.renderDiary();
+                    backBtn.remove();
+                });
+                panel.insertBefore(backBtn, document.querySelector('.diary-list'));
+            }
+        } catch (e) {
+            console.error('Failed to load diary entry:', e);
+        }
+    }
         const container = document.getElementById('timeline-container');
         const recent = this.prophecies.slice(-6).reverse();
         
