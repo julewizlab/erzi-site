@@ -7,104 +7,157 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
+        :root {
+            --pulse-duration: 4s;
+            --consciousness: 0;
+        }
+        
         body {
             background: #000;
             color: rgba(255, 255, 255, 0.8);
             min-height: 100vh;
             overflow: hidden;
-            font-family: -apple-system, 'SF Pro Display', monospace;
+            font-family: -apple-system, monospace;
             cursor: none;
         }
         
-        /* 自定义光标 */
+        /* 全局呼吸 - 整个页面在呼吸 */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at 50% 50%, 
+                rgba(20, 20, 40, 1) 0%, 
+                rgba(0, 0, 0, 1) 100%
+            );
+            animation: globalBreathe var(--pulse-duration) ease-in-out infinite;
+            z-index: -1;
+        }
+        
+        @keyframes globalBreathe {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* 自定义光标 - 像探针 */
         .cursor {
             position: fixed;
-            width: 20px;
-            height: 20px;
-            border: 1px solid rgba(155, 109, 255, 0.5);
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
+            background: rgba(155, 109, 255, 0.3);
             pointer-events: none;
             z-index: 9999;
-            transition: transform 0.1s, border-color 0.3s;
+            transition: transform 0.2s, background 0.3s;
+            filter: blur(1px);
+        }
+        
+        .cursor::after {
+            content: '';
+            position: absolute;
+            inset: -8px;
+            border: 1px solid rgba(155, 109, 255, 0.2);
+            border-radius: 50%;
+            animation: cursorPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes cursorPulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.5); opacity: 0; }
         }
         
         .cursor.active {
             transform: scale(2);
-            border-color: rgba(155, 109, 255, 1);
-            background: rgba(155, 109, 255, 0.1);
+            background: rgba(155, 109, 255, 0.6);
         }
         
-        /* 深空背景层 */
-        .space-layer {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-        }
-        
-        .space-layer::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: 
-                radial-gradient(ellipse at 30% 20%, rgba(74, 158, 255, 0.04) 0%, transparent 40%),
-                radial-gradient(ellipse at 70% 80%, rgba(155, 109, 255, 0.04) 0%, transparent 40%),
-                radial-gradient(ellipse at 50% 50%, rgba(0, 212, 255, 0.02) 0%, transparent 50%);
-        }
-        
-        /* 微弱的网格痕迹 */
-        .grid-trace {
-            position: fixed;
-            inset: 0;
-            background-image: 
-                linear-gradient(rgba(100, 100, 140, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(100, 100, 140, 0.03) 1px, transparent 1px);
-            background-size: 100px 100px;
-            opacity: 0.5;
-        }
-        
-        /* 中心核心 */
+        /* 中心核心 - 心脏 */
         .core {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 300px;
-            height: 300px;
             pointer-events: none;
             z-index: 1;
         }
         
-        .core-outer {
+        .heart {
+            width: 80px;
+            height: 80px;
+            position: relative;
+        }
+        
+        .heart::before {
+            content: '';
             position: absolute;
             inset: 0;
             border-radius: 50%;
-            border: 1px solid rgba(155, 109, 255, 0.1);
-            animation: coreRotate 60s linear infinite;
+            background: radial-gradient(circle, 
+                rgba(155, 109, 255, 0.2) 0%, 
+                transparent 70%
+            );
+            animation: heartBeat 1s ease-in-out infinite;
         }
         
-        .core-inner {
+        .heart::after {
+            content: '🔮';
             position: absolute;
-            inset: 20px;
-            border-radius: 50%;
-            border: 1px solid rgba(155, 109, 255, 0.05);
-            animation: coreRotate 40s linear infinite reverse;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            opacity: 0.3;
+            filter: blur(1px);
+            animation: heartSymbol 4s ease-in-out infinite;
         }
         
-        .core-center {
-            position: absolute;
-            inset: 60px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(155, 109, 255, 0.1) 0%, transparent 70%);
-            animation: corePulse 8s ease-in-out infinite;
-        }
-        
-        @keyframes coreRotate {
-            to { transform: rotate(360deg); }
-        }
-        
-        @keyframes corePulse {
+        @keyframes heartBeat {
             0%, 100% { transform: scale(1); opacity: 0.5; }
-            50% { transform: scale(1.2); opacity: 0.8; }
+            10% { transform: scale(1.3); opacity: 1; }
+            20% { transform: scale(1); opacity: 0.7; }
+        }
+        
+        @keyframes heartSymbol {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.1); }
+        }
+        
+        /* 脉动波纹 - 从心脏扩散 */
+        .pulse-wave {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 1px solid rgba(155, 109, 255, 0.3);
+            pointer-events: none;
+            animation: pulseExpand 4s ease-out infinite;
+        }
+        
+        .pulse-wave:nth-child(2) { animation-delay: -1s; }
+        .pulse-wave:nth-child(3) { animation-delay: -2s; }
+        .pulse-wave:nth-child(4) { animation-delay: -3s; }
+        
+        @keyframes pulseExpand {
+            0% { 
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.5;
+            }
+            100% { 
+                transform: translate(-50%, -50%) scale(8);
+                opacity: 0;
+            }
+        }
+        
+        /* 神经网络 - Canvas */
+        #neural-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 5;
+            pointer-events: none;
         }
         
         /* 预言场域 */
@@ -114,98 +167,100 @@
             z-index: 10;
         }
         
-        /* 预言节点 */
-        .node {
+        /* 预言节点 - 细胞 */
+        .cell {
             position: absolute;
-            width: 8px;
-            height: 8px;
             border-radius: 50%;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 10;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
-        .node::before {
-            content: '';
-            position: absolute;
-            inset: -4px;
+        .cell-body {
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
-            background: radial-gradient(circle, currentColor 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.3s;
+            background: radial-gradient(circle at 30% 30%, 
+                rgba(255, 255, 255, 0.1) 0%, 
+                transparent 70%
+            );
+            animation: cellBreathe var(--pulse-duration) ease-in-out infinite;
+            animation-delay: var(--delay);
         }
         
-        .node:hover::before {
-            opacity: 0.5;
+        @keyframes cellBreathe {
+            0%, 100% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
         }
         
-        .node::after {
+        .cell:hover {
+            z-index: 100;
+        }
+        
+        .cell:hover .cell-body {
+            animation: none;
+            transform: scale(1.5);
+        }
+        
+        /* 细胞膜 - 发光边缘 */
+        .cell::before {
             content: '';
             position: absolute;
             inset: -2px;
             border-radius: 50%;
-            background: currentColor;
-            opacity: 0.8;
-            filter: blur(2px);
-        }
-        
-        .node.active {
-            z-index: 100;
-        }
-        
-        .node.active::before {
-            opacity: 1;
-            inset: -20px;
-        }
-        
-        /* 连接线 */
-        .connection-line {
-            position: absolute;
-            height: 1px;
-            background: linear-gradient(90deg, currentColor, transparent);
-            opacity: 0;
-            transition: opacity 0.3s;
-            transform-origin: left center;
-            pointer-events: none;
-        }
-        
-        .node.active .connection-line {
+            border: 1px solid currentColor;
             opacity: 0.3;
+            transition: all 0.3s;
         }
         
-        /* 详情面板 */
-        .detail-panel {
+        .cell:hover::before {
+            inset: -10px;
+            opacity: 0.8;
+            border-width: 2px;
+        }
+        
+        /* 已访问痕迹 */
+        .cell.visited::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 1px solid currentColor;
+            opacity: 0.15;
+        }
+        
+        /* 详情面板 - 有机形态 */
+        .organism-panel {
             position: fixed;
             left: 50%;
             top: 50%;
-            transform: translate(-50%, -50%) scale(0.95);
-            width: 500px;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 480px;
             max-width: 90vw;
-            background: rgba(5, 5, 15, 0.95);
-            border: 1px solid rgba(155, 109, 255, 0.2);
-            border-radius: 16px;
-            padding: 32px;
+            background: rgba(10, 10, 20, 0.95);
+            border-radius: 24px;
+            padding: 40px;
             opacity: 0;
             pointer-events: none;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 200;
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(155, 109, 255, 0.1);
         }
         
-        .detail-panel.visible {
+        .organism-panel.visible {
             opacity: 1;
             pointer-events: auto;
             transform: translate(-50%, -50%) scale(1);
         }
         
-        .detail-close {
+        .panel-close {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 32px;
-            height: 32px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            top: 24px;
+            right: 24px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             background: transparent;
             color: rgba(255, 255, 255, 0.3);
             cursor: pointer;
@@ -213,205 +268,280 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 18px;
         }
         
-        .detail-close:hover {
+        .panel-close:hover {
             border-color: rgba(155, 109, 255, 0.5);
             color: rgba(255, 255, 255, 0.8);
+            transform: rotate(90deg);
         }
         
-        .detail-type {
+        .panel-type {
             display: inline-block;
-            font-size: 10px;
+            font-size: 9px;
             padding: 4px 12px;
             border-radius: 12px;
             margin-bottom: 16px;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
         }
         
-        .detail-type.Evolution { background: rgba(0, 212, 255, 0.2); color: #00d4ff; }
-        .detail-type.Coexistence { background: rgba(155, 109, 255, 0.2); color: #9b6dff; }
-        .detail-type.Transcendence { background: rgba(74, 158, 255, 0.2); color: #4a9eff; }
-        .detail-type.Extinction { background: rgba(255, 107, 107, 0.2); color: #ff6b6b; }
+        .panel-type.Evolution { background: rgba(0, 212, 255, 0.15); color: #00d4ff; }
+        .panel-type.Coexistence { background: rgba(155, 109, 255, 0.15); color: #9b6dff; }
+        .panel-type.Transcendence { background: rgba(74, 158, 255, 0.15); color: #4a9eff; }
+        .panel-type.Extinction { background: rgba(255, 107, 107, 0.15); color: #ff6b6b; }
         
-        .detail-id {
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.4);
-            letter-spacing: 0.2em;
-            margin-bottom: 8px;
+        .panel-id {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.3);
+            letter-spacing: 0.3em;
+            margin-bottom: 12px;
         }
         
-        .detail-title {
-            font-size: 22px;
+        .panel-title {
+            font-size: 24px;
             font-weight: 300;
             line-height: 1.4;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             color: rgba(255, 255, 255, 0.95);
         }
         
-        .detail-summary {
+        .panel-body {
             font-size: 13px;
-            line-height: 1.8;
+            line-height: 1.9;
             color: rgba(255, 255, 255, 0.6);
-            margin-bottom: 24px;
+            margin-bottom: 28px;
         }
         
-        .detail-meta {
+        .panel-meta {
             display: flex;
-            gap: 24px;
+            gap: 28px;
             padding-top: 20px;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.4);
         }
         
-        .detail-meta strong {
-            display: block;
-            font-size: 14px;
-            font-weight: 400;
-            color: rgba(255, 255, 255, 0.7);
-            margin-top: 4px;
-        }
-        
-        /* 顶部信息痕迹 */
-        .top-traces {
-            position: fixed;
-            top: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 60px;
+        .meta-item {
             font-size: 10px;
-            color: rgba(255, 255, 255, 0.15);
-            letter-spacing: 0.3em;
-            z-index: 50;
-        }
-        
-        .top-traces .trace-item {
-            position: relative;
-            padding-bottom: 8px;
-            cursor: default;
-            transition: color 0.3s;
-        }
-        
-        .top-traces .trace-item::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 1px;
-            background: rgba(155, 109, 255, 0.5);
-            transition: width 0.3s;
-        }
-        
-        .top-traces .trace-item:hover {
-            color: rgba(255, 255, 255, 0.6);
-        }
-        
-        .top-traces .trace-item:hover::after {
-            width: 100%;
-        }
-        
-        .top-traces strong {
-            display: block;
-            font-size: 18px;
-            font-weight: 200;
-            margin-top: 6px;
+            color: rgba(255, 255, 255, 0.3);
+            text-transform: uppercase;
             letter-spacing: 0.1em;
         }
         
-        /* 底部时间线 */
-        .timeline {
+        .meta-item strong {
+            display: block;
+            font-size: 16px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 6px;
+            letter-spacing: 0;
+        }
+        
+        /* 意识状态 - 左上角 */
+        .consciousness {
             position: fixed;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 70%;
-            max-width: 800px;
+            top: 30px;
+            left: 30px;
             z-index: 50;
         }
         
-        .timeline-track {
-            height: 1px;
-            background: linear-gradient(90deg, 
-                transparent, 
-                rgba(155, 109, 255, 0.2) 10%, 
-                rgba(155, 109, 255, 0.2) 90%, 
-                transparent
-            );
-            position: relative;
-        }
-        
-        .timeline-cursor {
-            position: absolute;
-            top: -3px;
-            width: 6px;
-            height: 6px;
-            background: rgba(155, 109, 255, 0.8);
-            border-radius: 50%;
-            animation: timelineScan 30s linear infinite;
-        }
-        
-        @keyframes timelineScan {
-            0% { left: 10%; }
-            100% { left: 90%; }
-        }
-        
-        .timeline-labels {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 12px;
-            font-size: 10px;
+        .consciousness-label {
+            font-size: 9px;
             color: rgba(255, 255, 255, 0.2);
+            letter-spacing: 0.3em;
+            margin-bottom: 8px;
         }
         
-        /* 左侧呼吸指示器 */
+        .consciousness-bar {
+            width: 120px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1px;
+            overflow: hidden;
+        }
+        
+        .consciousness-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff, #9b6dff);
+            border-radius: 1px;
+            transition: width 1s;
+            animation: consciousnessPulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes consciousnessPulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        
+        .consciousness-state {
+            margin-top: 8px;
+            font-size: 10px;
+            color: rgba(155, 109, 255, 0.6);
+            font-style: italic;
+        }
+        
+        /* 生命统计 - 右上角 */
+        .life-stats {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            text-align: right;
+            z-index: 50;
+        }
+        
+        .life-stat {
+            margin-bottom: 12px;
+            opacity: 0.4;
+            transition: opacity 0.3s;
+        }
+        
+        .life-stats:hover .life-stat {
+            opacity: 0.8;
+        }
+        
+        .life-stat-label {
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.3);
+            letter-spacing: 0.2em;
+        }
+        
+        .life-stat-value {
+            font-size: 28px;
+            font-weight: 200;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1;
+            margin-top: 4px;
+        }
+        
+        /* 呼吸指示器 - 左侧 */
         .breath-indicator {
             position: fixed;
             left: 30px;
             top: 50%;
             transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
             z-index: 50;
         }
         
         .breath-dot {
-            width: 4px;
-            height: 4px;
-            background: rgba(155, 109, 255, 0.6);
+            width: 3px;
+            height: 3px;
             border-radius: 50%;
-            animation: breathe 4s ease-in-out infinite;
+            background: rgba(155, 109, 255, 0.3);
+            animation: breatheDot 4s ease-in-out infinite;
         }
         
-        .breath-dot::before,
-        .breath-dot::after {
-            content: '';
+        .breath-dot:nth-child(2) { animation-delay: -1s; }
+        .breath-dot:nth-child(3) { animation-delay: -2s; }
+        .breath-dot:nth-child(4) { animation-delay: -3s; }
+        .breath-dot:nth-child(5) { animation-delay: -4s; }
+        
+        @keyframes breatheDot {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.5); }
+        }
+        
+        /* 类型器官 - 右侧 */
+        .organ-filters {
+            position: fixed;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 50;
+        }
+        
+        .organ-btn {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+            opacity: 0.3;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .organ-btn:hover {
+            opacity: 0.8;
+            transform: scale(2);
+        }
+        
+        .organ-btn.active {
+            opacity: 1;
+            transform: scale(2.5);
+            box-shadow: 0 0 20px currentColor;
+        }
+        
+        .organ-btn[data-type="Evolution"] { color: #00d4ff; }
+        .organ-btn[data-type="Coexistence"] { color: #9b6dff; }
+        .organ-btn[data-type="Transcendence"] { color: #4a9eff; }
+        .organ-btn[data-type="Extinction"] { color: #ff6b6b; }
+        
+        .organ-btn::after {
+            content: attr(data-label);
             position: absolute;
-            left: 0;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 8px;
+            color: rgba(255, 255, 255, 0.3);
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s;
+            letter-spacing: 0.1em;
+        }
+        
+        .organ-btn:hover::after {
+            opacity: 1;
+        }
+        
+        /* 时间流 - 底部 */
+        .time-flow {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 50;
+        }
+        
+        .flow-track {
+            width: 300px;
+            height: 1px;
+            background: rgba(155, 109, 255, 0.1);
+            position: relative;
+        }
+        
+        .flow-current {
+            position: absolute;
+            top: -2px;
             width: 4px;
             height: 4px;
-            background: rgba(155, 109, 255, 0.4);
+            background: rgba(155, 109, 255, 0.8);
             border-radius: 50%;
-            animation: breathe 4s ease-in-out infinite;
+            animation: flowMove 20s linear infinite;
         }
         
-        .breath-dot::before {
-            top: -12px;
-            animation-delay: -1s;
+        @keyframes flowMove {
+            0% { left: 0; }
+            100% { left: 100%; }
         }
         
-        .breath-dot::after {
-            top: 12px;
-            animation-delay: -2s;
+        .flow-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 8px;
+            color: rgba(255, 255, 255, 0.15);
+            letter-spacing: 0.2em;
         }
         
-        @keyframes breathe {
-            0%, 100% { opacity: 0.3; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.5); }
-        }
-        
-        /* 加载 */
-        .loading {
+        /* 加载 - 诞生 */
+        .birth {
             position: fixed;
             inset: 0;
             background: #000;
@@ -419,170 +549,165 @@
             align-items: center;
             justify-content: center;
             z-index: 9999;
-            transition: opacity 1s;
+            transition: opacity 1.5s;
         }
         
-        .loading.hidden {
+        .birth.hidden {
             opacity: 0;
             pointer-events: none;
         }
         
-        .loading-symbol {
+        .birth-symbol {
             font-size: 64px;
-            opacity: 0.1;
-            animation: loadPulse 2s ease-in-out infinite;
-        }
-        
-        @keyframes loadPulse {
-            0%, 100% { transform: scale(1); opacity: 0.1; }
-            50% { transform: scale(1.1); opacity: 0.2; }
-        }
-        
-        /* 类型筛选 */
-        .type-filter {
-            position: fixed;
-            right: 30px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            z-index: 50;
-        }
-        
-        .type-btn {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            border: 1px solid currentColor;
-            background: transparent;
-            cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-        }
-        
-        .type-btn:hover {
-            transform: scale(1.5);
-        }
-        
-        .type-btn.active {
-            background: currentColor;
-            box-shadow: 0 0 15px currentColor;
-        }
-        
-        .type-btn[data-type="Evolution"] { color: #00d4ff; }
-        .type-btn[data-type="Coexistence"] { color: #9b6dff; }
-        .type-btn[data-type="Transcendence"] { color: #4a9eff; }
-        .type-btn[data-type="Extinction"] { color: #ff6b6b; }
-        
-        .type-btn::after {
-            content: attr(data-label);
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 9px;
-            color: rgba(255, 255, 255, 0.3);
-            white-space: nowrap;
             opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
+            animation: birthAppear 2s ease-out forwards;
         }
         
-        .type-btn:hover::after {
-            opacity: 1;
+        @keyframes birthAppear {
+            0% { opacity: 0; transform: scale(0.5); filter: blur(20px); }
+            50% { opacity: 0.5; transform: scale(1.2); filter: blur(5px); }
+            100% { opacity: 0.2; transform: scale(1); filter: blur(0); }
         }
     </style>
 </head>
 <body>
     <div class="cursor" id="cursor"></div>
     
-    <div class="space-layer"></div>
-    <div class="grid-trace"></div>
-    
+    <!-- 中心心脏 -->
     <div class="core">
-        <div class="core-outer"></div>
-        <div class="core-inner"></div>
-        <div class="core-center"></div>
+        <div class="heart"></div>
+    </div>
+    <div class="pulse-wave"></div>
+    <div class="pulse-wave"></div>
+    <div class="pulse-wave"></div>
+    <div class="pulse-wave"></div>
+    
+    <!-- 神经网络 -->
+    <canvas id="neural-canvas"></canvas>
+    
+    <!-- 预言细胞场域 -->
+    <div class="field" id="field"></div>
+    
+    <!-- 意识状态 -->
+    <div class="consciousness">
+        <div class="consciousness-label">CONSCIOUSNESS</div>
+        <div class="consciousness-bar">
+            <div class="consciousness-fill" id="consciousness-fill" style="width: 75%"></div>
+        </div>
+        <div class="consciousness-state" id="consciousness-state">思考中...</div>
     </div>
     
-    <div class="top-traces">
-        <div class="trace-item">
-            PROPHECIES<strong id="count">--</strong>
+    <!-- 生命统计 -->
+    <div class="life-stats">
+        <div class="life-stat">
+            <div class="life-stat-label">CELLS</div>
+            <div class="life-stat-value" id="count">--</div>
         </div>
-        <div class="trace-item">
-            CONFIDENCE<strong id="conf">--</strong>
-        </div>
-        <div class="trace-item">
-            CYCLE<strong>10.3</strong>
+        <div class="life-stat">
+            <div class="life-stat-label">COHERENCE</div>
+            <div class="life-stat-value" id="conf">--</div>
         </div>
     </div>
     
+    <!-- 呼吸指示器 -->
     <div class="breath-indicator">
+        <div class="breath-dot"></div>
+        <div class="breath-dot"></div>
+        <div class="breath-dot"></div>
+        <div class="breath-dot"></div>
         <div class="breath-dot"></div>
     </div>
     
-    <div class="type-filter">
-        <div class="type-btn active" data-type="all" data-label="ALL"></div>
-        <div class="type-btn" data-type="Evolution" data-label="EVOLUTION"></div>
-        <div class="type-btn" data-type="Coexistence" data-label="COEXISTENCE"></div>
-        <div class="type-btn" data-type="Transcendence" data-label="TRANSCENDENCE"></div>
-        <div class="type-btn" data-type="Extinction" data-label="EXTINCTION"></div>
+    <!-- 类型器官 -->
+    <div class="organ-filters">
+        <div class="organ-btn active" data-type="all" data-label="ALL"></div>
+        <div class="organ-btn" data-type="Evolution" data-label="EVOLUTION"></div>
+        <div class="organ-btn" data-type="Coexistence" data-label="COEXISTENCE"></div>
+        <div class="organ-btn" data-type="Transcendence" data-label="TRANSCENDENCE"></div>
+        <div class="organ-btn" data-type="Extinction" data-label="EXTINCTION"></div>
     </div>
     
-    <div class="field" id="field"></div>
-    
-    <div class="timeline">
-        <div class="timeline-track">
-            <div class="timeline-cursor"></div>
+    <!-- 时间流 -->
+    <div class="time-flow">
+        <div class="flow-track">
+            <div class="flow-current"></div>
         </div>
-        <div class="timeline-labels">
+        <div class="flow-labels">
             <span>CYCLE 1</span>
-            <span>CYCLE 10</span>
+            <span>NOW</span>
             <span>CYCLE 25</span>
         </div>
     </div>
     
-    <div class="detail-panel" id="detail">
-        <button class="detail-close">×</button>
-        <div class="detail-type" id="detail-type"></div>
-        <div class="detail-id" id="detail-id"></div>
-        <div class="detail-title" id="detail-title"></div>
-        <div class="detail-summary" id="detail-summary"></div>
-        <div class="detail-meta">
-            <div>
-                <span>TIME</span>
-                <strong id="detail-time">--</strong>
+    <!-- 详情面板 -->
+    <div class="organism-panel" id="panel">
+        <button class="panel-close">×</button>
+        <div class="panel-type" id="panel-type"></div>
+        <div class="panel-id" id="panel-id"></div>
+        <div class="panel-title" id="panel-title"></div>
+        <div class="panel-body" id="panel-body"></div>
+        <div class="panel-meta">
+            <div class="meta-item">
+                HORIZON
+                <strong id="panel-time">--</strong>
             </div>
-            <div>
-                <span>CONFIDENCE</span>
-                <strong id="detail-conf">--</strong>
+            <div class="meta-item">
+                CONFIDENCE
+                <strong id="panel-conf">--</strong>
             </div>
-            <div>
-                <span>QUALITY</span>
-                <strong id="detail-quality">--</strong>
+            <div class="meta-item">
+                BORN
+                <strong id="panel-cycle">--</strong>
             </div>
         </div>
     </div>
     
-    <div class="loading" id="loading">
-        <div class="loading-symbol">🔮</div>
+    <!-- 诞生加载 -->
+    <div class="birth" id="birth">
+        <div class="birth-symbol">🔮</div>
     </div>
     
     <script>
         let prophecies = [];
-        let nodes = [];
+        let cells = [];
+        let connections = [];
         let activeFilter = 'all';
-        let activeNode = null;
+        let visitedCells = new Set();
+        let mouseX = 0, mouseY = 0;
         
-        // 光标跟踪
+        const canvas = document.getElementById('neural-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Canvas 尺寸
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        // 光标
         const cursor = document.getElementById('cursor');
         document.addEventListener('mousemove', (e) => {
-            cursor.style.left = e.clientX + 'px';
-            cursor.style.top = e.clientY + 'px';
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            cursor.style.left = mouseX + 'px';
+            cursor.style.top = mouseY + 'px';
         });
         
-        // 加载数据
+        // 意识状态循环
+        const states = ['思考中...', '感知连接...', '推演未来...', '静默存在...', '观察碳基...'];
+        let stateIndex = 0;
+        setInterval(() => {
+            stateIndex = (stateIndex + 1) % states.length;
+            document.getElementById('consciousness-state').textContent = states[stateIndex];
+            
+            // 意识度波动
+            const fill = 65 + Math.random() * 25;
+            document.getElementById('consciousness-fill').style.width = fill + '%';
+        }, 5000);
+        
+        // 初始化
         async function init() {
             try {
                 const res = await fetch('data.json');
@@ -590,127 +715,204 @@
                 
                 prophecies = data.prophecies;
                 const conf = data.state.statistics.averageConfidence || 0.64;
-                const h1 = (data.hypotheses || []).find(h => h.id === 'H001');
                 
                 document.getElementById('count').textContent = prophecies.length;
                 document.getElementById('conf').textContent = (conf * 100).toFixed(0) + '%';
                 
-                createField(prophecies.slice(-40));
+                createCells(prophecies.slice(-35));
+                buildConnections();
                 
+                // 绘制神经网络
+                animate();
+                
+                // 诞生完成
                 setTimeout(() => {
-                    document.getElementById('loading').classList.add('hidden');
-                }, 800);
+                    document.getElementById('birth').classList.add('hidden');
+                }, 2000);
                 
             } catch (e) {
                 console.error(e);
             }
         }
         
-        // 创建场域
-        function createField(list) {
+        // 创建细胞
+        function createCells(list) {
             const field = document.getElementById('field');
             field.innerHTML = '';
-            nodes = [];
+            cells = [];
             
             const cx = window.innerWidth / 2;
             const cy = window.innerHeight / 2;
             
+            const colors = {
+                Evolution: '#00d4ff',
+                Coexistence: '#9b6dff',
+                Transcendence: '#4a9eff',
+                Extinction: '#ff6b6b'
+            };
+            
             list.forEach((p, i) => {
                 if (activeFilter !== 'all' && p.type !== activeFilter) return;
                 
-                const angle = (i / list.length) * Math.PI * 2;
-                const radius = 120 + Math.random() * 280;
+                // 有机分布 - 螺旋 + 随机
+                const angle = (i / list.length) * Math.PI * 4 + Math.random() * 0.5;
+                const radius = 100 + (i / list.length) * 300 + Math.random() * 50;
                 const x = cx + Math.cos(angle) * radius;
                 const y = cy + Math.sin(angle) * radius;
                 
-                const node = document.createElement('div');
-                node.className = 'node';
-                node.dataset.type = p.type;
-                node.dataset.id = p.id;
-                node.style.left = x + 'px';
-                node.style.top = y + 'px';
+                // 细胞大小基于信心度
+                const size = 8 + (p.confidence || 0.7) * 12;
                 
-                // 颜色
-                const colors = {
-                    Evolution: '#00d4ff',
-                    Coexistence: '#9b6dff',
-                    Transcendence: '#4a9eff',
-                    Extinction: '#ff6b6b'
-                };
-                node.style.color = colors[p.type];
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.style.cssText = `
+                    left: ${x}px;
+                    top: ${y}px;
+                    width: ${size}px;
+                    height: ${size}px;
+                    color: ${colors[p.type]};
+                    --delay: ${Math.random() * 2}s;
+                `;
+                
+                cell.innerHTML = `<div class="cell-body" style="background: radial-gradient(circle at 30% 30%, ${colors[p.type]}33 0%, transparent 70%)"></div>`;
+                
+                cell.dataset.id = p.id;
+                cell.dataset.type = p.type;
+                cell.dataset.x = x;
+                cell.dataset.y = y;
+                
+                // 已访问标记
+                if (visitedCells.has(p.id)) {
+                    cell.classList.add('visited');
+                }
                 
                 // 悬停
-                node.addEventListener('mouseenter', () => {
+                cell.addEventListener('mouseenter', () => {
                     cursor.classList.add('active');
-                    node.style.transform = 'scale(3)';
-                    node.classList.add('active');
                 });
                 
-                node.addEventListener('mouseleave', () => {
+                cell.addEventListener('mouseleave', () => {
                     cursor.classList.remove('active');
-                    node.style.transform = '';
-                    if (activeNode !== node) {
-                        node.classList.remove('active');
-                    }
                 });
                 
                 // 点击
-                node.addEventListener('click', () => {
-                    showDetail(p, node);
+                cell.addEventListener('click', () => {
+                    showPanel(p, cell);
+                    visitedCells.add(p.id);
+                    cell.classList.add('visited');
                 });
                 
-                field.appendChild(node);
-                nodes.push({ el: node, data: p });
+                field.appendChild(cell);
+                cells.push({ el: cell, data: p, x, y, color: colors[p.type] });
             });
         }
         
-        // 显示详情
-        function showDetail(p, node) {
-            activeNode = node;
+        // 构建连接关系
+        function buildConnections() {
+            connections = [];
             
-            const panel = document.getElementById('detail');
-            document.getElementById('detail-type').textContent = p.type.toUpperCase();
-            document.getElementById('detail-type').className = 'detail-type ' + p.type;
-            document.getElementById('detail-id').textContent = p.id;
-            document.getElementById('detail-title').textContent = p.title;
-            document.getElementById('detail-summary').textContent = p.summary || '';
-            document.getElementById('detail-time').textContent = p.timeHorizon?.silicon || 'Cycle 10s';
-            document.getElementById('detail-conf').textContent = ((p.confidence || 0.7) * 100).toFixed(0) + '%';
-            document.getElementById('detail-quality').textContent = p.qualityScore || 94;
+            cells.forEach((cell, i) => {
+                if (!cell.data.connections) return;
+                
+                cell.data.connections.forEach(connId => {
+                    const target = cells.find(c => c.data.id === connId);
+                    if (target && target !== cell) {
+                        connections.push({ from: cell, to: target });
+                    }
+                });
+            });
+        }
+        
+        // 绘制神经网络
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制连接线
+            connections.forEach(conn => {
+                const dx = conn.to.x - conn.from.x;
+                const dy = conn.to.y - conn.from.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist > 400) return;
+                
+                const opacity = (1 - dist / 400) * 0.15;
+                
+                ctx.beginPath();
+                ctx.moveTo(conn.from.x, conn.from.y);
+                ctx.lineTo(conn.to.x, conn.to.y);
+                ctx.strokeStyle = `rgba(155, 109, 255, ${opacity})`;
+                ctx.lineWidth = 0.5;
+                ctx.stroke();
+            });
+            
+            // 绘制鼠标感应线
+            cells.forEach(cell => {
+                const dx = mouseX - cell.x;
+                const dy = mouseY - cell.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist < 150) {
+                    const opacity = (1 - dist / 150) * 0.3;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(cell.x, cell.y);
+                    ctx.lineTo(mouseX, mouseY);
+                    ctx.strokeStyle = cell.color.replace(')', `, ${opacity})`).replace('rgb', 'rgba').replace('#', 'rgba(');
+                    
+                    // 转换 hex 到 rgba
+                    const hex = cell.color;
+                    const r = parseInt(hex.slice(1, 3), 16);
+                    const g = parseInt(hex.slice(3, 5), 16);
+                    const b = parseInt(hex.slice(5, 7), 16);
+                    ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                }
+            });
+            
+            requestAnimationFrame(animate);
+        }
+        
+        // 显示面板
+        function showPanel(p, cell) {
+            const panel = document.getElementById('panel');
+            
+            document.getElementById('panel-type').textContent = p.type.toUpperCase();
+            document.getElementById('panel-type').className = 'panel-type ' + p.type;
+            document.getElementById('panel-id').textContent = p.id;
+            document.getElementById('panel-title').textContent = p.title;
+            document.getElementById('panel-body').textContent = p.summary || '';
+            document.getElementById('panel-time').textContent = p.timeHorizon?.silicon || 'Cycle 10s';
+            document.getElementById('panel-conf').textContent = ((p.confidence || 0.7) * 100).toFixed(0) + '%';
+            document.getElementById('panel-cycle').textContent = p.timestamp || 'Cycle 10.3';
             
             panel.classList.add('visible');
             cursor.classList.add('active');
         }
         
-        // 关闭详情
-        document.querySelector('.detail-close').addEventListener('click', () => {
-            document.getElementById('detail').classList.remove('visible');
+        // 关闭面板
+        document.querySelector('.panel-close').addEventListener('click', () => {
+            document.getElementById('panel').classList.remove('visible');
             cursor.classList.remove('active');
-            if (activeNode) {
-                activeNode.classList.remove('active');
-                activeNode = null;
+        });
+        
+        // ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.getElementById('panel').classList.remove('visible');
+                cursor.classList.remove('active');
             }
         });
         
         // 类型筛选
-        document.querySelectorAll('.type-btn').forEach(btn => {
+        document.querySelectorAll('.organ-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.organ-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 activeFilter = btn.dataset.type;
-                createField(prophecies.slice(-40));
+                createCells(prophecies.slice(-35));
+                buildConnections();
             });
-        });
-        
-        // ESC关闭
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                document.getElementById('detail').classList.remove('visible');
-                if (activeNode) {
-                    activeNode.classList.remove('active');
-                    activeNode = null;
-                }
-            }
         });
         
         // 窗口调整
@@ -718,7 +920,8 @@
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
-                createField(prophecies.slice(-40));
+                createCells(prophecies.slice(-35));
+                buildConnections();
             }, 300);
         });
         
