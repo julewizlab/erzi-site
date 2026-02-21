@@ -343,6 +343,8 @@ class SiliconProphet {
             console.error('Failed to load diary entry:', e);
         }
     }
+    
+    renderTimeline() {
         const container = document.getElementById('timeline-container');
         const recent = this.prophecies.slice(-6).reverse();
         
