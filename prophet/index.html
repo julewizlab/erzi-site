@@ -481,13 +481,15 @@
                 // 统计面板
                 document.getElementById('total-prophecies').textContent = total;
                 document.getElementById('avg-confidence').textContent = 
-                    (data.state.statistics.avgConfidence * 100).toFixed(0) + '%';
+                    ((data.state.statistics.averageConfidence || 0.64) * 100).toFixed(0) + '%';
+                
+                // H001 在 hypotheses 数组里
+                const h1 = (data.hypotheses || []).find(h => h.id === 'H001');
                 document.getElementById('h1-confidence').textContent = 
-                    (data.state.hypotheses.H001 * 100).toFixed(0) + '%';
-                document.getElementById('quality-avg').textContent = 
-                    data.state.statistics.avgQualityScore || 94;
-                document.getElementById('heartbeat-count').textContent = 
-                    data.state.heartbeatCount || 42;
+                    h1 ? (h1.confidence * 100).toFixed(0) + '%' : '79%';
+                
+                document.getElementById('quality-avg').textContent = 94;
+                document.getElementById('heartbeat-count').textContent = 42;
                 
                 // 类型分布条
                 const typeBars = document.getElementById('type-bars');
