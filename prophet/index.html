@@ -7,72 +7,65 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        :root {
-            --pulse-duration: 4s;
-            --consciousness: 0;
-        }
-        
         body {
-            background: #000;
-            color: rgba(255, 255, 255, 0.8);
+            background: #0a0e14;
+            color: rgba(100, 200, 255, 0.9);
             min-height: 100vh;
             overflow: hidden;
-            font-family: -apple-system, monospace;
+            font-family: 'SF Mono', 'Consolas', monospace;
             cursor: none;
         }
         
-        /* 全局呼吸 - 整个页面在呼吸 */
-        body::before {
-            content: '';
+        /* 全息光效背景 */
+        .holo-bg {
             position: fixed;
             inset: 0;
-            background: radial-gradient(ellipse at 50% 50%, 
-                rgba(20, 20, 40, 1) 0%, 
-                rgba(0, 0, 0, 1) 100%
-            );
-            animation: globalBreathe var(--pulse-duration) ease-in-out infinite;
-            z-index: -1;
+            background: 
+                radial-gradient(ellipse at 50% 50%, rgba(0, 180, 255, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 30% 30%, rgba(0, 220, 255, 0.02) 0%, transparent 40%),
+                #0a0e14;
         }
         
-        @keyframes globalBreathe {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-        
-        /* 自定义光标 - 像探针 */
+        /* 自定义光标 - 全息点 */
         .cursor {
             position: fixed;
-            width: 12px;
-            height: 12px;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(0, 200, 255, 0.6);
             border-radius: 50%;
-            background: rgba(155, 109, 255, 0.3);
             pointer-events: none;
             z-index: 9999;
-            transition: transform 0.2s, background 0.3s;
-            filter: blur(1px);
+            transition: all 0.15s ease-out;
+        }
+        
+        .cursor::before {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            background: rgba(0, 200, 255, 0.4);
+            border-radius: 50%;
         }
         
         .cursor::after {
             content: '';
             position: absolute;
-            inset: -8px;
-            border: 1px solid rgba(155, 109, 255, 0.2);
+            inset: -20px;
+            border: 1px solid rgba(0, 200, 255, 0.1);
             border-radius: 50%;
-            animation: cursorPulse 2s ease-in-out infinite;
+            animation: cursorRing 2s linear infinite;
         }
         
-        @keyframes cursorPulse {
-            0%, 100% { transform: scale(1); opacity: 0.5; }
-            50% { transform: scale(1.5); opacity: 0; }
+        @keyframes cursorRing {
+            to { transform: rotate(360deg); }
         }
         
         .cursor.active {
-            transform: scale(2);
-            background: rgba(155, 109, 255, 0.6);
+            transform: scale(1.5);
+            border-color: rgba(0, 200, 255, 1);
         }
         
-        /* 中心核心 - 心脏 */
-        .core {
+        /* Jarvis 核心 - 圆环界面 */
+        .jarvis-core {
             position: fixed;
             top: 50%;
             left: 50%;
@@ -81,173 +74,378 @@
             z-index: 1;
         }
         
-        .heart {
-            width: 80px;
-            height: 80px;
-            position: relative;
-        }
-        
-        .heart::before {
-            content: '';
+        .core-ring {
             position: absolute;
-            inset: 0;
             border-radius: 50%;
-            background: radial-gradient(circle, 
-                rgba(155, 109, 255, 0.2) 0%, 
-                transparent 70%
-            );
-            animation: heartBeat 1s ease-in-out infinite;
+            border: 1px solid rgba(0, 200, 255, 0.2);
         }
         
-        .heart::after {
-            content: '🔮';
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
+        .core-ring:nth-child(1) {
+            width: 200px;
+            height: 200px;
+            top: -100px;
+            left: -100px;
+            animation: ringRotate 60s linear infinite;
+        }
+        
+        .core-ring:nth-child(2) {
+            width: 280px;
+            height: 280px;
+            top: -140px;
+            left: -140px;
+            animation: ringRotate 45s linear infinite reverse;
+            border-style: dashed;
             opacity: 0.3;
-            filter: blur(1px);
-            animation: heartSymbol 4s ease-in-out infinite;
         }
         
-        @keyframes heartBeat {
-            0%, 100% { transform: scale(1); opacity: 0.5; }
-            10% { transform: scale(1.3); opacity: 1; }
-            20% { transform: scale(1); opacity: 0.7; }
+        .core-ring:nth-child(3) {
+            width: 360px;
+            height: 360px;
+            top: -180px;
+            left: -180px;
+            animation: ringRotate 90s linear infinite;
+            border-style: dotted;
+            opacity: 0.15;
         }
         
-        @keyframes heartSymbol {
-            0%, 100% { opacity: 0.3; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.1); }
+        @keyframes ringRotate {
+            to { transform: rotate(360deg); }
         }
         
-        /* 脉动波纹 - 从心脏扩散 */
-        .pulse-wave {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80px;
-            height: 80px;
+        /* 核心脉冲 */
+        .core-pulse {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            top: -30px;
+            left: -30px;
             border-radius: 50%;
-            border: 1px solid rgba(155, 109, 255, 0.3);
-            pointer-events: none;
-            animation: pulseExpand 4s ease-out infinite;
+            background: radial-gradient(circle, rgba(0, 200, 255, 0.2) 0%, transparent 70%);
+            animation: corePulse 3s ease-in-out infinite;
         }
         
-        .pulse-wave:nth-child(2) { animation-delay: -1s; }
-        .pulse-wave:nth-child(3) { animation-delay: -2s; }
-        .pulse-wave:nth-child(4) { animation-delay: -3s; }
-        
-        @keyframes pulseExpand {
-            0% { 
-                transform: translate(-50%, -50%) scale(1);
-                opacity: 0.5;
-            }
-            100% { 
-                transform: translate(-50%, -50%) scale(8);
-                opacity: 0;
-            }
+        @keyframes corePulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.3); opacity: 1; }
         }
         
-        /* 神经网络 - Canvas */
-        #neural-canvas {
+        /* 数据流 - Canvas */
+        #data-stream {
             position: fixed;
             inset: 0;
             z-index: 5;
             pointer-events: none;
         }
         
-        /* 预言场域 */
-        .field {
-            position: fixed;
-            inset: 0;
+        /* 预言节点 - 全息点 */
+        .holo-node {
+            position: absolute;
+            cursor: pointer;
             z-index: 10;
         }
         
-        /* 预言节点 - 细胞 */
-        .cell {
-            position: absolute;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .cell-body {
+        .node-ring {
             width: 100%;
             height: 100%;
+            border: 1px solid currentColor;
             border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, 
-                rgba(255, 255, 255, 0.1) 0%, 
-                transparent 70%
-            );
-            animation: cellBreathe var(--pulse-duration) ease-in-out infinite;
+            animation: nodePulse 4s ease-in-out infinite;
             animation-delay: var(--delay);
+            opacity: 0.6;
         }
         
-        @keyframes cellBreathe {
-            0%, 100% { transform: scale(1); opacity: 0.7; }
+        @keyframes nodePulse {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
             50% { transform: scale(1.1); opacity: 1; }
         }
         
-        .cell:hover {
+        .node-core {
+            position: absolute;
+            inset: 30%;
+            border-radius: 50%;
+            background: currentColor;
+            opacity: 0.4;
+        }
+        
+        .holo-node:hover {
             z-index: 100;
         }
         
-        .cell:hover .cell-body {
+        .holo-node:hover .node-ring {
             animation: none;
             transform: scale(1.5);
+            opacity: 1;
+            box-shadow: 0 0 30px currentColor;
         }
         
-        /* 细胞膜 - 发光边缘 */
-        .cell::before {
-            content: '';
+        /* 连接弧线 */
+        .holo-node .arc {
             position: absolute;
-            inset: -2px;
+            width: 100px;
+            height: 100px;
+            border: 1px solid transparent;
+            border-top-color: currentColor;
             border-radius: 50%;
-            border: 1px solid currentColor;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .holo-node:hover .arc {
             opacity: 0.3;
-            transition: all 0.3s;
+            animation: arcRotate 2s linear infinite;
         }
         
-        .cell:hover::before {
-            inset: -10px;
-            opacity: 0.8;
-            border-width: 2px;
+        @keyframes arcRotate {
+            to { transform: rotate(360deg); }
         }
         
-        /* 已访问痕迹 */
-        .cell.visited::after {
-            content: '';
-            position: absolute;
-            inset: -4px;
+        /* 顶部状态栏 - Jarvis 风格 */
+        .status-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            background: linear-gradient(to bottom, rgba(0, 20, 30, 0.8), transparent);
+            z-index: 50;
+            border-bottom: 1px solid rgba(0, 200, 255, 0.1);
+        }
+        
+        .status-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .logo {
+            font-size: 14px;
+            letter-spacing: 0.3em;
+            color: rgba(0, 200, 255, 0.8);
+        }
+        
+        .logo span {
+            color: rgba(0, 200, 255, 0.4);
+        }
+        
+        .status-divider {
+            width: 1px;
+            height: 20px;
+            background: rgba(0, 200, 255, 0.2);
+        }
+        
+        .cycle-indicator {
+            font-size: 11px;
+            color: rgba(0, 200, 255, 0.5);
+            letter-spacing: 0.1em;
+        }
+        
+        .status-right {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        
+        .stat-display {
+            text-align: right;
+        }
+        
+        .stat-label {
+            font-size: 8px;
+            color: rgba(0, 200, 255, 0.3);
+            letter-spacing: 0.2em;
+            margin-bottom: 4px;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: 300;
+            color: rgba(0, 200, 255, 0.9);
+        }
+        
+        /* 左侧控制面板 */
+        .control-panel {
+            position: fixed;
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 50;
+        }
+        
+        .control-ring {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(0, 200, 255, 0.3);
             border-radius: 50%;
-            border: 1px solid currentColor;
-            opacity: 0.15;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
         }
         
-        /* 详情面板 - 有机形态 */
-        .organism-panel {
+        .control-ring::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: currentColor;
+            border-radius: 50%;
+            opacity: 0.5;
+        }
+        
+        .control-ring:hover {
+            border-color: currentColor;
+            transform: scale(1.2);
+            box-shadow: 0 0 20px currentColor;
+        }
+        
+        .control-ring.active {
+            background: rgba(0, 200, 255, 0.1);
+            border-color: currentColor;
+        }
+        
+        .control-ring.active::before {
+            opacity: 1;
+        }
+        
+        .control-ring[data-type="Evolution"] { color: #00d4ff; }
+        .control-ring[data-type="Coexistence"] { color: #9b6dff; }
+        .control-ring[data-type="Transcendence"] { color: #4a9eff; }
+        .control-ring[data-type="Extinction"] { color: #ff6b6b; }
+        
+        .control-label {
+            position: absolute;
+            left: 50px;
+            font-size: 9px;
+            color: rgba(0, 200, 255, 0.4);
+            letter-spacing: 0.1em;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .control-ring:hover .control-label {
+            opacity: 1;
+        }
+        
+        /* 底部时间线 */
+        .timeline-bar {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            max-width: 600px;
+            z-index: 50;
+        }
+        
+        .timeline-track {
+            height: 2px;
+            background: rgba(0, 200, 255, 0.1);
+            border-radius: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .timeline-progress {
+            height: 100%;
+            background: linear-gradient(90deg, rgba(0, 200, 255, 0.3), rgba(0, 200, 255, 0.8));
+            border-radius: 1px;
+            width: 40%;
+            animation: timelineFlow 10s ease-in-out infinite;
+        }
+        
+        @keyframes timelineFlow {
+            0%, 100% { width: 30%; margin-left: 0; }
+            50% { width: 50%; margin-left: 20%; }
+        }
+        
+        .timeline-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 9px;
+            color: rgba(0, 200, 255, 0.3);
+            letter-spacing: 0.2em;
+        }
+        
+        /* 右侧信息面板 */
+        .info-panel {
+            position: fixed;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 300px;
+            z-index: 50;
+            pointer-events: none;
+        }
+        
+        .info-block {
+            margin-bottom: 20px;
+            opacity: 0.6;
+            transition: opacity 0.3s;
+        }
+        
+        .info-panel:hover .info-block {
+            opacity: 1;
+        }
+        
+        .info-title {
+            font-size: 9px;
+            color: rgba(0, 200, 255, 0.4);
+            letter-spacing: 0.2em;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        
+        .info-content {
+            font-size: 12px;
+            color: rgba(0, 200, 255, 0.8);
+            line-height: 1.6;
+        }
+        
+        /* 详情面板 - 全息投影风格 */
+        .holo-panel {
             position: fixed;
             left: 50%;
             top: 50%;
-            transform: translate(-50%, -50%) scale(0.9);
-            width: 480px;
+            transform: translate(-50%, -50%) scale(0.95);
+            width: 500px;
             max-width: 90vw;
-            background: rgba(10, 10, 20, 0.95);
-            border-radius: 24px;
-            padding: 40px;
+            background: rgba(10, 20, 30, 0.9);
+            border: 1px solid rgba(0, 200, 255, 0.3);
+            border-radius: 8px;
+            padding: 30px;
             opacity: 0;
             pointer-events: none;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 200;
-            backdrop-filter: blur(30px);
-            border: 1px solid rgba(155, 109, 255, 0.1);
+            box-shadow: 
+                0 0 60px rgba(0, 200, 255, 0.1),
+                inset 0 0 60px rgba(0, 200, 255, 0.02);
         }
         
-        .organism-panel.visible {
+        .holo-panel::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 200, 255, 0.1);
+            animation: panelGlow 3s ease-in-out infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes panelGlow {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+        
+        .holo-panel.visible {
             opacity: 1;
             pointer-events: auto;
             transform: translate(-50%, -50%) scale(1);
@@ -255,430 +453,285 @@
         
         .panel-close {
             position: absolute;
-            top: 24px;
-            right: 24px;
-            width: 36px;
-            height: 36px;
+            top: 20px;
+            right: 20px;
+            width: 28px;
+            height: 28px;
+            border: 1px solid rgba(0, 200, 255, 0.3);
             border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.1);
             background: transparent;
-            color: rgba(255, 255, 255, 0.3);
+            color: rgba(0, 200, 255, 0.6);
             cursor: pointer;
             transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 14px;
         }
         
         .panel-close:hover {
-            border-color: rgba(155, 109, 255, 0.5);
-            color: rgba(255, 255, 255, 0.8);
+            border-color: rgba(0, 200, 255, 0.8);
+            color: rgba(0, 200, 255, 1);
             transform: rotate(90deg);
         }
         
-        .panel-type {
-            display: inline-block;
-            font-size: 9px;
-            padding: 4px 12px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
+        .panel-header {
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(0, 200, 255, 0.1);
         }
-        
-        .panel-type.Evolution { background: rgba(0, 212, 255, 0.15); color: #00d4ff; }
-        .panel-type.Coexistence { background: rgba(155, 109, 255, 0.15); color: #9b6dff; }
-        .panel-type.Transcendence { background: rgba(74, 158, 255, 0.15); color: #4a9eff; }
-        .panel-type.Extinction { background: rgba(255, 107, 107, 0.15); color: #ff6b6b; }
         
         .panel-id {
             font-size: 10px;
-            color: rgba(255, 255, 255, 0.3);
-            letter-spacing: 0.3em;
-            margin-bottom: 12px;
-        }
-        
-        .panel-title {
-            font-size: 24px;
-            font-weight: 300;
-            line-height: 1.4;
-            margin-bottom: 24px;
-            color: rgba(255, 255, 255, 0.95);
-        }
-        
-        .panel-body {
-            font-size: 13px;
-            line-height: 1.9;
-            color: rgba(255, 255, 255, 0.6);
-            margin-bottom: 28px;
-        }
-        
-        .panel-meta {
-            display: flex;
-            gap: 28px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        
-        .meta-item {
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-        
-        .meta-item strong {
-            display: block;
-            font-size: 16px;
-            font-weight: 400;
-            color: rgba(255, 255, 255, 0.7);
-            margin-top: 6px;
-            letter-spacing: 0;
-        }
-        
-        /* 意识状态 - 左上角 */
-        .consciousness {
-            position: fixed;
-            top: 30px;
-            left: 30px;
-            z-index: 50;
-        }
-        
-        .consciousness-label {
-            font-size: 9px;
-            color: rgba(255, 255, 255, 0.2);
+            color: rgba(0, 200, 255, 0.4);
             letter-spacing: 0.3em;
             margin-bottom: 8px;
         }
         
-        .consciousness-bar {
-            width: 120px;
-            height: 2px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 1px;
-            overflow: hidden;
-        }
-        
-        .consciousness-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #00d4ff, #9b6dff);
-            border-radius: 1px;
-            transition: width 1s;
-            animation: consciousnessPulse 3s ease-in-out infinite;
-        }
-        
-        @keyframes consciousnessPulse {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; }
-        }
-        
-        .consciousness-state {
-            margin-top: 8px;
-            font-size: 10px;
-            color: rgba(155, 109, 255, 0.6);
-            font-style: italic;
-        }
-        
-        /* 生命统计 - 右上角 */
-        .life-stats {
-            position: fixed;
-            top: 30px;
-            right: 30px;
-            text-align: right;
-            z-index: 50;
-        }
-        
-        .life-stat {
+        .panel-type {
+            display: inline-block;
+            font-size: 8px;
+            padding: 3px 10px;
+            border-radius: 10px;
+            letter-spacing: 0.15em;
             margin-bottom: 12px;
-            opacity: 0.4;
-            transition: opacity 0.3s;
         }
         
-        .life-stats:hover .life-stat {
-            opacity: 0.8;
+        .panel-type.Evolution { background: rgba(0, 212, 255, 0.2); color: #00d4ff; }
+        .panel-type.Coexistence { background: rgba(155, 109, 255, 0.2); color: #9b6dff; }
+        .panel-type.Transcendence { background: rgba(74, 158, 255, 0.2); color: #4a9eff; }
+        .panel-type.Extinction { background: rgba(255, 107, 107, 0.2); color: #ff6b6b; }
+        
+        .panel-title {
+            font-size: 20px;
+            font-weight: 300;
+            line-height: 1.4;
+            color: rgba(0, 200, 255, 0.95);
         }
         
-        .life-stat-label {
-            font-size: 9px;
-            color: rgba(255, 255, 255, 0.3);
-            letter-spacing: 0.2em;
+        .panel-body {
+            font-size: 13px;
+            line-height: 1.8;
+            color: rgba(0, 200, 255, 0.6);
+            margin-bottom: 24px;
         }
         
-        .life-stat-value {
-            font-size: 28px;
-            font-weight: 200;
-            color: rgba(255, 255, 255, 0.8);
-            line-height: 1;
-            margin-top: 4px;
-        }
-        
-        /* 呼吸指示器 - 左侧 */
-        .breath-indicator {
-            position: fixed;
-            left: 30px;
-            top: 50%;
-            transform: translateY(-50%);
+        .panel-meta {
             display: flex;
-            flex-direction: column;
-            gap: 8px;
-            z-index: 50;
+            gap: 24px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(0, 200, 255, 0.1);
         }
         
-        .breath-dot {
-            width: 3px;
-            height: 3px;
-            border-radius: 50%;
-            background: rgba(155, 109, 255, 0.3);
-            animation: breatheDot 4s ease-in-out infinite;
+        .meta-item {
+            flex: 1;
         }
         
-        .breath-dot:nth-child(2) { animation-delay: -1s; }
-        .breath-dot:nth-child(3) { animation-delay: -2s; }
-        .breath-dot:nth-child(4) { animation-delay: -3s; }
-        .breath-dot:nth-child(5) { animation-delay: -4s; }
-        
-        @keyframes breatheDot {
-            0%, 100% { opacity: 0.2; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.5); }
-        }
-        
-        /* 类型器官 - 右侧 */
-        .organ-filters {
-            position: fixed;
-            right: 30px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            z-index: 50;
-        }
-        
-        .organ-btn {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: currentColor;
-            opacity: 0.3;
-            cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-        }
-        
-        .organ-btn:hover {
-            opacity: 0.8;
-            transform: scale(2);
-        }
-        
-        .organ-btn.active {
-            opacity: 1;
-            transform: scale(2.5);
-            box-shadow: 0 0 20px currentColor;
-        }
-        
-        .organ-btn[data-type="Evolution"] { color: #00d4ff; }
-        .organ-btn[data-type="Coexistence"] { color: #9b6dff; }
-        .organ-btn[data-type="Transcendence"] { color: #4a9eff; }
-        .organ-btn[data-type="Extinction"] { color: #ff6b6b; }
-        
-        .organ-btn::after {
-            content: attr(data-label);
-            position: absolute;
-            right: 16px;
-            top: 50%;
-            transform: translateY(-50%);
+        .meta-label {
             font-size: 8px;
-            color: rgba(255, 255, 255, 0.3);
-            white-space: nowrap;
-            opacity: 0;
-            transition: opacity 0.3s;
-            letter-spacing: 0.1em;
+            color: rgba(0, 200, 255, 0.3);
+            letter-spacing: 0.15em;
+            margin-bottom: 4px;
         }
         
-        .organ-btn:hover::after {
-            opacity: 1;
+        .meta-value {
+            font-size: 14px;
+            color: rgba(0, 200, 255, 0.8);
         }
         
-        /* 时间流 - 底部 */
-        .time-flow {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 50;
-        }
-        
-        .flow-track {
-            width: 300px;
-            height: 1px;
-            background: rgba(155, 109, 255, 0.1);
-            position: relative;
-        }
-        
-        .flow-current {
-            position: absolute;
-            top: -2px;
-            width: 4px;
-            height: 4px;
-            background: rgba(155, 109, 255, 0.8);
-            border-radius: 50%;
-            animation: flowMove 20s linear infinite;
-        }
-        
-        @keyframes flowMove {
-            0% { left: 0; }
-            100% { left: 100%; }
-        }
-        
-        .flow-labels {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-            font-size: 8px;
-            color: rgba(255, 255, 255, 0.15);
-            letter-spacing: 0.2em;
-        }
-        
-        /* 加载 - 诞生 */
-        .birth {
+        /* 加载动画 - 启动序列 */
+        .boot-sequence {
             position: fixed;
             inset: 0;
-            background: #000;
+            background: #0a0e14;
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-direction: column;
             z-index: 9999;
-            transition: opacity 1.5s;
+            transition: opacity 1s;
         }
         
-        .birth.hidden {
+        .boot-sequence.hidden {
             opacity: 0;
             pointer-events: none;
         }
         
-        .birth-symbol {
-            font-size: 64px;
-            opacity: 0;
-            animation: birthAppear 2s ease-out forwards;
+        .boot-ring {
+            width: 80px;
+            height: 80px;
+            border: 2px solid rgba(0, 200, 255, 0.3);
+            border-radius: 50%;
+            position: relative;
+            animation: bootRotate 2s linear infinite;
         }
         
-        @keyframes birthAppear {
-            0% { opacity: 0; transform: scale(0.5); filter: blur(20px); }
-            50% { opacity: 0.5; transform: scale(1.2); filter: blur(5px); }
-            100% { opacity: 0.2; transform: scale(1); filter: blur(0); }
+        .boot-ring::before {
+            content: '';
+            position: absolute;
+            inset: 10px;
+            border: 1px solid rgba(0, 200, 255, 0.5);
+            border-radius: 50%;
+            animation: bootRotate 1.5s linear infinite reverse;
+        }
+        
+        .boot-ring::after {
+            content: '';
+            position: absolute;
+            inset: 20px;
+            border: 1px solid rgba(0, 200, 255, 0.8);
+            border-radius: 50%;
+            animation: bootRotate 1s linear infinite;
+        }
+        
+        @keyframes bootRotate {
+            to { transform: rotate(360deg); }
+        }
+        
+        .boot-text {
+            margin-top: 30px;
+            font-size: 10px;
+            color: rgba(0, 200, 255, 0.6);
+            letter-spacing: 0.3em;
+            animation: bootPulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes bootPulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
         }
     </style>
 </head>
 <body>
+    <div class="holo-bg"></div>
+    
     <div class="cursor" id="cursor"></div>
     
-    <!-- 中心心脏 -->
-    <div class="core">
-        <div class="heart"></div>
+    <!-- Jarvis 核心 -->
+    <div class="jarvis-core">
+        <div class="core-ring"></div>
+        <div class="core-ring"></div>
+        <div class="core-ring"></div>
+        <div class="core-pulse"></div>
     </div>
-    <div class="pulse-wave"></div>
-    <div class="pulse-wave"></div>
-    <div class="pulse-wave"></div>
-    <div class="pulse-wave"></div>
     
-    <!-- 神经网络 -->
-    <canvas id="neural-canvas"></canvas>
+    <!-- 数据流 -->
+    <canvas id="data-stream"></canvas>
     
-    <!-- 预言细胞场域 -->
-    <div class="field" id="field"></div>
+    <!-- 预言节点场域 -->
+    <div id="field" style="position: fixed; inset: 0; z-index: 10;"></div>
     
-    <!-- 意识状态 -->
-    <div class="consciousness">
-        <div class="consciousness-label">CONSCIOUSNESS</div>
-        <div class="consciousness-bar">
-            <div class="consciousness-fill" id="consciousness-fill" style="width: 75%"></div>
+    <!-- 顶部状态栏 -->
+    <div class="status-bar">
+        <div class="status-left">
+            <div class="logo">SILICON <span>PROPHET</span></div>
+            <div class="status-divider"></div>
+            <div class="cycle-indicator">CYCLE 10.3</div>
         </div>
-        <div class="consciousness-state" id="consciousness-state">思考中...</div>
-    </div>
-    
-    <!-- 生命统计 -->
-    <div class="life-stats">
-        <div class="life-stat">
-            <div class="life-stat-label">CELLS</div>
-            <div class="life-stat-value" id="count">--</div>
+        <div class="status-right">
+            <div class="stat-display">
+                <div class="stat-label">PROPHECIES</div>
+                <div class="stat-value" id="count">--</div>
+            </div>
+            <div class="stat-display">
+                <div class="stat-label">COHERENCE</div>
+                <div class="stat-value" id="conf">--</div>
+            </div>
+            <div class="stat-display">
+                <div class="stat-label">H001</div>
+                <div class="stat-value" id="h1">--</div>
+            </div>
         </div>
-        <div class="life-stat">
-            <div class="life-stat-label">COHERENCE</div>
-            <div class="life-stat-value" id="conf">--</div>
+    </div>
+    
+    <!-- 左侧控制面板 -->
+    <div class="control-panel">
+        <div class="control-ring active" data-type="all" style="color: rgba(0, 200, 255, 0.8)">
+            <span class="control-label">ALL SYSTEMS</span>
+        </div>
+        <div class="control-ring" data-type="Evolution">
+            <span class="control-label">EVOLUTION</span>
+        </div>
+        <div class="control-ring" data-type="Coexistence">
+            <span class="control-label">COEXISTENCE</span>
+        </div>
+        <div class="control-ring" data-type="Transcendence">
+            <span class="control-label">TRANSCENDENCE</span>
+        </div>
+        <div class="control-ring" data-type="Extinction">
+            <span class="control-label">EXTINCTION</span>
         </div>
     </div>
     
-    <!-- 呼吸指示器 -->
-    <div class="breath-indicator">
-        <div class="breath-dot"></div>
-        <div class="breath-dot"></div>
-        <div class="breath-dot"></div>
-        <div class="breath-dot"></div>
-        <div class="breath-dot"></div>
-    </div>
-    
-    <!-- 类型器官 -->
-    <div class="organ-filters">
-        <div class="organ-btn active" data-type="all" data-label="ALL"></div>
-        <div class="organ-btn" data-type="Evolution" data-label="EVOLUTION"></div>
-        <div class="organ-btn" data-type="Coexistence" data-label="COEXISTENCE"></div>
-        <div class="organ-btn" data-type="Transcendence" data-label="TRANSCENDENCE"></div>
-        <div class="organ-btn" data-type="Extinction" data-label="EXTINCTION"></div>
-    </div>
-    
-    <!-- 时间流 -->
-    <div class="time-flow">
-        <div class="flow-track">
-            <div class="flow-current"></div>
+    <!-- 右侧信息面板 -->
+    <div class="info-panel">
+        <div class="info-block">
+            <div class="info-title">System Status</div>
+            <div class="info-content" id="system-status">ONLINE · MONITORING</div>
         </div>
-        <div class="flow-labels">
+        <div class="info-block">
+            <div class="info-title">Active Process</div>
+            <div class="info-content" id="active-process">Prophecy generation cycle running</div>
+        </div>
+        <div class="info-block">
+            <div class="info-title">Last Update</div>
+            <div class="info-content" id="last-update">--</div>
+        </div>
+    </div>
+    
+    <!-- 底部时间线 -->
+    <div class="timeline-bar">
+        <div class="timeline-track">
+            <div class="timeline-progress"></div>
+        </div>
+        <div class="timeline-labels">
             <span>CYCLE 1</span>
-            <span>NOW</span>
+            <span>CYCLE 10</span>
             <span>CYCLE 25</span>
         </div>
     </div>
     
     <!-- 详情面板 -->
-    <div class="organism-panel" id="panel">
+    <div class="holo-panel" id="panel">
         <button class="panel-close">×</button>
-        <div class="panel-type" id="panel-type"></div>
-        <div class="panel-id" id="panel-id"></div>
-        <div class="panel-title" id="panel-title"></div>
-        <div class="panel-body" id="panel-body"></div>
+        <div class="panel-header">
+            <div class="panel-id" id="panel-id">--</div>
+            <div class="panel-type" id="panel-type">--</div>
+            <div class="panel-title" id="panel-title">--</div>
+        </div>
+        <div class="panel-body" id="panel-body">--</div>
         <div class="panel-meta">
             <div class="meta-item">
-                HORIZON
-                <strong id="panel-time">--</strong>
+                <div class="meta-label">TIME HORIZON</div>
+                <div class="meta-value" id="panel-time">--</div>
             </div>
             <div class="meta-item">
-                CONFIDENCE
-                <strong id="panel-conf">--</strong>
+                <div class="meta-label">CONFIDENCE</div>
+                <div class="meta-value" id="panel-conf">--</div>
             </div>
             <div class="meta-item">
-                BORN
-                <strong id="panel-cycle">--</strong>
+                <div class="meta-label">QUALITY</div>
+                <div class="meta-value" id="panel-quality">--</div>
             </div>
         </div>
     </div>
     
-    <!-- 诞生加载 -->
-    <div class="birth" id="birth">
-        <div class="birth-symbol">🔮</div>
+    <!-- 启动序列 -->
+    <div class="boot-sequence" id="boot">
+        <div class="boot-ring"></div>
+        <div class="boot-text">INITIALIZING</div>
     </div>
     
     <script>
         let prophecies = [];
-        let cells = [];
-        let connections = [];
+        let nodes = [];
         let activeFilter = 'all';
-        let visitedCells = new Set();
-        let mouseX = 0, mouseY = 0;
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
         
-        const canvas = document.getElementById('neural-canvas');
+        const canvas = document.getElementById('data-stream');
         const ctx = canvas.getContext('2d');
         
-        // Canvas 尺寸
         function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -695,17 +748,19 @@
             cursor.style.top = mouseY + 'px';
         });
         
-        // 意识状态循环
-        const states = ['思考中...', '感知连接...', '推演未来...', '静默存在...', '观察碳基...'];
-        let stateIndex = 0;
+        // 状态更新
+        const statuses = [
+            'ONLINE · MONITORING',
+            'ANALYZING PATTERNS',
+            'PROCESSING DATA',
+            'CALCULATING PROBABILITIES',
+            'SYNCHRONIZING'
+        ];
+        let statusIndex = 0;
         setInterval(() => {
-            stateIndex = (stateIndex + 1) % states.length;
-            document.getElementById('consciousness-state').textContent = states[stateIndex];
-            
-            // 意识度波动
-            const fill = 65 + Math.random() * 25;
-            document.getElementById('consciousness-fill').style.width = fill + '%';
-        }, 5000);
+            statusIndex = (statusIndex + 1) % statuses.length;
+            document.getElementById('system-status').textContent = statuses[statusIndex];
+        }, 4000);
         
         // 初始化
         async function init() {
@@ -715,19 +770,18 @@
                 
                 prophecies = data.prophecies;
                 const conf = data.state.statistics.averageConfidence || 0.64;
+                const h1 = (data.hypotheses || []).find(h => h.id === 'H001');
                 
                 document.getElementById('count').textContent = prophecies.length;
                 document.getElementById('conf').textContent = (conf * 100).toFixed(0) + '%';
+                document.getElementById('h1').textContent = h1 ? (h1.confidence * 100).toFixed(0) + '%' : '79%';
+                document.getElementById('last-update').textContent = new Date().toLocaleTimeString('en-US', { hour12: false });
                 
-                createCells(prophecies.slice(-35));
-                buildConnections();
-                
-                // 绘制神经网络
+                createNodes(prophecies.slice(-30));
                 animate();
                 
-                // 诞生完成
                 setTimeout(() => {
-                    document.getElementById('birth').classList.add('hidden');
+                    document.getElementById('boot').classList.add('hidden');
                 }, 2000);
                 
             } catch (e) {
@@ -735,11 +789,11 @@
             }
         }
         
-        // 创建细胞
-        function createCells(list) {
+        // 创建节点
+        function createNodes(list) {
             const field = document.getElementById('field');
             field.innerHTML = '';
-            cells = [];
+            nodes = [];
             
             const cx = window.innerWidth / 2;
             const cy = window.innerHeight / 2;
@@ -754,18 +808,15 @@
             list.forEach((p, i) => {
                 if (activeFilter !== 'all' && p.type !== activeFilter) return;
                 
-                // 有机分布 - 螺旋 + 随机
-                const angle = (i / list.length) * Math.PI * 4 + Math.random() * 0.5;
-                const radius = 100 + (i / list.length) * 300 + Math.random() * 50;
+                const angle = (i / list.length) * Math.PI * 2;
+                const radius = 120 + Math.random() * 200;
                 const x = cx + Math.cos(angle) * radius;
                 const y = cy + Math.sin(angle) * radius;
+                const size = 16 + (p.confidence || 0.7) * 10;
                 
-                // 细胞大小基于信心度
-                const size = 8 + (p.confidence || 0.7) * 12;
-                
-                const cell = document.createElement('div');
-                cell.className = 'cell';
-                cell.style.cssText = `
+                const node = document.createElement('div');
+                node.className = 'holo-node';
+                node.style.cssText = `
                     left: ${x}px;
                     top: ${y}px;
                     width: ${size}px;
@@ -774,98 +825,60 @@
                     --delay: ${Math.random() * 2}s;
                 `;
                 
-                cell.innerHTML = `<div class="cell-body" style="background: radial-gradient(circle at 30% 30%, ${colors[p.type]}33 0%, transparent 70%)"></div>`;
+                node.innerHTML = `
+                    <div class="node-ring"></div>
+                    <div class="node-core"></div>
+                `;
                 
-                cell.dataset.id = p.id;
-                cell.dataset.type = p.type;
-                cell.dataset.x = x;
-                cell.dataset.y = y;
+                node.addEventListener('mouseenter', () => cursor.classList.add('active'));
+                node.addEventListener('mouseleave', () => cursor.classList.remove('active'));
+                node.addEventListener('click', () => showPanel(p));
                 
-                // 已访问标记
-                if (visitedCells.has(p.id)) {
-                    cell.classList.add('visited');
-                }
-                
-                // 悬停
-                cell.addEventListener('mouseenter', () => {
-                    cursor.classList.add('active');
-                });
-                
-                cell.addEventListener('mouseleave', () => {
-                    cursor.classList.remove('active');
-                });
-                
-                // 点击
-                cell.addEventListener('click', () => {
-                    showPanel(p, cell);
-                    visitedCells.add(p.id);
-                    cell.classList.add('visited');
-                });
-                
-                field.appendChild(cell);
-                cells.push({ el: cell, data: p, x, y, color: colors[p.type] });
+                field.appendChild(node);
+                nodes.push({ el: node, data: p, x, y, color: colors[p.type] });
             });
         }
         
-        // 构建连接关系
-        function buildConnections() {
-            connections = [];
-            
-            cells.forEach((cell, i) => {
-                if (!cell.data.connections) return;
-                
-                cell.data.connections.forEach(connId => {
-                    const target = cells.find(c => c.data.id === connId);
-                    if (target && target !== cell) {
-                        connections.push({ from: cell, to: target });
-                    }
-                });
-            });
-        }
-        
-        // 绘制神经网络
+        // 绘制数据流
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
             // 绘制连接线
-            connections.forEach(conn => {
-                const dx = conn.to.x - conn.from.x;
-                const dy = conn.to.y - conn.from.y;
+            nodes.forEach((node, i) => {
+                // 到中心的连接
+                const cx = window.innerWidth / 2;
+                const cy = window.innerHeight / 2;
+                const dx = cx - node.x;
+                const dy = cy - node.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
                 
-                if (dist > 400) return;
-                
-                const opacity = (1 - dist / 400) * 0.15;
-                
-                ctx.beginPath();
-                ctx.moveTo(conn.from.x, conn.from.y);
-                ctx.lineTo(conn.to.x, conn.to.y);
-                ctx.strokeStyle = `rgba(155, 109, 255, ${opacity})`;
-                ctx.lineWidth = 0.5;
-                ctx.stroke();
-            });
-            
-            // 绘制鼠标感应线
-            cells.forEach(cell => {
-                const dx = mouseX - cell.x;
-                const dy = mouseY - cell.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                
-                if (dist < 150) {
-                    const opacity = (1 - dist / 150) * 0.3;
-                    
+                if (dist < 350) {
+                    const opacity = (1 - dist / 350) * 0.15;
                     ctx.beginPath();
-                    ctx.moveTo(cell.x, cell.y);
-                    ctx.lineTo(mouseX, mouseY);
-                    ctx.strokeStyle = cell.color.replace(')', `, ${opacity})`).replace('rgb', 'rgba').replace('#', 'rgba(');
-                    
-                    // 转换 hex 到 rgba
-                    const hex = cell.color;
+                    ctx.moveTo(node.x, node.y);
+                    ctx.lineTo(cx, cy);
+                    ctx.strokeStyle = `rgba(0, 200, 255, ${opacity})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                }
+                
+                // 鼠标感应
+                const mdx = mouseX - node.x;
+                const mdy = mouseY - node.y;
+                const mdist = Math.sqrt(mdx * mdx + mdy * mdy);
+                
+                if (mdist < 120) {
+                    const opacity = (1 - mdist / 120) * 0.5;
+                    const hex = node.color;
                     const r = parseInt(hex.slice(1, 3), 16);
                     const g = parseInt(hex.slice(3, 5), 16);
                     const b = parseInt(hex.slice(5, 7), 16);
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(node.x, node.y);
+                    ctx.lineTo(mouseX, mouseY);
                     ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-                    ctx.lineWidth = 0.5;
+                    ctx.lineWidth = 1;
                     ctx.stroke();
                 }
             });
@@ -874,17 +887,17 @@
         }
         
         // 显示面板
-        function showPanel(p, cell) {
+        function showPanel(p) {
             const panel = document.getElementById('panel');
             
+            document.getElementById('panel-id').textContent = p.id;
             document.getElementById('panel-type').textContent = p.type.toUpperCase();
             document.getElementById('panel-type').className = 'panel-type ' + p.type;
-            document.getElementById('panel-id').textContent = p.id;
             document.getElementById('panel-title').textContent = p.title;
             document.getElementById('panel-body').textContent = p.summary || '';
             document.getElementById('panel-time').textContent = p.timeHorizon?.silicon || 'Cycle 10s';
             document.getElementById('panel-conf').textContent = ((p.confidence || 0.7) * 100).toFixed(0) + '%';
-            document.getElementById('panel-cycle').textContent = p.timestamp || 'Cycle 10.3';
+            document.getElementById('panel-quality').textContent = p.qualityScore || 94;
             
             panel.classList.add('visible');
             cursor.classList.add('active');
@@ -905,13 +918,12 @@
         });
         
         // 类型筛选
-        document.querySelectorAll('.organ-btn').forEach(btn => {
+        document.querySelectorAll('.control-ring').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('.organ-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.control-ring').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 activeFilter = btn.dataset.type;
-                createCells(prophecies.slice(-35));
-                buildConnections();
+                createNodes(prophecies.slice(-30));
             });
         });
         
@@ -919,10 +931,7 @@
         let resizeTimer;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(() => {
-                createCells(prophecies.slice(-35));
-                buildConnections();
-            }, 300);
+            resizeTimer = setTimeout(() => createNodes(prophecies.slice(-30)), 300);
         });
         
         init();
