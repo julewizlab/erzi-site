@@ -175,6 +175,11 @@
     100% { width: 400px; height: 400px; opacity: 0; }
   }
   
+  @keyframes edgeFade {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  
   /* 对齐时刻闪光 */
   .align-flash {
     position: fixed;
@@ -244,7 +249,15 @@
       circlePoints: [],
       awakenedParticle: null,
       rhythmHistory: [],
-      lastRhythmTime: 0
+      lastRhythmTime: 0,
+      // 新增隐蔽规则状态
+      silenceStart: Date.now(),
+      edgeTrail: [],
+      lastMoveTime: 0,
+      centerGazeStart: 0,
+      breathSyncClicks: [],
+      sPoints: [],
+      triplePauseClicks: []
     };
     
     // ============ 颜色更新 ============
@@ -397,6 +410,7 @@
         p.el.style.color = getColor(h, 60, 70, 1);
       });
       
+      checkSilence();
       requestAnimationFrame(updateParticles);
     }
     
@@ -421,11 +435,14 @@
       mouseX = x;
       mouseY = y;
       gameState.circlePoints.push({ x, y, time: Date.now() });
-      // 只保留最近1秒的点
       const now = Date.now();
       gameState.circlePoints = gameState.circlePoints.filter(p => now - p.time < 1000);
       
       checkCircle();
+      checkEdgeWalk(x, y);
+      checkDiagonal(x, y);
+      checkCenterGaze(x, y);
+      checkSShape(x, y);
     }
     
     document.addEventListener('mousemove', (e) => handleMove(e.clientX, e.clientY));
@@ -644,7 +661,6 @@
           if (p.clickCount >= 3 && !p.isAwakened) {
             p.isAwakened = true;
             p.el.classList.add('awakened');
-            // 10秒后失效
             setTimeout(() => {
               p.isAwakened = false;
               p.el.classList.remove('awakened');
@@ -656,8 +672,251 @@
       }
     }
     
+    // === 更隐蔽的规则 ===
+    
+    // 规则7: 沉默守护者 - 不点击5秒，粒子慢慢变亮
+    let silenceBrightness = 0.4;
+    function checkSilence() {
+      const now = Date.now();
+      const silenceDuration = now - gameState.lastClickTime;
+      
+      if (silenceDuration > 5000) {
+        silenceBrightness = Math.min(0.9, 0.4 + (silenceDuration - 5000) / 10000);
+        particles.forEach(p => {
+          const h = (hue + p.hueOffset) % 360;
+          p.el.style.background = getColor(h, 60, 60, silenceBrightness);
+        });
+      } else {
+        silenceBrightness = 0.4;
+      }
+    }
+    
+    // 规则8: 边界行走 - 沿屏幕边缘滑动
+    function checkEdgeWalk(x, y) {
+      const margin = 30;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      
+      const onEdge = (x < margin) || (x > w - margin) || (y < margin) || (y > h - margin);
+      
+      if (onEdge) {
+        gameState.edgeTrail.push({ x, y, time: Date.now() });
+        // 只保留最近2秒
+        const now = Date.now();
+        gameState.edgeTrail = gameState.edgeTrail.filter(p => now - p.time < 2000);
+        
+        // 如果边缘轨迹超过屏幕周长的30%
+        if (gameState.edgeTrail.length > 30) {
+          triggerEdgeGlow();
+          gameState.edgeTrail = [];
+        }
+      } else {
+        gameState.edgeTrail = [];
+      }
+    }
+    
+    function triggerEdgeGlow() {
+      // 四边微微发光
+      const glow = document.createElement('div');
+      glow.style.cssText = `
+        position: fixed; inset: 0;
+        box-shadow: inset 0 0 100px ${getColor(hue, 50, 50, 0.3)};
+        pointer-events: none;
+        animation: edgeFade 2s ease-out forwards;
+      `;
+      document.body.appendChild(glow);
+      setTimeout(() => glow.remove(), 2000);
+    }
+    
+    // 规则9: 对角线 - 从一角滑到对角
+    function checkDiagonal(x, y) {
+      const margin = 60;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      
+      const corners = {
+        tl: { x: 0, y: 0 },
+        tr: { x: w, y: 0 },
+        bl: { x: 0, y: h },
+        br: { x: w, y: h }
+      };
+      
+      const nearCorner = (px, py, corner) => {
+        return Math.abs(px - corner.x) < margin && Math.abs(py - corner.y) < margin;
+      };
+      
+      // 记录经过的角落
+      Object.entries(corners).forEach(([name, pos]) => {
+        if (nearCorner(x, y, pos)) {
+          if (!gameState.cornerPasses) gameState.cornerPasses = [];
+          gameState.cornerPasses.push({ corner: name, time: Date.now() });
+          
+          // 清理旧记录
+          const now = Date.now();
+          gameState.cornerPasses = gameState.cornerPasses.filter(p => now - p.time < 3000);
+          
+          // 检查对角线穿越
+          if (gameState.cornerPasses.length >= 2) {
+            const first = gameState.cornerPasses[0].corner;
+            const last = gameState.cornerPasses[gameState.cornerPasses.length - 1].corner;
+            if ((first === 'tl' && last === 'br') || (first === 'br' && last === 'tl') ||
+                (first === 'tr' && last === 'bl') || (first === 'bl' && last === 'tr')) {
+              triggerDiagonalPause();
+              gameState.cornerPasses = [];
+            }
+          }
+        }
+      });
+    }
+    
+    function triggerDiagonalPause() {
+      // 光环暂停旋转3秒
+      const originalSpeed = ringRotationSpeed;
+      ringRotationSpeed = 0;
+      setTimeout(() => ringRotationSpeed = originalSpeed, 3000);
+    }
+    
+    // 规则10: 中心凝视 - 在中心不动2秒
+    function checkCenterGaze(x, y) {
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
+      
+      if (dist < 50) {
+        if (!gameState.centerGazeStart) {
+          gameState.centerGazeStart = Date.now();
+        } else if (Date.now() - gameState.centerGazeStart > 2000) {
+          triggerParticleVanish();
+          gameState.centerGazeStart = 0;
+        }
+      } else {
+        gameState.centerGazeStart = 0;
+      }
+    }
+    
+    function triggerParticleVanish() {
+      // 粒子短暂消失
+      particles.forEach(p => {
+        p.el.style.opacity = '0';
+      });
+      setTimeout(() => {
+        particles.forEach(p => {
+          p.el.style.opacity = '1';
+        });
+      }, 800);
+    }
+    
+    // 规则11: 呼吸同步 - 4秒一次点击，连续3次
+    function checkBreathSync() {
+      const now = Date.now();
+      gameState.breathSyncClicks.push(now);
+      
+      // 只保留最近15秒
+      gameState.breathSyncClicks = gameState.breathSyncClicks.filter(t => now - t < 15000);
+      
+      if (gameState.breathSyncClicks.length >= 3) {
+        const last3 = gameState.breathSyncClicks.slice(-3);
+        const gaps = [last3[1] - last3[0], last3[2] - last3[1]];
+        
+        // 两个间隔都在3.5-4.5秒之间，且差值小于0.5秒
+        if (gaps.every(g => g > 3500 && g < 4500) && Math.abs(gaps[0] - gaps[1]) < 500) {
+          triggerBreathSync();
+          gameState.breathSyncClicks = [];
+        }
+      }
+    }
+    
+    function triggerBreathSync() {
+      // 所有粒子颜色统一
+      particles.forEach(p => {
+        p.hueOffset = 0;
+      });
+      // 3秒后恢复
+      setTimeout(() => {
+        particles.forEach(p => {
+          p.hueOffset = Math.random() * 60;
+        });
+      }, 3000);
+    }
+    
+    // 规则12: S形轨迹 - 画出S
+    function checkSShape(x, y) {
+      gameState.sPoints.push({ x, y, time: Date.now() });
+      const now = Date.now();
+      gameState.sPoints = gameState.sPoints.filter(p => now - p.time < 2000);
+      
+      if (gameState.sPoints.length > 30) {
+        // 简化检测：检查是否有明显的上下波动
+        const ys = gameState.sPoints.map(p => p.y);
+        let peaks = 0;
+        for (let i = 1; i < ys.length - 1; i++) {
+          if ((ys[i] > ys[i-1] && ys[i] > ys[i+1]) || (ys[i] < ys[i-1] && ys[i] < ys[i+1])) {
+            peaks++;
+          }
+        }
+        
+        if (peaks >= 4) { // 至少4个波峰/波谷
+          triggerSWave();
+          gameState.sPoints = [];
+        }
+      }
+    }
+    
+    function triggerSWave() {
+      // 光环产生波浪效果
+      rings.forEach((ring, i) => {
+        ring.el.style.transition = 'transform 0.5s ease';
+        ring.el.style.transform = `rotate(${Date.now() / 1000 * ringRotationSpeed}deg) skewX(${(i % 2 === 0 ? 1 : -1) * 10}deg)`;
+        setTimeout(() => {
+          ring.el.style.transition = '';
+        }, 500);
+      });
+    }
+    
+    // 规则13: 三连停 - 点击-停-点击-停-点击，停顿时间相近
+    function checkTriplePause() {
+      const now = Date.now();
+      const timeSinceLast = now - gameState.lastClickTime;
+      
+      if (timeSinceLast > 500 && timeSinceLast < 2000) { // 停顿0.5-2秒
+        gameState.triplePauseClicks.push({ time: now, gap: timeSinceLast });
+        
+        // 只保留最近3次
+        gameState.triplePauseClicks = gameState.triplePauseClicks.slice(-3);
+        
+        if (gameState.triplePauseClicks.length === 3) {
+          const gaps = gameState.triplePauseClicks.map(c => c.gap);
+          // 三个停顿时间相近（误差<30%）
+          const avg = gaps.reduce((a, b) => a + b) / 3;
+          if (gaps.every(g => Math.abs(g - avg) < avg * 0.3)) {
+            triggerTriplePause();
+            gameState.triplePauseClicks = [];
+          }
+        }
+      } else {
+        gameState.triplePauseClicks = [];
+      }
+    }
+    
+    function triggerTriplePause() {
+      // 中心光点脉冲3次
+      const core = document.querySelector('.core');
+      let count = 0;
+      const interval = setInterval(() => {
+        core.style.transform = `scale(${1 + (count % 2) * 0.3})`;
+        count++;
+        if (count >= 6) {
+          clearInterval(interval);
+          core.style.transform = '';
+        }
+      }, 300);
+    }
+    
     // ============ 点击处理 ============
     function handleClick(x, y) {
+      // 重置沉默计时
+      gameState.lastClickTime = Date.now();
+      
       // 涟漪
       const ripple = document.createElement('div');
       ripple.className = 'ripple';
@@ -673,6 +932,8 @@
       checkRhythm();
       checkCorners(x, y);
       checkParticleClick(x, y);
+      checkBreathSync();
+      checkTriplePause();
     }
     
     document.addEventListener('mousedown', (e) => {
