@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>erzi.site</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -12,6 +12,9 @@
     min-height: 100vh;
     overflow: hidden;
     cursor: none;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
   }
   
   /* 自定义光标 */
@@ -46,9 +49,9 @@
     width: 150px;
     height: 150px;
     pointer-events: none;
+    transition: filter 0.5s ease;
   }
   
-  /* 中心光点 */
   .core {
     position: absolute;
     inset: 0;
@@ -57,7 +60,6 @@
     animation: breathe 4s ease-in-out infinite;
   }
   
-  /* 外层光环 */
   .ring {
     position: absolute;
     border-radius: 50%;
@@ -76,9 +78,29 @@
     border-radius: 50%;
     filter: blur(1px);
     pointer-events: none;
+    transition: filter 0.3s ease, box-shadow 0.3s ease;
   }
   
-  /* 脉冲效果 */
+  .particle.awakened {
+    filter: blur(0);
+    box-shadow: 0 0 10px currentColor;
+  }
+  
+  /* 漩涡效果 */
+  .vortex {
+    position: fixed;
+    border-radius: 50%;
+    border: 2px solid;
+    animation: vortex-spin 2s ease-out forwards;
+    pointer-events: none;
+  }
+  
+  @keyframes vortex-spin {
+    0% { transform: scale(0) rotate(0deg); opacity: 1; }
+    100% { transform: scale(3) rotate(720deg); opacity: 0; }
+  }
+  
+  /* 脉冲 */
   .pulse {
     position: fixed;
     border-radius: 50%;
@@ -92,18 +114,51 @@
     100% { transform: scale(3); opacity: 0; }
   }
   
-  /* 对齐时刻闪光 */
-  .align-flash {
+  /* 连击爆发 */
+  .combo-burst {
     position: fixed;
-    inset: 0;
-    background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
-    opacity: 0;
+    border-radius: 50%;
+    animation: burst 0.8s ease-out forwards;
     pointer-events: none;
-    transition: opacity 0.3s ease;
   }
   
-  .align-flash.active {
+  @keyframes burst {
+    0% { transform: scale(0); opacity: 1; }
+    50% { transform: scale(2); opacity: 0.8; }
+    100% { transform: scale(3); opacity: 0; }
+  }
+  
+  /* 隐藏图形 */
+  .hidden-shape {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    z-index: 100;
+  }
+  
+  .hidden-shape.visible {
     opacity: 1;
+  }
+  
+  .hidden-shape svg {
+    width: 200px;
+    height: 200px;
+    stroke: rgba(255, 255, 255, 0.3);
+    fill: none;
+    stroke-width: 1;
+  }
+  
+  /* 时间变慢 */
+  body.slow-time .particle,
+  body.slow-time .ring,
+  body.slow-time .core {
+    animation-duration: 12s !important;
+    transition-duration: 1s !important;
   }
   
   /* 点击涟漪 */
@@ -116,105 +171,135 @@
   }
   
   @keyframes ripple-expand {
-    0% {
-      width: 0;
-      height: 0;
-      opacity: 0.6;
-    }
-    100% {
-      width: 600px;
-      height: 600px;
-      opacity: 0;
-    }
+    0% { width: 0; height: 0; opacity: 0.6; }
+    100% { width: 400px; height: 400px; opacity: 0; }
   }
   
-  /* 隐藏滚动条 */
+  /* 对齐时刻闪光 */
+  .align-flash {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.15) 0%, transparent 70%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  
+  .align-flash.active { opacity: 1; }
+  
+  /* 四角指示器（隐藏） */
+  .corner-indicator {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+  
+  .corner-indicator.active { opacity: 0.5; }
+  .corner-indicator.tl { top: 20px; left: 20px; }
+  .corner-indicator.tr { top: 20px; right: 20px; }
+  .corner-indicator.bl { bottom: 20px; left: 20px; }
+  .corner-indicator.br { bottom: 20px; right: 20px; }
+  
   ::-webkit-scrollbar { display: none; }
 </style>
 </head>
 <body>
   <div class="cursor"></div>
   <div class="align-flash"></div>
+  <div class="hidden-shape">
+    <svg viewBox="0 0 100 100">
+      <polygon points="50,10 90,90 10,90" />
+    </svg>
+  </div>
+  <div class="corner-indicator tl"></div>
+  <div class="corner-indicator tr"></div>
+  <div class="corner-indicator bl"></div>
+  <div class="corner-indicator br"></div>
   <div class="breath">
     <div class="core"></div>
   </div>
   
   <script>
-    // 颜色系统 - HSL 渐变
+    // ============ 基础系统 ============
     let hue = Math.random() * 360;
     let targetHue = hue;
+    let timeScale = 1;
     
     function getColor(h, s = 60, l = 50, a = 1) {
       return `hsla(${h}, ${s}%, ${l}%, ${a})`;
     }
     
+    // ============ 游戏状态 ============
+    const gameState = {
+      combo: 0,
+      lastClickTime: 0,
+      clickHistory: [],
+      cornerSequence: [],
+      longPressStart: 0,
+      isLongPressing: false,
+      circlePoints: [],
+      awakenedParticle: null,
+      rhythmHistory: [],
+      lastRhythmTime: 0
+    };
+    
+    // ============ 颜色更新 ============
     function updateColors() {
-      // 缓慢改变目标色相
       if (Math.random() < 0.01) {
         targetHue = (targetHue + 30 + Math.random() * 60) % 360;
       }
       
-      // 平滑过渡
       const diff = targetHue - hue;
-      hue += diff * 0.001;
+      hue += diff * 0.001 * timeScale;
       if (hue < 0) hue += 360;
       if (hue >= 360) hue -= 360;
       
-      // 更新核心颜色
       document.querySelector('.core').style.background = 
         `radial-gradient(circle, ${getColor(hue, 70, 60, 0.4)} 0%, ${getColor(hue, 60, 40, 0.1)} 50%, transparent 70%)`;
       
       requestAnimationFrame(updateColors);
     }
     
-    // 光环系统
+    // ============ 光环系统 ============
     const rings = [];
     const ringCount = 8;
+    let ringRotationSpeed = 2;
     
     function createRings() {
       const breath = document.querySelector('.breath');
-      
       for (let i = 0; i < ringCount; i++) {
         const ring = document.createElement('div');
         ring.className = 'ring';
-        
         const baseSize = 150 + i * 50;
-        const hueOffset = i * 15;
-        const delay = i * 0.3;
-        const duration = 4 + Math.random() * 2;
-        
         ring.style.width = baseSize + 'px';
         ring.style.height = baseSize + 'px';
         ring.style.left = (i * -25) + 'px';
         ring.style.top = (i * -25) + 'px';
-        ring.style.animation = `breathe ${duration}s ease-in-out infinite ${delay}s`;
-        
+        ring.style.animation = `breathe ${4 + Math.random() * 2}s ease-in-out infinite ${i * 0.3}s`;
         breath.appendChild(ring);
-        rings.push({ el: ring, baseSize, hueOffset, phase: Math.random() * Math.PI * 2 });
+        rings.push({ el: ring, baseSize, hueOffset: i * 15, phase: Math.random() * Math.PI * 2 });
       }
     }
     
     function updateRings() {
-      const time = Date.now() / 1000;
-      
+      const time = Date.now() / 1000 * timeScale;
       rings.forEach((ring, i) => {
-        // 有机扭曲
         const wobble = Math.sin(time * 0.5 + ring.phase) * 5;
         const scale = 1 + Math.sin(time * 0.3 + i) * 0.05;
-        
         ring.el.style.width = (ring.baseSize + wobble) + 'px';
         ring.el.style.height = (ring.baseSize + wobble * 0.7) + 'px';
-        ring.el.style.transform = `rotate(${time * 2 + i * 10}deg) scale(${scale})`;
-        
-        // 颜色
+        ring.el.style.transform = `rotate(${time * ringRotationSpeed + i * 10}deg) scale(${scale})`;
         const h = (hue + ring.hueOffset + time * 2) % 360;
         ring.el.style.borderColor = getColor(h, 50, 50, 0.15 - i * 0.015);
       });
-      
       requestAnimationFrame(updateRings);
     }
     
-    // 有机粒子系统
+    // ============ 粒子系统 ============
     const particles = [];
     const particleCount = 25;
     
@@ -222,11 +307,10 @@
       for (let i = 0; i < particleCount; i++) {
         const particle = document.createElement('div');
         particle.className = 'particle';
-        
         const size = 2 + Math.random() * 4;
         particle.style.width = size + 'px';
         particle.style.height = size + 'px';
-        
+        particle.dataset.index = i;
         document.body.appendChild(particle);
         
         particles.push({
@@ -237,25 +321,27 @@
           vy: -0.3 - Math.random() * 0.5,
           phase: Math.random() * Math.PI * 2,
           hueOffset: Math.random() * 60,
-          size
+          size,
+          clickCount: 0,
+          isAwakened: false,
+          attractionPoint: null
         });
       }
     }
     
     function updateParticles() {
-      const time = Date.now() / 1000;
+      const time = Date.now() / 1000 * timeScale;
       const centerX = window.innerWidth / 2;
       const centerY = window.innerHeight / 2;
       
       particles.forEach(p => {
-        // 有机运动（水母式）
+        // 有机运动
         const wobbleX = Math.sin(time + p.phase) * 0.8;
         const wobbleY = Math.cos(time * 0.7 + p.phase) * 0.3;
-        
         p.vx += wobbleX * 0.01;
         p.vy += wobbleY * 0.01;
         
-        // 向中心的微弱吸引
+        // 中心吸引
         const dx = centerX - p.x;
         const dy = centerY - p.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -264,15 +350,38 @@
           p.vy += dy / dist * 0.005;
         }
         
+        // 觉醒粒子追随光标
+        if (p.isAwakened) {
+          const cursorX = mouseX || centerX;
+          const cursorY = mouseY || centerY;
+          const adx = cursorX - p.x;
+          const ady = cursorY - p.y;
+          const adist = Math.sqrt(adx * adx + ady * ady);
+          p.vx += adx / adist * 0.15;
+          p.vy += ady / adist * 0.15;
+        }
+        
+        // 吸引点
+        if (p.attractionPoint) {
+          const ax = p.attractionPoint.x - p.x;
+          const ay = p.attractionPoint.y - p.y;
+          const adist = Math.sqrt(ax * ax + ay * ay);
+          if (adist > 20) {
+            p.vx += ax / adist * 0.1;
+            p.vy += ay / adist * 0.1;
+          } else {
+            p.attractionPoint = null;
+          }
+        }
+        
         // 阻尼
         p.vx *= 0.99;
         p.vy *= 0.99;
         
-        // 更新位置
-        p.x += p.vx;
-        p.y += p.vy;
+        p.x += p.vx * timeScale;
+        p.y += p.vy * timeScale;
         
-        // 边界处理
+        // 边界
         if (p.x < -50) p.x = window.innerWidth + 50;
         if (p.x > window.innerWidth + 50) p.x = -50;
         if (p.y < -50) {
@@ -280,22 +389,23 @@
           p.x = Math.random() * window.innerWidth;
         }
         
-        // 应用
         p.el.style.left = p.x + 'px';
         p.el.style.top = p.y + 'px';
         
-        // 颜色
         const h = (hue + p.hueOffset + time * 5) % 360;
-        p.el.style.background = getColor(h, 60, 60, 0.4);
+        p.el.style.background = getColor(h, 60, p.isAwakened ? 70 : 60, p.isAwakened ? 0.8 : 0.4);
+        p.el.style.color = getColor(h, 60, 70, 1);
       });
       
       requestAnimationFrame(updateParticles);
     }
     
-    // 自定义光标
+    // ============ 光标系统 ============
     const cursor = document.querySelector('.cursor');
     const trails = [];
     const trailLength = 12;
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
     
     function initCursor() {
       for (let i = 0; i < trailLength; i++) {
@@ -303,29 +413,35 @@
         trail.className = 'cursor-trail';
         trail.style.opacity = (1 - i / trailLength) * 0.3;
         document.body.appendChild(trail);
-        trails.push({ el: trail, x: 0, y: 0 });
+        trails.push({ el: trail, x: mouseX, y: mouseY });
       }
     }
     
-    let mouseX = window.innerWidth / 2;
-    let mouseY = window.innerHeight / 2;
+    function handleMove(x, y) {
+      mouseX = x;
+      mouseY = y;
+      gameState.circlePoints.push({ x, y, time: Date.now() });
+      // 只保留最近1秒的点
+      const now = Date.now();
+      gameState.circlePoints = gameState.circlePoints.filter(p => now - p.time < 1000);
+      
+      checkCircle();
+    }
     
-    document.addEventListener('mousemove', (e) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-    });
+    document.addEventListener('mousemove', (e) => handleMove(e.clientX, e.clientY));
+    document.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      handleMove(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: false });
     
     function updateCursor() {
-      // 主光标
       cursor.style.left = mouseX + 'px';
       cursor.style.top = mouseY + 'px';
       
-      // 轨迹
       trails.forEach((trail, i) => {
         const prev = i === 0 ? { x: mouseX, y: mouseY } : trails[i - 1];
         trail.x += (prev.x - trail.x) * 0.15;
         trail.y += (prev.y - trail.y) * 0.15;
-        
         trail.el.style.left = trail.x + 'px';
         trail.el.style.top = trail.y + 'px';
       });
@@ -333,77 +449,289 @@
       requestAnimationFrame(updateCursor);
     }
     
-    // 点击涟漪
-    document.addEventListener('click', (e) => {
+    // ============ 隐藏规则系统 ============
+    
+    // 规则1: 连击系统
+    function checkCombo(x, y) {
+      const now = Date.now();
+      const timeSinceLast = now - gameState.lastClickTime;
+      
+      if (timeSinceLast < 300) {
+        gameState.combo++;
+      } else {
+        gameState.combo = 1;
+      }
+      
+      gameState.lastClickTime = now;
+      
+      if (gameState.combo >= 5) {
+        triggerComboBurst(x, y);
+        gameState.combo = 0;
+      }
+    }
+    
+    function triggerComboBurst(x, y) {
+      ringRotationSpeed = 8;
+      setTimeout(() => ringRotationSpeed = 2, 2000);
+      
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+          const burst = document.createElement('div');
+          burst.className = 'combo-burst';
+          const h = (hue + i * 30) % 360;
+          burst.style.borderColor = getColor(h, 70, 60, 0.6);
+          burst.style.left = x - 100 + 'px';
+          burst.style.top = y - 100 + 'px';
+          burst.style.animationDelay = (i * 0.1) + 's';
+          document.body.appendChild(burst);
+          setTimeout(() => burst.remove(), 800);
+        }, i * 100);
+      }
+    }
+    
+    // 规则2: 节奏系统
+    function checkRhythm() {
+      const now = Date.now();
+      const timeSinceLast = now - gameState.lastRhythmTime;
+      gameState.lastRhythmTime = now;
+      
+      if (timeSinceLast > 100 && timeSinceLast < 500) {
+        gameState.rhythmHistory.push(timeSinceLast < 250 ? 'fast' : 'slow');
+        if (gameState.rhythmHistory.length > 5) {
+          gameState.rhythmHistory.shift();
+        }
+        
+        // 检查 "快-快-慢" 模式
+        if (gameState.rhythmHistory.length >= 3 &&
+            gameState.rhythmHistory.slice(-3).join('-') === 'fast-fast-slow') {
+          triggerRhythmEffect();
+          gameState.rhythmHistory = [];
+        }
+      } else {
+        gameState.rhythmHistory = [];
+      }
+    }
+    
+    function triggerRhythmEffect() {
+      // 粒子聚拢到中心
+      particles.forEach(p => {
+        p.attractionPoint = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+      });
+    }
+    
+    // 规则3: 画圆检测
+    function checkCircle() {
+      if (gameState.circlePoints.length < 20) return;
+      
+      const points = gameState.circlePoints;
+      const first = points[0];
+      const last = points[points.length - 1];
+      
+      // 检查起点和终点是否接近
+      const dist = Math.sqrt((first.x - last.x) ** 2 + (first.y - last.y) ** 2);
+      if (dist < 50) {
+        // 检查是否经过四个象限
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+        let quadrants = new Set();
+        
+        points.forEach(p => {
+          if (p.x < centerX && p.y < centerY) quadrants.add('tl');
+          if (p.x > centerX && p.y < centerY) quadrants.add('tr');
+          if (p.x < centerX && p.y > centerY) quadrants.add('bl');
+          if (p.x > centerX && p.y > centerY) quadrants.add('br');
+        });
+        
+        if (quadrants.size === 4) {
+          triggerVortex((first.x + last.x) / 2, (first.y + last.y) / 2);
+          gameState.circlePoints = [];
+        }
+      }
+    }
+    
+    function triggerVortex(x, y) {
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+          const vortex = document.createElement('div');
+          vortex.className = 'vortex';
+          const h = (hue + i * 40) % 360;
+          vortex.style.borderColor = getColor(h, 60, 50, 0.5);
+          vortex.style.left = x - 100 + 'px';
+          vortex.style.top = y - 100 + 'px';
+          vortex.style.animationDelay = (i * 0.15) + 's';
+          document.body.appendChild(vortex);
+          setTimeout(() => vortex.remove(), 2000);
+        }, i * 150);
+      }
+    }
+    
+    // 规则4: 四角密码
+    function checkCorners(x, y) {
+      const margin = 80;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      
+      let corner = null;
+      if (x < margin && y < margin) corner = 'tl';
+      else if (x > w - margin && y < margin) corner = 'tr';
+      else if (x < margin && y > h - margin) corner = 'bl';
+      else if (x > w - margin && y > h - margin) corner = 'br';
+      
+      // 更新指示器
+      document.querySelectorAll('.corner-indicator').forEach(el => {
+        el.classList.remove('active');
+        const h = (hue + 30) % 360;
+        el.style.background = getColor(h, 50, 50);
+      });
+      
+      if (corner) {
+        document.querySelector(`.corner-indicator.${corner}`).classList.add('active');
+        
+        if (gameState.cornerSequence.length === 0 || 
+            gameState.cornerSequence[gameState.cornerSequence.length - 1] !== corner) {
+          gameState.cornerSequence.push(corner);
+          
+          // 检查是否完成四角
+          if (gameState.cornerSequence.length >= 4) {
+            const last4 = gameState.cornerSequence.slice(-4);
+            const unique = new Set(last4);
+            if (unique.size === 4) {
+              triggerHiddenShape();
+              gameState.cornerSequence = [];
+            }
+          }
+        }
+      }
+    }
+    
+    function triggerHiddenShape() {
+      const shape = document.querySelector('.hidden-shape');
+      shape.classList.add('visible');
+      setTimeout(() => shape.classList.remove('visible'), 2000);
+    }
+    
+    // 规则5: 长按
+    function startLongPress() {
+      gameState.longPressStart = Date.now();
+      gameState.isLongPressing = true;
+    }
+    
+    function endLongPress() {
+      if (gameState.isLongPressing) {
+        const duration = Date.now() - gameState.longPressStart;
+        if (duration > 3000) {
+          triggerSlowTime();
+        }
+        gameState.isLongPressing = false;
+      }
+    }
+    
+    function triggerSlowTime() {
+      document.body.classList.add('slow-time');
+      timeScale = 0.3;
+      setTimeout(() => {
+        document.body.classList.remove('slow-time');
+        timeScale = 1;
+      }, 5000);
+    }
+    
+    // 规则6: 追逐粒子
+    function checkParticleClick(x, y) {
+      for (let p of particles) {
+        const dist = Math.sqrt((p.x - x) ** 2 + (p.y - y) ** 2);
+        if (dist < 30) {
+          p.clickCount++;
+          if (p.clickCount >= 3 && !p.isAwakened) {
+            p.isAwakened = true;
+            p.el.classList.add('awakened');
+            // 10秒后失效
+            setTimeout(() => {
+              p.isAwakened = false;
+              p.el.classList.remove('awakened');
+              p.clickCount = 0;
+            }, 10000);
+          }
+          break;
+        }
+      }
+    }
+    
+    // ============ 点击处理 ============
+    function handleClick(x, y) {
+      // 涟漪
       const ripple = document.createElement('div');
       ripple.className = 'ripple';
-      
       const h = (hue + Math.random() * 60) % 360;
       ripple.style.borderColor = getColor(h, 70, 60, 0.5);
-      ripple.style.left = e.clientX - 300 + 'px';
-      ripple.style.top = e.clientY - 300 + 'px';
-      
+      ripple.style.left = x - 200 + 'px';
+      ripple.style.top = y - 200 + 'px';
       document.body.appendChild(ripple);
       setTimeout(() => ripple.remove(), 2000);
+      
+      // 检查所有规则
+      checkCombo(x, y);
+      checkRhythm();
+      checkCorners(x, y);
+      checkParticleClick(x, y);
+    }
+    
+    document.addEventListener('mousedown', (e) => {
+      startLongPress();
+      handleClick(e.clientX, e.clientY);
     });
     
-    // 随机脉冲
+    document.addEventListener('mouseup', endLongPress);
+    
+    document.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      mouseX = touch.clientX;
+      mouseY = touch.clientY;
+      startLongPress();
+      handleClick(touch.clientX, touch.clientY);
+    }, { passive: false });
+    
+    document.addEventListener('touchend', endLongPress);
+    
+    // ============ 随机脉冲 ============
     function randomPulse() {
-      if (Math.random() < 0.02) { // 每帧2%概率
+      if (Math.random() < 0.01) {
         const pulse = document.createElement('div');
         pulse.className = 'pulse';
-        
         const x = Math.random() * window.innerWidth;
         const y = Math.random() * window.innerHeight;
         const h = (hue + Math.random() * 120) % 360;
-        
         pulse.style.left = x + 'px';
         pulse.style.top = y + 'px';
         pulse.style.borderColor = getColor(h, 60, 50, 0.4);
-        
         document.body.appendChild(pulse);
         setTimeout(() => pulse.remove(), 1500);
       }
-      
       requestAnimationFrame(randomPulse);
     }
     
-    // 对齐时刻
+    // ============ 对齐时刻 ============
     let lastAlignTime = 0;
-    
     function checkAlignment() {
       const time = Date.now() / 1000;
-      
-      // 平均每30秒一次
       if (time - lastAlignTime > 20 && Math.random() < 0.001) {
         lastAlignTime = time;
-        triggerAlignment();
+        const flash = document.querySelector('.align-flash');
+        flash.classList.add('active');
+        rings.forEach(ring => {
+          ring.el.style.animation = 'none';
+          ring.el.offsetHeight;
+          ring.el.style.animation = `breathe 4s ease-in-out infinite`;
+        });
+        setTimeout(() => flash.classList.remove('active'), 500);
       }
-      
       requestAnimationFrame(checkAlignment);
     }
     
-    function triggerAlignment() {
-      const flash = document.querySelector('.align-flash');
-      flash.classList.add('active');
-      
-      // 所有元素瞬间同步
-      rings.forEach((ring, i) => {
-        ring.el.style.animation = 'none';
-        ring.el.offsetHeight; // 触发重排
-        ring.el.style.animation = `breathe 4s ease-in-out infinite`;
-      });
-      
-      setTimeout(() => {
-        flash.classList.remove('active');
-      }, 500);
-    }
-    
-    // 启动
+    // ============ 启动 ============
     createRings();
     createParticles();
     initCursor();
-    
     updateColors();
     updateRings();
     updateParticles();
