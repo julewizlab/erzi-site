@@ -17,6 +17,32 @@
     -webkit-user-select: none;
   }
   
+  /* 宇宙背景时间 */
+  .cosmic-time {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    color: rgba(255, 255, 255, 0.15);
+    z-index: 100;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .cosmic-time .symbol {
+    font-size: 14px;
+    opacity: 0.6;
+  }
+  
+  .cosmic-time .number {
+    font-variant-numeric: tabular-nums;
+  }
+  
   /* 自定义光标 */
   .cursor {
     position: fixed;
@@ -213,6 +239,10 @@
 </style>
 </head>
 <body>
+  <div class="cosmic-time">
+    <span class="symbol">Ω</span>
+    <span class="number" id="cosmicClock">0000000000.00</span>
+  </div>
   <div class="cursor"></div>
   <div class="align-flash"></div>
   <div class="hidden-shape">
@@ -989,6 +1019,58 @@
       requestAnimationFrame(checkAlignment);
     }
     
+    // ============ 宇宙背景时间 ============
+    // 纪元起点: 2020-01-01 00:00:00 UTC (虚构的"第零纪元")
+    const COSMIC_EPOCH = new Date('2020-01-01T00:00:00Z').getTime();
+    let lastResonanceCheck = 0;
+    
+    function updateCosmicTime() {
+      const now = Date.now();
+      const cosmicSeconds = (now - COSMIC_EPOCH) / 1000;
+      
+      // 格式化为带2位小数的数字
+      const formatted = cosmicSeconds.toFixed(2);
+      
+      // 补零到至少10位整数
+      const parts = formatted.split('.');
+      const intPart = parts[0].padStart(10, '0');
+      const display = intPart + '.' + parts[1];
+      
+      document.getElementById('cosmicClock').textContent = display;
+      
+      // 规则14: 宇宙共振时刻 - 每1000秒（最后3位为000）
+      const intSeconds = Math.floor(cosmicSeconds);
+      if (intSeconds % 1000 === 0 && intSeconds !== lastResonanceCheck) {
+        lastResonanceCheck = intSeconds;
+        triggerCosmicResonance();
+      }
+      
+      requestAnimationFrame(updateCosmicTime);
+    }
+    
+    function triggerCosmicResonance() {
+      // 宇宙时间数字变亮
+      const timeEl = document.querySelector('.cosmic-time');
+      timeEl.style.color = 'rgba(255, 255, 255, 0.6)';
+      timeEl.style.textShadow = '0 0 20px rgba(255, 255, 255, 0.3)';
+      
+      // 所有粒子同步脉冲
+      particles.forEach((p, i) => {
+        setTimeout(() => {
+          p.el.style.transform = 'scale(2)';
+          setTimeout(() => {
+            p.el.style.transform = '';
+          }, 200);
+        }, i * 50);
+      });
+      
+      // 恢复
+      setTimeout(() => {
+        timeEl.style.color = 'rgba(255, 255, 255, 0.15)';
+        timeEl.style.textShadow = '';
+      }, 3000);
+    }
+    
     // ============ 启动 ============
     createRings();
     createParticles();
@@ -999,6 +1081,7 @@
     updateCursor();
     randomPulse();
     checkAlignment();
+    updateCosmicTime();
   </script>
 </body>
 </html>
