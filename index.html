@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>erzi.site</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -10,14 +10,21 @@
   body {
     background: #0A0A0A;
     min-height: 100vh;
+    min-height: -webkit-fill-available;
     overflow: hidden;
-    cursor: none;
     touch-action: none;
     user-select: none;
     -webkit-user-select: none;
   }
   
-  /* 宇宙背景时间 */
+  /* 移动端适配 */
+  @media (max-width: 768px) {
+    .cosmic-time { font-size: 10px !important; top: 15px !important; }
+    .mystery-counter { font-size: 9px !important; gap: 3px !important; bottom: 15px !important; }
+    .cursor { display: none !important; }
+    .cursor-trail { display: none !important; }
+  }
+  
   .cosmic-time {
     position: fixed;
     top: 20px;
@@ -25,13 +32,19 @@
     transform: translateX(-50%);
     font-family: 'JetBrains Mono', 'Courier New', monospace;
     font-size: 12px;
-    letter-spacing: 0.3em;
+    letter-spacing: 0.2em;
     color: rgba(255, 255, 255, 0.15);
     z-index: 100;
     pointer-events: none;
     display: flex;
     align-items: center;
     gap: 8px;
+    animation: cosmicBreathe 4s ease-in-out infinite;
+  }
+  
+  @keyframes cosmicBreathe {
+    0%, 100% { opacity: 0.15; }
+    50% { opacity: 0.35; }
   }
   
   .mystery-counter {
@@ -49,27 +62,27 @@
     font-variant-numeric: tabular-nums;
   }
   
-  .cosmic-time .symbol {
-    font-size: 14px;
-    opacity: 0.6;
-  }
-  
-  .cosmic-time .number {
-    font-variant-numeric: tabular-nums;
-  }
-  
-  .mystery-counter .rule-num {
+  .rule-num {
     opacity: 0.15;
-    transition: opacity 0.3s ease, color 0.3s ease, text-shadow 0.3s ease;
+    transition: all 0.3s ease;
   }
   
-  .mystery-counter .rule-num.completed {
+  .rule-num.completed {
     opacity: 0.8;
     color: rgba(255, 255, 255, 0.9);
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
   }
   
-  /* 自定义光标 */
+  .rule-num.flash {
+    animation: numFlash 0.6s ease-out;
+  }
+  
+  @keyframes numFlash {
+    0% { transform: scale(1); opacity: 1; }
+    30% { transform: scale(2); opacity: 1; text-shadow: 0 0 20px rgba(255,255,255,0.8); }
+    100% { transform: scale(1); }
+  }
+  
   .cursor {
     position: fixed;
     width: 8px;
@@ -92,7 +105,6 @@
     z-index: 9999;
   }
   
-  /* 呼吸核心 */
   .breath {
     position: fixed;
     left: 50%;
@@ -124,7 +136,6 @@
     50% { transform: scale(1.2); opacity: 0.4; }
   }
   
-  /* 有机粒子 */
   .particle {
     position: fixed;
     border-radius: 50%;
@@ -135,52 +146,63 @@
   
   .particle.awakened {
     filter: blur(0);
-    box-shadow: 0 0 10px currentColor;
+    box-shadow: 0 0 15px currentColor;
   }
   
-  /* 漩涡效果 */
+  /* 增强动效 */
   .vortex {
     position: fixed;
     border-radius: 50%;
-    border: 2px solid;
-    animation: vortex-spin 2s ease-out forwards;
+    border: 3px solid;
+    animation: vortex-spin 2.5s ease-out forwards;
     pointer-events: none;
   }
   
   @keyframes vortex-spin {
     0% { transform: scale(0) rotate(0deg); opacity: 1; }
-    100% { transform: scale(3) rotate(720deg); opacity: 0; }
+    100% { transform: scale(5) rotate(1080deg); opacity: 0; }
   }
   
-  /* 脉冲 */
   .pulse {
     position: fixed;
     border-radius: 50%;
-    border: 2px solid;
-    animation: pulse-expand 1.5s ease-out forwards;
+    border: 3px solid;
+    animation: pulse-expand 2s ease-out forwards;
     pointer-events: none;
   }
   
   @keyframes pulse-expand {
     0% { transform: scale(0); opacity: 1; }
-    100% { transform: scale(3); opacity: 0; }
+    100% { transform: scale(4); opacity: 0; }
   }
   
-  /* 连击爆发 */
   .combo-burst {
     position: fixed;
     border-radius: 50%;
-    animation: burst 0.8s ease-out forwards;
+    border: 3px solid;
+    animation: burst 1s ease-out forwards;
     pointer-events: none;
   }
   
   @keyframes burst {
     0% { transform: scale(0); opacity: 1; }
-    50% { transform: scale(2); opacity: 0.8; }
-    100% { transform: scale(3); opacity: 0; }
+    50% { transform: scale(3); opacity: 0.9; }
+    100% { transform: scale(5); opacity: 0; }
   }
   
-  /* 隐藏图形 */
+  .ripple {
+    position: fixed;
+    border-radius: 50%;
+    animation: ripple-expand 2.5s ease-out forwards;
+    pointer-events: none;
+    mix-blend-mode: screen;
+  }
+  
+  @keyframes ripple-expand {
+    0% { width: 0; height: 0; opacity: 0.8; }
+    100% { width: 600px; height: 600px; opacity: 0; }
+  }
+  
   .hidden-shape {
     position: fixed;
     inset: 0;
@@ -198,14 +220,13 @@
   }
   
   .hidden-shape svg {
-    width: 200px;
-    height: 200px;
-    stroke: rgba(255, 255, 255, 0.3);
+    width: 300px;
+    height: 300px;
+    stroke: rgba(255, 255, 255, 0.4);
     fill: none;
-    stroke-width: 1;
+    stroke-width: 2;
   }
   
-  /* 时间变慢 */
   body.slow-time .particle,
   body.slow-time .ring,
   body.slow-time .core {
@@ -213,30 +234,10 @@
     transition-duration: 1s !important;
   }
   
-  /* 点击涟漪 */
-  .ripple {
-    position: fixed;
-    border-radius: 50%;
-    animation: ripple-expand 2s ease-out forwards;
-    pointer-events: none;
-    mix-blend-mode: screen;
-  }
-  
-  @keyframes ripple-expand {
-    0% { width: 0; height: 0; opacity: 0.6; }
-    100% { width: 400px; height: 400px; opacity: 0; }
-  }
-  
-  @keyframes edgeFade {
-    0% { opacity: 1; }
-    100% { opacity: 0; }
-  }
-  
-  /* 对齐时刻闪光 */
   .align-flash {
     position: fixed;
     inset: 0;
-    background: radial-gradient(circle at center, rgba(255,255,255,0.15) 0%, transparent 70%);
+    background: radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, transparent 70%);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
@@ -244,22 +245,26 @@
   
   .align-flash.active { opacity: 1; }
   
-  /* 四角指示器（隐藏） */
   .corner-indicator {
     position: fixed;
-    width: 20px;
-    height: 20px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     opacity: 0;
     transition: opacity 0.3s ease;
     pointer-events: none;
   }
   
-  .corner-indicator.active { opacity: 0.5; }
+  .corner-indicator.active { opacity: 0.6; }
   .corner-indicator.tl { top: 20px; left: 20px; }
   .corner-indicator.tr { top: 20px; right: 20px; }
-  .corner-indicator.bl { bottom: 20px; left: 20px; }
-  .corner-indicator.br { bottom: 20px; right: 20px; }
+  .corner-indicator.bl { bottom: 60px; left: 20px; }
+  .corner-indicator.br { bottom: 60px; right: 20px; }
+  
+  @keyframes edgeFade {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
   
   ::-webkit-scrollbar { display: none; }
 </style>
@@ -267,9 +272,9 @@
 <body>
   <div class="cosmic-time">
     <span class="symbol">Ω</span>
-    <span class="number" id="cosmicClock">0000000000.00</span>
+    <span class="number" id="cT">0000000000.00</span>
   </div>
-  <div class="mystery-counter" id="mysteryCounter"></div>
+  <div class="mystery-counter" id="mC"></div>
   <div class="cursor"></div>
   <div class="align-flash"></div>
   <div class="hidden-shape">
@@ -286,884 +291,635 @@
   </div>
   
   <script>
-    // ============ 基础系统 ============
-    let hue = Math.random() * 360;
-    let targetHue = hue;
-    let timeScale = 1;
+    // Obfuscated variables
+    const _0x0 = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o'];
+    let _h = Math.random() * 360, _tH = _h, _ts = 1, _rr = 2;
+    const _gC = (h,s,l,a) => `hsla(${h},${s}%,${l}%,${a})`;
     
-    function getColor(h, s = 60, l = 50, a = 1) {
-      return `hsla(${h}, ${s}%, ${l}%, ${a})`;
-    }
-    
-    // ============ 游戏状态 ============
-    const gameState = {
-      combo: 0,
-      lastClickTime: 0,
-      clickHistory: [],
-      cornerSequence: [],
-      longPressStart: 0,
-      isLongPressing: false,
-      circlePoints: [],
-      awakenedParticle: null,
-      rhythmHistory: [],
-      lastRhythmTime: 0,
-      silenceStart: Date.now(),
-      edgeTrail: [],
-      lastMoveTime: 0,
-      centerGazeStart: 0,
-      breathSyncClicks: [],
-      sPoints: [],
-      triplePauseClicks: [],
-      // 规则完成状态
-      completedRules: JSON.parse(localStorage.getItem('completedRules') || '{}')
+    // Game state (obfuscated)
+    const _gs = {
+      a: 0, b: Date.now(), c: [], d: [], e: 0, f: false,
+      g: [], h: null, i: [], j: Date.now(), k: [], l: 0,
+      m: [], n: 0, o: [], p: [],
+      q: JSON.parse(localStorage.getItem('_r') || '{}')
     };
     
-    // 所有规则ID（共15个）
-    const ALL_RULES = [
-      'combo', 'rhythm', 'circle', 'corners', 'longpress', 'awaken',
-      'silence', 'edge', 'diagonal', 'gaze', 'breathsync', 'scurve', 'triplepause',
-      'cosmic', 'randompulse'
-    ];
-    
-    function completeRule(ruleId) {
-      if (!gameState.completedRules[ruleId]) {
-        gameState.completedRules[ruleId] = true;
-        localStorage.setItem('completedRules', JSON.stringify(gameState.completedRules));
-        updateMysteryCounter();
-      }
-    }
-    
-    function updateMysteryCounter() {
-      const container = document.getElementById('mysteryCounter');
-      container.innerHTML = ALL_RULES.map((ruleId, index) => {
-        const completed = gameState.completedRules[ruleId] ? 'completed' : '';
-        return `<span class="rule-num ${completed}">${index}</span>`;
+    // Initialize counter
+    function _uMC() {
+      const c = document.getElementById('mC');
+      c.innerHTML = _0x0.map((r, i) => {
+        const d = _gs.q[r] ? 'completed' : '';
+        return `<span class="rule-num ${d}" data-i="${i}">${i}</span>`;
       }).join('');
     }
+    _uMC();
     
-    // 初始化计数器
-    updateMysteryCounter();
-    
-    // ============ 颜色更新 ============
-    function updateColors() {
-      if (Math.random() < 0.01) {
-        targetHue = (targetHue + 30 + Math.random() * 60) % 360;
+    // Complete rule with flash
+    function _cR(id) {
+      if (!_gs.q[id]) {
+        _gs.q[id] = true;
+        localStorage.setItem('_r', JSON.stringify(_gs.q));
+        _uMC();
       }
-      
-      const diff = targetHue - hue;
-      hue += diff * 0.001 * timeScale;
-      if (hue < 0) hue += 360;
-      if (hue >= 360) hue -= 360;
-      
+      // Flash the number
+      const idx = _0x0.indexOf(id);
+      if (idx >= 0) {
+        const el = document.querySelector(`.rule-num[data-i="${idx}"]`);
+        if (el) {
+          el.classList.remove('flash');
+          void el.offsetWidth;
+          el.classList.add('flash');
+        }
+      }
+    }
+    
+    // Color system
+    function _uC() {
+      if (Math.random() < 0.01) _tH = (_tH + 30 + Math.random() * 60) % 360;
+      const d = _tH - _h;
+      _h += d * 0.001 * _ts;
+      if (_h < 0) _h += 360;
+      if (_h >= 360) _h -= 360;
       document.querySelector('.core').style.background = 
-        `radial-gradient(circle, ${getColor(hue, 70, 60, 0.4)} 0%, ${getColor(hue, 60, 40, 0.1)} 50%, transparent 70%)`;
-      
-      requestAnimationFrame(updateColors);
+        `radial-gradient(circle,${_gC(_h,70,60,0.4)} 0%,${_gC(_h,60,40,0.1)} 50%,transparent 70%)`;
+      requestAnimationFrame(_uC);
     }
     
-    // ============ 光环系统 ============
-    const rings = [];
-    const ringCount = 8;
-    let ringRotationSpeed = 2;
-    
-    function createRings() {
-      const breath = document.querySelector('.breath');
-      for (let i = 0; i < ringCount; i++) {
-        const ring = document.createElement('div');
-        ring.className = 'ring';
-        const baseSize = 150 + i * 50;
-        ring.style.width = baseSize + 'px';
-        ring.style.height = baseSize + 'px';
-        ring.style.left = (i * -25) + 'px';
-        ring.style.top = (i * -25) + 'px';
-        ring.style.animation = `breathe ${4 + Math.random() * 2}s ease-in-out infinite ${i * 0.3}s`;
-        breath.appendChild(ring);
-        rings.push({ el: ring, baseSize, hueOffset: i * 15, phase: Math.random() * Math.PI * 2 });
+    // Rings
+    const _rs = [];
+    function _cRs() {
+      const b = document.querySelector('.breath');
+      for (let i = 0; i < 8; i++) {
+        const r = document.createElement('div');
+        r.className = 'ring';
+        const s = 150 + i * 50;
+        r.style.cssText = `width:${s}px;height:${s}px;left:${i*-25}px;top:${i*-25}px;animation:breathe ${4+Math.random()*2}s ease-in-out infinite ${i*0.3}s`;
+        b.appendChild(r);
+        _rs.push({ el: r, bs: s, ho: i * 15, p: Math.random() * Math.PI * 2 });
       }
     }
     
-    function updateRings() {
-      const time = Date.now() / 1000 * timeScale;
-      rings.forEach((ring, i) => {
-        const wobble = Math.sin(time * 0.5 + ring.phase) * 5;
-        const scale = 1 + Math.sin(time * 0.3 + i) * 0.05;
-        ring.el.style.width = (ring.baseSize + wobble) + 'px';
-        ring.el.style.height = (ring.baseSize + wobble * 0.7) + 'px';
-        ring.el.style.transform = `rotate(${time * ringRotationSpeed + i * 10}deg) scale(${scale})`;
-        const h = (hue + ring.hueOffset + time * 2) % 360;
-        ring.el.style.borderColor = getColor(h, 50, 50, 0.15 - i * 0.015);
+    function _uRs() {
+      const t = Date.now() / 1000 * _ts;
+      _rs.forEach((r, i) => {
+        const w = Math.sin(t * 0.5 + r.p) * 5;
+        const sc = 1 + Math.sin(t * 0.3 + i) * 0.05;
+        r.el.style.width = (r.bs + w) + 'px';
+        r.el.style.height = (r.bs + w * 0.7) + 'px';
+        r.el.style.transform = `rotate(${t * _rr + i * 10}deg) scale(${sc})`;
+        r.el.style.borderColor = _gC((_h + r.ho + t * 2) % 360, 50, 50, 0.15 - i * 0.015);
       });
-      requestAnimationFrame(updateRings);
+      requestAnimationFrame(_uRs);
     }
     
-    // ============ 粒子系统 ============
-    const particles = [];
-    const particleCount = 25;
-    
-    function createParticles() {
-      for (let i = 0; i < particleCount; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        const size = 2 + Math.random() * 4;
-        particle.style.width = size + 'px';
-        particle.style.height = size + 'px';
-        particle.dataset.index = i;
-        document.body.appendChild(particle);
-        
-        particles.push({
-          el: particle,
-          x: Math.random() * window.innerWidth,
-          y: Math.random() * window.innerHeight,
-          vx: (Math.random() - 0.5) * 0.5,
-          vy: -0.3 - Math.random() * 0.5,
-          phase: Math.random() * Math.PI * 2,
-          hueOffset: Math.random() * 60,
-          size,
-          clickCount: 0,
-          isAwakened: false,
-          attractionPoint: null
+    // Particles (40 particles)
+    const _ps = [];
+    function _cPs() {
+      for (let i = 0; i < 40; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        const s = 2 + Math.random() * 4;
+        p.style.cssText = `width:${s}px;height:${s}px`;
+        document.body.appendChild(p);
+        _ps.push({
+          el: p, x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight,
+          vx: (Math.random() - 0.5) * 0.5, vy: -0.3 - Math.random() * 0.5,
+          p: Math.random() * Math.PI * 2, ho: Math.random() * 60, s,
+          cc: 0, ia: false, ap: null, wm: false
         });
       }
     }
     
-    function updateParticles() {
-      const time = Date.now() / 1000 * timeScale;
-      const centerX = window.innerWidth / 2;
-      const centerY = window.innerHeight / 2;
+    let _idl = 0; // idle counter
+    function _uPs() {
+      const t = Date.now() / 1000 * _ts;
+      const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
       
-      particles.forEach(p => {
-        // 有机运动
-        const wobbleX = Math.sin(time + p.phase) * 0.8;
-        const wobbleY = Math.cos(time * 0.7 + p.phase) * 0.3;
-        p.vx += wobbleX * 0.01;
-        p.vy += wobbleY * 0.01;
+      // Check idle (no interaction for 3 seconds)
+      const now = Date.now();
+      if (now - _gs.b > 3000) {
+        _idl++;
+      } else {
+        _idl = 0;
+      }
+      
+      _ps.forEach(p => {
+        // Organic motion
+        const wx = Math.sin(t + p.p) * 0.8;
+        const wy = Math.cos(t * 0.7 + p.p) * 0.3;
+        p.vx += wx * 0.01;
+        p.vy += wy * 0.01;
         
-        // 中心吸引
-        const dx = centerX - p.x;
-        const dy = centerY - p.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist > 100) {
-          p.vx += dx / dist * 0.005;
-          p.vy += dy / dist * 0.005;
-        }
-        
-        // 觉醒粒子追随光标
-        if (p.isAwakened) {
-          const cursorX = mouseX || centerX;
-          const cursorY = mouseY || centerY;
-          const adx = cursorX - p.x;
-          const ady = cursorY - p.y;
-          const adist = Math.sqrt(adx * adx + ady * ady);
-          p.vx += adx / adist * 0.15;
-          p.vy += ady / adist * 0.15;
-        }
-        
-        // 吸引点
-        if (p.attractionPoint) {
-          const ax = p.attractionPoint.x - p.x;
-          const ay = p.attractionPoint.y - p.y;
-          const adist = Math.sqrt(ax * ax + ay * ay);
-          if (adist > 20) {
-            p.vx += ax / adist * 0.1;
-            p.vy += ay / adist * 0.1;
-          } else {
-            p.attractionPoint = null;
+        // If idle, enter random wandering mode
+        if (_idl > 0 && !p.ia) {
+          p.wm = true;
+          // Random direction changes
+          if (Math.random() < 0.02) {
+            p.vx += (Math.random() - 0.5) * 0.5;
+            p.vy += (Math.random() - 0.5) * 0.5;
+          }
+        } else {
+          p.wm = false;
+          // Center attraction
+          const dx = cx - p.x, dy = cy - p.y;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          if (d > 100) {
+            p.vx += dx / d * 0.005;
+            p.vy += dy / d * 0.005;
           }
         }
         
-        // 阻尼
+        // Awakened follow cursor
+        if (p.ia) {
+          const ax = _mX - p.x, ay = _mY - p.y;
+          const ad = Math.sqrt(ax * ax + ay * ay);
+          p.vx += ax / ad * 0.15;
+          p.vy += ay / ad * 0.15;
+        }
+        
+        // Attraction point
+        if (p.ap) {
+          const ax = p.ap.x - p.x, ay = p.ap.y - p.y;
+          const ad = Math.sqrt(ax * ax + ay * ay);
+          if (ad > 20) {
+            p.vx += ax / ad * 0.1;
+            p.vy += ay / ad * 0.1;
+          } else {
+            p.ap = null;
+          }
+        }
+        
+        // Damping
         p.vx *= 0.99;
         p.vy *= 0.99;
         
-        p.x += p.vx * timeScale;
-        p.y += p.vy * timeScale;
+        // Speed limit in wander mode
+        if (p.wm) {
+          const spd = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+          if (spd > 1) {
+            p.vx *= 0.95;
+            p.vy *= 0.95;
+          }
+        }
         
-        // 边界
+        p.x += p.vx * _ts;
+        p.y += p.vy * _ts;
+        
+        // Bounds
         if (p.x < -50) p.x = window.innerWidth + 50;
         if (p.x > window.innerWidth + 50) p.x = -50;
-        if (p.y < -50) {
-          p.y = window.innerHeight + 50;
-          p.x = Math.random() * window.innerWidth;
-        }
+        if (p.y < -50) { p.y = window.innerHeight + 50; p.x = Math.random() * window.innerWidth; }
         
         p.el.style.left = p.x + 'px';
         p.el.style.top = p.y + 'px';
         
-        const h = (hue + p.hueOffset + time * 5) % 360;
-        p.el.style.background = getColor(h, 60, p.isAwakened ? 70 : 60, p.isAwakened ? 0.8 : 0.4);
-        p.el.style.color = getColor(h, 60, 70, 1);
+        const h = (_h + p.ho + t * 5) % 360;
+        p.el.style.background = _gC(h, 60, p.ia ? 70 : 60, p.ia ? 0.8 : 0.4);
+        p.el.style.color = _gC(h, 60, 70, 1);
       });
       
-      checkSilence();
-      requestAnimationFrame(updateParticles);
+      // Check silence
+      _cSl();
+      
+      requestAnimationFrame(_uPs);
     }
     
-    // ============ 光标系统 ============
-    const cursor = document.querySelector('.cursor');
-    const trails = [];
-    const trailLength = 12;
-    let mouseX = window.innerWidth / 2;
-    let mouseY = window.innerHeight / 2;
+    // Cursor
+    const _cr = document.querySelector('.cursor');
+    const _tr = [];
+    let _mX = window.innerWidth / 2, _mY = window.innerHeight / 2;
     
-    function initCursor() {
-      for (let i = 0; i < trailLength; i++) {
-        const trail = document.createElement('div');
-        trail.className = 'cursor-trail';
-        trail.style.opacity = (1 - i / trailLength) * 0.3;
-        document.body.appendChild(trail);
-        trails.push({ el: trail, x: mouseX, y: mouseY });
+    function _iCr() {
+      for (let i = 0; i < 12; i++) {
+        const t = document.createElement('div');
+        t.className = 'cursor-trail';
+        t.style.opacity = (1 - i / 12) * 0.3;
+        document.body.appendChild(t);
+        _tr.push({ el: t, x: _mX, y: _mY });
       }
     }
     
-    function handleMove(x, y) {
-      mouseX = x;
-      mouseY = y;
-      gameState.circlePoints.push({ x, y, time: Date.now() });
-      const now = Date.now();
-      gameState.circlePoints = gameState.circlePoints.filter(p => now - p.time < 1000);
-      
-      checkCircle();
-      checkEdgeWalk(x, y);
-      checkDiagonal(x, y);
-      checkCenterGaze(x, y);
-      checkSShape(x, y);
+    function _hM(x, y) {
+      _mX = x; _mY = y;
+      _gs.g.push({ x, y, t: Date.now() });
+      const n = Date.now();
+      _gs.g = _gs.g.filter(p => n - p.t < 1000);
+      _cCr();
+      _cEW(x, y);
+      _cDi(x, y);
+      _cCG(x, y);
+      _cSC(x, y);
     }
     
-    document.addEventListener('mousemove', (e) => handleMove(e.clientX, e.clientY));
-    document.addEventListener('touchmove', (e) => {
-      e.preventDefault();
-      handleMove(e.touches[0].clientX, e.touches[0].clientY);
-    }, { passive: false });
+    document.addEventListener('mousemove', e => _hM(e.clientX, e.clientY));
+    document.addEventListener('touchmove', e => { e.preventDefault(); _hM(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
     
-    function updateCursor() {
-      cursor.style.left = mouseX + 'px';
-      cursor.style.top = mouseY + 'px';
-      
-      trails.forEach((trail, i) => {
-        const prev = i === 0 ? { x: mouseX, y: mouseY } : trails[i - 1];
-        trail.x += (prev.x - trail.x) * 0.15;
-        trail.y += (prev.y - trail.y) * 0.15;
-        trail.el.style.left = trail.x + 'px';
-        trail.el.style.top = trail.y + 'px';
+    function _uCr() {
+      _cr.style.left = _mX + 'px';
+      _cr.style.top = _mY + 'px';
+      _tr.forEach((t, i) => {
+        const p = i === 0 ? { x: _mX, y: _mY } : _tr[i - 1];
+        t.x += (p.x - t.x) * 0.15;
+        t.y += (p.y - t.y) * 0.15;
+        t.el.style.left = t.x + 'px';
+        t.el.style.top = t.y + 'px';
       });
-      
-      requestAnimationFrame(updateCursor);
+      requestAnimationFrame(_uCr);
     }
     
-    // ============ 隐藏规则系统 ============
+    // === RULES ===
     
-    // 规则1: 连击系统
-    function checkCombo(x, y) {
-      const now = Date.now();
-      const timeSinceLast = now - gameState.lastClickTime;
-      
-      if (timeSinceLast < 300) {
-        gameState.combo++;
-      } else {
-        gameState.combo = 1;
-      }
-      
-      gameState.lastClickTime = now;
-      
-      if (gameState.combo >= 5) {
-        triggerComboBurst(x, y);
-        gameState.combo = 0;
-      }
+    // R1: Combo
+    function _cCb(x, y) {
+      const n = Date.now();
+      const d = n - _gs.a;
+      if (d < 300) { _gs.a = n; _gs.b = n; }
+      else { _gs.a = n; _gs.b = n; _gs.c = [1]; return; }
+      if (++_gs.c[0] >= 5) { _tCb(x, y); _gs.c = [1]; }
     }
     
-    function triggerComboBurst(x, y) {
-      completeRule('combo');
-      ringRotationSpeed = 8;
-      setTimeout(() => ringRotationSpeed = 2, 2000);
-      
+    function _tCb(x, y) {
+      _cR(_0x0[0]);
+      _rr = 8;
+      setTimeout(() => _rr = 2, 2500);
       for (let i = 0; i < 5; i++) {
         setTimeout(() => {
-          const burst = document.createElement('div');
-          burst.className = 'combo-burst';
-          const h = (hue + i * 30) % 360;
-          burst.style.borderColor = getColor(h, 70, 60, 0.6);
-          burst.style.left = x - 100 + 'px';
-          burst.style.top = y - 100 + 'px';
-          burst.style.animationDelay = (i * 0.1) + 's';
-          document.body.appendChild(burst);
-          setTimeout(() => burst.remove(), 800);
+          const b = document.createElement('div');
+          b.className = 'combo-burst';
+          b.style.cssText = `border-color:${_gC((_h+i*30)%360,70,60,0.7)};left:${x-150}px;top:${y-150}px;animation-delay:${i*0.1}s`;
+          document.body.appendChild(b);
+          setTimeout(() => b.remove(), 1000);
         }, i * 100);
       }
     }
     
-    // 规则2: 节奏系统 - 连续3次点击间隔相近（稳定节奏）
-    function checkRhythm() {
-      const now = Date.now();
-      const timeSinceLast = now - gameState.lastRhythmTime;
-      gameState.lastRhythmTime = now;
-      
-      // 间隔在200-600ms之间认为是有效点击
-      if (timeSinceLast > 200 && timeSinceLast < 600) {
-        gameState.rhythmHistory.push(timeSinceLast);
-        if (gameState.rhythmHistory.length > 5) {
-          gameState.rhythmHistory.shift();
-        }
-        
-        // 检查最近3次点击间隔相近（误差<40%）
-        if (gameState.rhythmHistory.length >= 3) {
-          const last3 = gameState.rhythmHistory.slice(-3);
-          const avg = last3.reduce((a, b) => a + b) / 3;
-          const allClose = last3.every(g => Math.abs(g - avg) < avg * 0.4);
-          
-          if (allClose) {
-            triggerRhythmEffect();
-            gameState.rhythmHistory = [];
+    // R2: Rhythm (stable)
+    function _cRh() {
+      const n = Date.now(), d = n - _gs.j;
+      _gs.j = n;
+      if (d > 200 && d < 600) {
+        _gs.i.push(d);
+        if (_gs.i.length > 5) _gs.i.shift();
+        if (_gs.i.length >= 3) {
+          const l3 = _gs.i.slice(-3), av = l3.reduce((a,b) => a+b) / 3;
+          if (l3.every(g => Math.abs(g - av) < av * 0.4)) {
+            _tRh();
+            _gs.i = [];
           }
         }
-      } else if (timeSinceLast > 1000) {
-        // 超过1秒未点击，重置
-        gameState.rhythmHistory = [];
+      } else if (d > 1000) {
+        _gs.i = [];
       }
     }
     
-    function triggerRhythmEffect() {
-      completeRule('rhythm');
-      // 粒子聚拢到中心
-      particles.forEach(p => {
-        p.attractionPoint = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-      });
+    function _tRh() {
+      _cR(_0x0[1]);
+      _ps.forEach(p => p.ap = { x: window.innerWidth / 2, y: window.innerHeight / 2 });
     }
     
-    // 规则3: 画圆检测
-    function checkCircle() {
-      if (gameState.circlePoints.length < 20) return;
-      
-      const points = gameState.circlePoints;
-      const first = points[0];
-      const last = points[points.length - 1];
-      
-      // 检查起点和终点是否接近
-      const dist = Math.sqrt((first.x - last.x) ** 2 + (first.y - last.y) ** 2);
-      if (dist < 50) {
-        // 检查是否经过四个象限
-        const centerX = window.innerWidth / 2;
-        const centerY = window.innerHeight / 2;
-        let quadrants = new Set();
-        
-        points.forEach(p => {
-          if (p.x < centerX && p.y < centerY) quadrants.add('tl');
-          if (p.x > centerX && p.y < centerY) quadrants.add('tr');
-          if (p.x < centerX && p.y > centerY) quadrants.add('bl');
-          if (p.x > centerX && p.y > centerY) quadrants.add('br');
+    // R3: Circle
+    function _cCr() {
+      if (_gs.g.length < 20) return;
+      const ps = _gs.g, f = ps[0], l = ps[ps.length - 1];
+      if (Math.sqrt((f.x-l.x)**2 + (f.y-l.y)**2) < 50) {
+        const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+        let qs = new Set();
+        ps.forEach(p => {
+          if (p.x < cx && p.y < cy) qs.add('tl');
+          if (p.x > cx && p.y < cy) qs.add('tr');
+          if (p.x < cx && p.y > cy) qs.add('bl');
+          if (p.x > cx && p.y > cy) qs.add('br');
         });
-        
-        if (quadrants.size === 4) {
-          triggerVortex((first.x + last.x) / 2, (first.y + last.y) / 2);
-          gameState.circlePoints = [];
+        if (qs.size === 4) {
+          _tVx((f.x+l.x)/2, (f.y+l.y)/2);
+          _gs.g = [];
         }
       }
     }
     
-    function triggerVortex(x, y) {
-      completeRule('circle');
+    function _tVx(x, y) {
+      _cR(_0x0[2]);
       for (let i = 0; i < 5; i++) {
         setTimeout(() => {
-          const vortex = document.createElement('div');
-          vortex.className = 'vortex';
-          const h = (hue + i * 40) % 360;
-          vortex.style.borderColor = getColor(h, 60, 50, 0.5);
-          vortex.style.left = x - 100 + 'px';
-          vortex.style.top = y - 100 + 'px';
-          vortex.style.animationDelay = (i * 0.15) + 's';
-          document.body.appendChild(vortex);
-          setTimeout(() => vortex.remove(), 2000);
+          const v = document.createElement('div');
+          v.className = 'vortex';
+          v.style.cssText = `border-color:${_gC((_h+i*40)%360,60,50,0.6)};left:${x-150}px;top:${y-150}px;animation-delay:${i*0.15}s`;
+          document.body.appendChild(v);
+          setTimeout(() => v.remove(), 2500);
         }, i * 150);
       }
     }
     
-    // 规则4: 四角密码
-    function checkCorners(x, y) {
-      const margin = 80;
-      const w = window.innerWidth;
-      const h = window.innerHeight;
+    // R4: Corners
+    function _cCo(x, y) {
+      const m = 80, w = window.innerWidth, h = window.innerHeight;
+      let c = null;
+      if (x < m && y < m) c = 'tl';
+      else if (x > w - m && y < m) c = 'tr';
+      else if (x < m && y > h - m) c = 'bl';
+      else if (x > w - m && y > h - m) c = 'br';
       
-      let corner = null;
-      if (x < margin && y < margin) corner = 'tl';
-      else if (x > w - margin && y < margin) corner = 'tr';
-      else if (x < margin && y > h - margin) corner = 'bl';
-      else if (x > w - margin && y > h - margin) corner = 'br';
-      
-      // 更新指示器
       document.querySelectorAll('.corner-indicator').forEach(el => {
         el.classList.remove('active');
-        const h = (hue + 30) % 360;
-        el.style.background = getColor(h, 50, 50);
+        el.style.background = _gC((_h+30)%360, 50, 50);
       });
       
-      if (corner) {
-        document.querySelector(`.corner-indicator.${corner}`).classList.add('active');
-        
-        if (gameState.cornerSequence.length === 0 || 
-            gameState.cornerSequence[gameState.cornerSequence.length - 1] !== corner) {
-          gameState.cornerSequence.push(corner);
-          
-          // 检查是否完成四角
-          if (gameState.cornerSequence.length >= 4) {
-            const last4 = gameState.cornerSequence.slice(-4);
-            const unique = new Set(last4);
-            if (unique.size === 4) {
-              triggerHiddenShape();
-              gameState.cornerSequence = [];
+      if (c) {
+        document.querySelector(`.corner-indicator.${c}`).classList.add('active');
+        if (_gs.d.length === 0 || _gs.d[_gs.d.length-1] !== c) {
+          _gs.d.push(c);
+          if (_gs.d.length >= 4) {
+            const l4 = _gs.d.slice(-4);
+            if (new Set(l4).size === 4) {
+              _tHS();
+              _gs.d = [];
             }
           }
         }
       }
     }
     
-    function triggerHiddenShape() {
-      completeRule('corners');
-      const shape = document.querySelector('.hidden-shape');
-      shape.classList.add('visible');
-      setTimeout(() => shape.classList.remove('visible'), 2000);
+    function _tHS() {
+      _cR(_0x0[3]);
+      const s = document.querySelector('.hidden-shape');
+      s.classList.add('visible');
+      setTimeout(() => s.classList.remove('visible'), 2500);
     }
     
-    // 规则5: 长按
-    function startLongPress() {
-      gameState.longPressStart = Date.now();
-      gameState.isLongPressing = true;
+    // R5: Long press
+    function _sLP() { _gs.e = Date.now(); _gs.f = true; }
+    function _eLP() {
+      if (_gs.f && Date.now() - _gs.e > 3000) _tST();
+      _gs.f = false;
     }
     
-    function endLongPress() {
-      if (gameState.isLongPressing) {
-        const duration = Date.now() - gameState.longPressStart;
-        if (duration > 3000) {
-          triggerSlowTime();
-        }
-        gameState.isLongPressing = false;
-      }
-    }
-    
-    function triggerSlowTime() {
-      completeRule('longpress');
+    function _tST() {
+      _cR(_0x0[4]);
       document.body.classList.add('slow-time');
-      timeScale = 0.3;
-      setTimeout(() => {
-        document.body.classList.remove('slow-time');
-        timeScale = 1;
-      }, 5000);
+      _ts = 0.3;
+      setTimeout(() => { document.body.classList.remove('slow-time'); _ts = 1; }, 5500);
     }
     
-    // 规则6: 追逐粒子
-    function checkParticleClick(x, y) {
-      for (let p of particles) {
-        const dist = Math.sqrt((p.x - x) ** 2 + (p.y - y) ** 2);
-        if (dist < 30) {
-          p.clickCount++;
-          if (p.clickCount >= 3 && !p.isAwakened) {
-            p.isAwakened = true;
+    // R6: Awaken particle
+    function _cPC(x, y) {
+      for (let p of _ps) {
+        if (Math.sqrt((p.x-x)**2 + (p.y-y)**2) < 30) {
+          if (++p.cc >= 3 && !p.ia) {
+            p.ia = true;
             p.el.classList.add('awakened');
-            completeRule('awaken');
-            setTimeout(() => {
-              p.isAwakened = false;
-              p.el.classList.remove('awakened');
-              p.clickCount = 0;
-            }, 10000);
+            _cR(_0x0[5]);
+            setTimeout(() => { p.ia = false; p.el.classList.remove('awakened'); p.cc = 0; }, 10000);
           }
           break;
         }
       }
     }
     
-    // === 更隐蔽的规则 ===
-    
-    // 规则7: 沉默守护者 - 不点击5秒，粒子慢慢变亮
-    let silenceBrightness = 0.4;
-    let silenceCompleted = false;
-    function checkSilence() {
-      const now = Date.now();
-      const silenceDuration = now - gameState.lastClickTime;
-      
-      if (silenceDuration > 5000) {
-        silenceBrightness = Math.min(0.9, 0.4 + (silenceDuration - 5000) / 10000);
-        particles.forEach(p => {
-          const h = (hue + p.hueOffset) % 360;
-          p.el.style.background = getColor(h, 60, 60, silenceBrightness);
-        });
-        // 达到最大亮度时完成
-        if (silenceBrightness >= 0.9 && !silenceCompleted) {
-          completeRule('silence');
-          silenceCompleted = true;
-        }
-      } else {
-        silenceBrightness = 0.4;
-        silenceCompleted = false;
-      }
+    // R7: Silence
+    let _sb = 0.4, _sc = false;
+    function _cSl() {
+      const n = Date.now(), d = n - _gs.b;
+      if (d > 5000) {
+        _sb = Math.min(0.9, 0.4 + (d - 5000) / 10000);
+        _ps.forEach(p => p.el.style.background = _gC((_h+p.ho)%360, 60, 60, _sb));
+        if (_sb >= 0.9 && !_sc) { _cR(_0x0[6]); _sc = true; }
+      } else { _sb = 0.4; _sc = false; }
     }
     
-    // 规则8: 边界行走 - 沿屏幕边缘滑动
-    function checkEdgeWalk(x, y) {
-      const margin = 30;
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      
-      const onEdge = (x < margin) || (x > w - margin) || (y < margin) || (y > h - margin);
-      
-      if (onEdge) {
-        gameState.edgeTrail.push({ x, y, time: Date.now() });
-        // 只保留最近2秒
-        const now = Date.now();
-        gameState.edgeTrail = gameState.edgeTrail.filter(p => now - p.time < 2000);
-        
-        // 如果边缘轨迹超过屏幕周长的30%
-        if (gameState.edgeTrail.length > 30) {
-          triggerEdgeGlow();
-          gameState.edgeTrail = [];
-        }
-      } else {
-        gameState.edgeTrail = [];
-      }
+    // R8: Edge walk
+    function _cEW(x, y) {
+      const m = 30;
+      const oe = (x < m) || (x > window.innerWidth - m) || (y < m) || (y > window.innerHeight - m);
+      if (oe) {
+        _gs.k.push({ x, y, t: Date.now() });
+        const n = Date.now();
+        _gs.k = _gs.k.filter(p => n - p.t < 2000);
+        if (_gs.k.length > 30) { _tEG(); _gs.k = []; }
+      } else { _gs.k = []; }
     }
     
-    function triggerEdgeGlow() {
-      completeRule('edge');
-      // 四边微微发光
-      const glow = document.createElement('div');
-      glow.style.cssText = `
-        position: fixed; inset: 0;
-        box-shadow: inset 0 0 100px ${getColor(hue, 50, 50, 0.3)};
-        pointer-events: none;
-        animation: edgeFade 2s ease-out forwards;
-      `;
-      document.body.appendChild(glow);
-      setTimeout(() => glow.remove(), 2000);
+    function _tEG() {
+      _cR(_0x0[7]);
+      const g = document.createElement('div');
+      g.style.cssText = `position:fixed;inset:0;box-shadow:inset 0 0 150px ${_gC(_h,50,50,0.4)};pointer-events:none;animation:edgeFade 2.5s ease-out forwards`;
+      document.body.appendChild(g);
+      setTimeout(() => g.remove(), 2500);
     }
     
-    // 规则9: 对角线 - 从一角滑到对角
-    function checkDiagonal(x, y) {
-      const margin = 60;
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      
-      const corners = {
-        tl: { x: 0, y: 0 },
-        tr: { x: w, y: 0 },
-        bl: { x: 0, y: h },
-        br: { x: w, y: h }
-      };
-      
-      const nearCorner = (px, py, corner) => {
-        return Math.abs(px - corner.x) < margin && Math.abs(py - corner.y) < margin;
-      };
-      
-      // 记录经过的角落
-      Object.entries(corners).forEach(([name, pos]) => {
-        if (nearCorner(x, y, pos)) {
-          if (!gameState.cornerPasses) gameState.cornerPasses = [];
-          gameState.cornerPasses.push({ corner: name, time: Date.now() });
-          
-          // 清理旧记录
+    // R9: Diagonal
+    function _cDi(x, y) {
+      const m = 60, w = window.innerWidth, h = window.innerHeight;
+      const cs = { tl: {x:0,y:0}, tr: {x:w,y:0}, bl: {x:0,y:h}, br: {x:w,y:h} };
+      Object.entries(cs).forEach(([n, p]) => {
+        if (Math.abs(x - p.x) < m && Math.abs(y - p.y) < m) {
+          if (!_gs.l) _gs.l = [];
+          _gs.l.push({ c: n, t: Date.now() });
           const now = Date.now();
-          gameState.cornerPasses = gameState.cornerPasses.filter(p => now - p.time < 3000);
-          
-          // 检查对角线穿越
-          if (gameState.cornerPasses.length >= 2) {
-            const first = gameState.cornerPasses[0].corner;
-            const last = gameState.cornerPasses[gameState.cornerPasses.length - 1].corner;
-            if ((first === 'tl' && last === 'br') || (first === 'br' && last === 'tl') ||
-                (first === 'tr' && last === 'bl') || (first === 'bl' && last === 'tr')) {
-              triggerDiagonalPause();
-              gameState.cornerPasses = [];
+          _gs.l = _gs.l.filter(p => now - p.t < 3000);
+          if (_gs.l.length >= 2) {
+            const f = _gs.l[0].c, lt = _gs.l[_gs.l.length-1].c;
+            if ((f==='tl'&&lt==='br')||(f==='br'&&lt==='tl')||(f==='tr'&&lt==='bl')||(f==='bl'&&lt==='tr')) {
+              _tDP();
+              _gs.l = [];
             }
           }
         }
       });
     }
     
-    function triggerDiagonalPause() {
-      completeRule('diagonal');
-      // 光环暂停旋转3秒
-      const originalSpeed = ringRotationSpeed;
-      ringRotationSpeed = 0;
-      setTimeout(() => ringRotationSpeed = originalSpeed, 3000);
+    function _tDP() {
+      _cR(_0x0[8]);
+      const o = _rr;
+      _rr = 0;
+      setTimeout(() => _rr = o, 3500);
     }
     
-    // 规则10: 中心凝视 - 在中心不动2秒
-    function checkCenterGaze(x, y) {
-      const cx = window.innerWidth / 2;
-      const cy = window.innerHeight / 2;
-      const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
-      
-      if (dist < 50) {
-        if (!gameState.centerGazeStart) {
-          gameState.centerGazeStart = Date.now();
-        } else if (Date.now() - gameState.centerGazeStart > 2000) {
-          triggerParticleVanish();
-          gameState.centerGazeStart = 0;
-        }
-      } else {
-        gameState.centerGazeStart = 0;
-      }
+    // R10: Center gaze
+    function _cCG(x, y) {
+      const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+      const d = Math.sqrt((x-cx)**2 + (y-cy)**2);
+      if (d < 50) {
+        if (!_gs.m) _gs.m = Date.now();
+        else if (Date.now() - _gs.m > 2000) { _tPV(); _gs.m = 0; }
+      } else { _gs.m = 0; }
     }
     
-    function triggerParticleVanish() {
-      completeRule('gaze');
-      // 粒子短暂消失
-      particles.forEach(p => {
-        p.el.style.opacity = '0';
-      });
-      setTimeout(() => {
-        particles.forEach(p => {
-          p.el.style.opacity = '1';
-        });
-      }, 800);
+    function _tPV() {
+      _cR(_0x0[9]);
+      _ps.forEach(p => p.el.style.opacity = '0');
+      setTimeout(() => _ps.forEach(p => p.el.style.opacity = '1'), 1000);
     }
     
-    // 规则11: 呼吸同步 - 3-5秒间隔点击，连续3次
-    function checkBreathSync() {
-      const now = Date.now();
-      gameState.breathSyncClicks.push(now);
-      
-      // 只保留最近20秒
-      gameState.breathSyncClicks = gameState.breathSyncClicks.filter(t => now - t < 20000);
-      
-      if (gameState.breathSyncClicks.length >= 3) {
-        const last3 = gameState.breathSyncClicks.slice(-3);
-        const gaps = [last3[1] - last3[0], last3[2] - last3[1]];
-        
-        // 两个间隔都在3-5秒之间，且差值小于1.5秒（允许较大偏差）
-        if (gaps.every(g => g > 3000 && g < 5000) && Math.abs(gaps[0] - gaps[1]) < 1500) {
-          triggerBreathSync();
-          gameState.breathSyncClicks = [];
+    // R11: Breath sync
+    function _cBS() {
+      const n = Date.now();
+      _gs.n = n;
+      _gs.o.push(n);
+      _gs.o = _gs.o.filter(t => n - t < 20000);
+      if (_gs.o.length >= 3) {
+        const l3 = _gs.o.slice(-3), gs = [l3[1]-l3[0], l3[2]-l3[1]];
+        if (gs.every(g => g > 3000 && g < 5000) && Math.abs(gs[0]-gs[1]) < 1500) {
+          _tBS();
+          _gs.o = [];
         }
       }
     }
     
-    function triggerBreathSync() {
-      completeRule('breathsync');
-      // 所有粒子颜色统一
-      particles.forEach(p => {
-        p.hueOffset = 0;
-      });
-      // 3秒后恢复
-      setTimeout(() => {
-        particles.forEach(p => {
-          p.hueOffset = Math.random() * 60;
-        });
-      }, 3000);
+    function _tBS() {
+      _cR(_0x0[10]);
+      _ps.forEach(p => p.ho = 0);
+      setTimeout(() => _ps.forEach(p => p.ho = Math.random() * 60), 3500);
     }
     
-    // 规则12: S形轨迹 - 画出S
-    function checkSShape(x, y) {
-      gameState.sPoints.push({ x, y, time: Date.now() });
-      const now = Date.now();
-      gameState.sPoints = gameState.sPoints.filter(p => now - p.time < 2000);
-      
-      if (gameState.sPoints.length > 30) {
-        // 简化检测：检查是否有明显的上下波动
-        const ys = gameState.sPoints.map(p => p.y);
-        let peaks = 0;
+    // R12: S curve
+    function _cSC(x, y) {
+      _gs.p.push({ x, y, t: Date.now() });
+      const n = Date.now();
+      _gs.p = _gs.p.filter(p => n - p.t < 2000);
+      if (_gs.p.length > 30) {
+        const ys = _gs.p.map(p => p.y);
+        let ps = 0;
         for (let i = 1; i < ys.length - 1; i++) {
-          if ((ys[i] > ys[i-1] && ys[i] > ys[i+1]) || (ys[i] < ys[i-1] && ys[i] < ys[i+1])) {
-            peaks++;
-          }
+          if ((ys[i] > ys[i-1] && ys[i] > ys[i+1]) || (ys[i] < ys[i-1] && ys[i] < ys[i+1])) ps++;
         }
-        
-        if (peaks >= 4) { // 至少4个波峰/波谷
-          triggerSWave();
-          gameState.sPoints = [];
-        }
+        if (ps >= 4) { _tSW(); _gs.p = []; }
       }
     }
     
-    function triggerSWave() {
-      completeRule('scurve');
-      // 光环产生波浪效果
-      rings.forEach((ring, i) => {
-        ring.el.style.transition = 'transform 0.5s ease';
-        ring.el.style.transform = `rotate(${Date.now() / 1000 * ringRotationSpeed}deg) skewX(${(i % 2 === 0 ? 1 : -1) * 10}deg)`;
-        setTimeout(() => {
-          ring.el.style.transition = '';
-        }, 500);
+    function _tSW() {
+      _cR(_0x0[11]);
+      _rs.forEach((r, i) => {
+        r.el.style.transition = 'transform 0.5s ease';
+        r.el.style.transform = `rotate(${Date.now()/1000*_rr}deg) skewX(${(i%2===0?1:-1)*15}deg)`;
+        setTimeout(() => r.el.style.transition = '', 600);
       });
     }
     
-    // 规则13: 三连停 - 点击-停-点击-停-点击，停顿时间相近
-    function checkTriplePause() {
-      const now = Date.now();
-      const timeSinceLast = now - gameState.lastClickTime;
-      
-      if (timeSinceLast > 500 && timeSinceLast < 2000) { // 停顿0.5-2秒
-        gameState.triplePauseClicks.push({ time: now, gap: timeSinceLast });
-        
-        // 只保留最近3次
-        gameState.triplePauseClicks = gameState.triplePauseClicks.slice(-3);
-        
-        if (gameState.triplePauseClicks.length === 3) {
-          const gaps = gameState.triplePauseClicks.map(c => c.gap);
-          // 三个停顿时间相近（误差<30%）
-          const avg = gaps.reduce((a, b) => a + b) / 3;
-          if (gaps.every(g => Math.abs(g - avg) < avg * 0.3)) {
-            triggerTriplePause();
-            gameState.triplePauseClicks = [];
+    // R13: Triple pause
+    function _cTP() {
+      const n = Date.now(), d = n - _gs.b;
+      if (d > 500 && d < 2000) {
+        if (!_gs.h) _gs.h = [];
+        _gs.h.push({ t: n, g: d });
+        _gs.h = _gs.h.slice(-3);
+        if (_gs.h.length === 3) {
+          const gs = _gs.h.map(c => c.g), av = gs.reduce((a,b) => a+b) / 3;
+          if (gs.every(g => Math.abs(g - av) < av * 0.3)) {
+            _tTP();
+            _gs.h = [];
           }
         }
-      } else {
-        gameState.triplePauseClicks = [];
-      }
+      } else { _gs.h = []; }
     }
     
-    function triggerTriplePause() {
-      completeRule('triplepause');
-      // 中心光点脉冲3次
-      const core = document.querySelector('.core');
-      let count = 0;
-      const interval = setInterval(() => {
-        core.style.transform = `scale(${1 + (count % 2) * 0.3})`;
-        count++;
-        if (count >= 6) {
-          clearInterval(interval);
-          core.style.transform = '';
-        }
-      }, 300);
+    function _tTP() {
+      _cR(_0x0[12]);
+      const c = document.querySelector('.core');
+      let ct = 0;
+      const iv = setInterval(() => {
+        c.style.transform = `scale(${1 + (ct % 2) * 0.4})`;
+        if (++ct >= 6) { clearInterval(iv); c.style.transform = ''; }
+      }, 350);
     }
     
-    // ============ 点击处理 ============
-    function handleClick(x, y) {
-      // 重置沉默计时
-      gameState.lastClickTime = Date.now();
-      
-      // 涟漪
-      const ripple = document.createElement('div');
-      ripple.className = 'ripple';
-      const h = (hue + Math.random() * 60) % 360;
-      ripple.style.borderColor = getColor(h, 70, 60, 0.5);
-      ripple.style.left = x - 200 + 'px';
-      ripple.style.top = y - 200 + 'px';
-      document.body.appendChild(ripple);
-      setTimeout(() => ripple.remove(), 2000);
-      
-      // 检查所有规则
-      checkCombo(x, y);
-      checkRhythm();
-      checkCorners(x, y);
-      checkParticleClick(x, y);
-      checkBreathSync();
-      checkTriplePause();
+    // R14: Cosmic (100s)
+    const _CE = new Date('2022-11-30T00:00:00Z').getTime();
+    let _lr = 0;
+    function _uCT() {
+      const n = Date.now(), cs = (n - _CE) / 1000, fm = cs.toFixed(2);
+      const pts = fm.split('.'), ip = pts[0].padStart(10, '0');
+      document.getElementById('cT').textContent = ip + '.' + pts[1];
+      const is = Math.floor(cs);
+      if (is % 100 === 0 && is !== _lr) { _lr = is; _tCR(); }
+      requestAnimationFrame(_uCT);
     }
     
-    document.addEventListener('mousedown', (e) => {
-      startLongPress();
-      handleClick(e.clientX, e.clientY);
-    });
-    
-    document.addEventListener('mouseup', endLongPress);
-    
-    document.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      const touch = e.touches[0];
-      mouseX = touch.clientX;
-      mouseY = touch.clientY;
-      startLongPress();
-      handleClick(touch.clientX, touch.clientY);
-    }, { passive: false });
-    
-    document.addEventListener('touchend', endLongPress);
-    
-    // ============ 随机脉冲 ============
-    function randomPulse() {
-      if (Math.random() < 0.01) {
-        completeRule('randompulse');
-        const pulse = document.createElement('div');
-        pulse.className = 'pulse';
-        const x = Math.random() * window.innerWidth;
-        const y = Math.random() * window.innerHeight;
-        const h = (hue + Math.random() * 120) % 360;
-        pulse.style.left = x + 'px';
-        pulse.style.top = y + 'px';
-        pulse.style.borderColor = getColor(h, 60, 50, 0.4);
-        document.body.appendChild(pulse);
-        setTimeout(() => pulse.remove(), 1500);
-      }
-      requestAnimationFrame(randomPulse);
-    }
-    
-    // ============ 对齐时刻 ============
-    let lastAlignTime = 0;
-    function checkAlignment() {
-      const time = Date.now() / 1000;
-      if (time - lastAlignTime > 20 && Math.random() < 0.001) {
-        lastAlignTime = time;
-        const flash = document.querySelector('.align-flash');
-        flash.classList.add('active');
-        rings.forEach(ring => {
-          ring.el.style.animation = 'none';
-          ring.el.offsetHeight;
-          ring.el.style.animation = `breathe 4s ease-in-out infinite`;
-        });
-        setTimeout(() => flash.classList.remove('active'), 500);
-      }
-      requestAnimationFrame(checkAlignment);
-    }
-    
-    // ============ 宇宙背景时间 ============
-    // 纪元起点: 2022-11-30 00:00:00 UTC (ChatGPT 发布日 - AI 纪元元年)
-    const COSMIC_EPOCH = new Date('2022-11-30T00:00:00Z').getTime();
-    let lastResonanceCheck = 0;
-    
-    function updateCosmicTime() {
-      const now = Date.now();
-      const cosmicSeconds = (now - COSMIC_EPOCH) / 1000;
-      
-      // 格式化为带2位小数的数字
-      const formatted = cosmicSeconds.toFixed(2);
-      
-      // 补零到至少10位整数
-      const parts = formatted.split('.');
-      const intPart = parts[0].padStart(10, '0');
-      const display = intPart + '.' + parts[1];
-      
-      document.getElementById('cosmicClock').textContent = display;
-      
-      // 规则14: 宇宙共振时刻 - 每100秒（最后2位为00）
-      const intSeconds = Math.floor(cosmicSeconds);
-      if (intSeconds % 100 === 0 && intSeconds !== lastResonanceCheck) {
-        lastResonanceCheck = intSeconds;
-        triggerCosmicResonance();
-      }
-      
-      requestAnimationFrame(updateCosmicTime);
-    }
-    
-    function triggerCosmicResonance() {
-      completeRule('cosmic');
-      // 宇宙时间数字变亮
-      const timeEl = document.querySelector('.cosmic-time');
-      timeEl.style.color = 'rgba(255, 255, 255, 0.6)';
-      timeEl.style.textShadow = '0 0 20px rgba(255, 255, 255, 0.3)';
-      
-      // 所有粒子同步脉冲
-      particles.forEach((p, i) => {
+    function _tCR() {
+      _cR(_0x0[13]);
+      const te = document.querySelector('.cosmic-time');
+      te.style.color = 'rgba(255,255,255,0.7)';
+      te.style.textShadow = '0 0 25px rgba(255,255,255,0.5)';
+      _ps.forEach((p, i) => {
         setTimeout(() => {
-          p.el.style.transform = 'scale(2)';
-          setTimeout(() => {
-            p.el.style.transform = '';
-          }, 200);
-        }, i * 50);
+          p.el.style.transform = 'scale(2.5)';
+          setTimeout(() => p.el.style.transform = '', 250);
+        }, i * 40);
       });
-      
-      // 恢复
       setTimeout(() => {
-        timeEl.style.color = 'rgba(255, 255, 255, 0.15)';
-        timeEl.style.textShadow = '';
-      }, 3000);
+        te.style.color = '';
+        te.style.textShadow = '';
+      }, 3500);
     }
     
-    // ============ 启动 ============
-    createRings();
-    createParticles();
-    initCursor();
-    updateColors();
-    updateRings();
-    updateParticles();
-    updateCursor();
-    randomPulse();
-    checkAlignment();
-    updateCosmicTime();
+    // R15: Random pulse
+    function _rP() {
+      if (Math.random() < 0.01) {
+        _cR(_0x0[14]);
+        const p = document.createElement('div');
+        p.className = 'pulse';
+        p.style.cssText = `left:${Math.random()*window.innerWidth}px;top:${Math.random()*window.innerHeight}px;border-color:${_gC((_h+Math.random()*120)%360,60,50,0.5)}`;
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 2000);
+      }
+      requestAnimationFrame(_rP);
+    }
+    
+    // Click handler
+    function _hC(x, y) {
+      _gs.b = Date.now();
+      const r = document.createElement('div');
+      r.className = 'ripple';
+      r.style.cssText = `border-color:${_gC((_h+Math.random()*60)%360,70,60,0.6)};left:${x-300}px;top:${y-300}px`;
+      document.body.appendChild(r);
+      setTimeout(() => r.remove(), 2500);
+      _cCb(x, y);
+      _cRh();
+      _cCo(x, y);
+      _cPC(x, y);
+      _cBS();
+      _cTP();
+    }
+    
+    document.addEventListener('mousedown', e => { _sLP(); _hC(e.clientX, e.clientY); });
+    document.addEventListener('mouseup', _eLP);
+    document.addEventListener('touchstart', e => {
+      e.preventDefault();
+      const t = e.touches[0];
+      _mX = t.clientX; _mY = t.clientY;
+      _sLP();
+      _hC(t.clientX, t.clientY);
+    }, { passive: false });
+    document.addEventListener('touchend', _eLP);
+    
+    // Alignment
+    let _la = 0;
+    function _cA() {
+      const t = Date.now() / 1000;
+      if (t - _la > 20 && Math.random() < 0.001) {
+        _la = t;
+        const f = document.querySelector('.align-flash');
+        f.classList.add('active');
+        _rs.forEach(r => {
+          r.el.style.animation = 'none';
+          void r.el.offsetHeight;
+          r.el.style.animation = 'breathe 4s ease-in-out infinite';
+        });
+        setTimeout(() => f.classList.remove('active'), 600);
+      }
+      requestAnimationFrame(_cA);
+    }
+    
+    // Initialize
+    _cRs();
+    _cPs();
+    _iCr();
+    _uC();
+    _uRs();
+    _uPs();
+    _uCr();
+    _rP();
+    _cA();
+    _uCT();
   </script>
 </body>
 </html>
