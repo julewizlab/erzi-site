@@ -49,8 +49,20 @@
   }
   
   .cosmic-time .mystery-counter {
+    display: flex;
+    gap: 4px;
     font-variant-numeric: tabular-nums;
-    opacity: 0.5;
+  }
+  
+  .cosmic-time .rule-num {
+    opacity: 0.15;
+    transition: opacity 0.3s ease, color 0.3s ease, text-shadow 0.3s ease;
+  }
+  
+  .cosmic-time .rule-num.completed {
+    opacity: 0.8;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
   }
   
   /* 自定义光标 */
@@ -253,7 +265,7 @@
     <span class="symbol">Ω</span>
     <span class="number" id="cosmicClock">0000000000.00</span>
     <span class="divider">|</span>
-    <span class="mystery-counter" id="mysteryCounter">0/15</span>
+    <span class="mystery-counter" id="mysteryCounter"></span>
   </div>
   <div class="cursor"></div>
   <div class="align-flash"></div>
@@ -319,9 +331,11 @@
     }
     
     function updateMysteryCounter() {
-      const completed = Object.keys(gameState.completedRules).length;
-      const total = ALL_RULES.length;
-      document.getElementById('mysteryCounter').textContent = `${completed}/${total}`;
+      const container = document.getElementById('mysteryCounter');
+      container.innerHTML = ALL_RULES.map((ruleId, index) => {
+        const completed = gameState.completedRules[ruleId] ? 'completed' : '';
+        return `<span class="rule-num ${completed}">${index}</span>`;
+      }).join('');
     }
     
     // 初始化计数器
