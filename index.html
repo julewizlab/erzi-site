@@ -20,7 +20,7 @@
   /* 宇宙背景时间 */
   .cosmic-time {
     position: fixed;
-    bottom: 20px;
+    top: 20px;
     left: 50%;
     transform: translateX(-50%);
     font-family: 'JetBrains Mono', 'Courier New', monospace;
@@ -34,6 +34,21 @@
     gap: 8px;
   }
   
+  .mystery-counter {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.15);
+    z-index: 100;
+    pointer-events: none;
+    display: flex;
+    gap: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  
   .cosmic-time .symbol {
     font-size: 14px;
     opacity: 0.6;
@@ -43,23 +58,12 @@
     font-variant-numeric: tabular-nums;
   }
   
-  .cosmic-time .divider {
-    opacity: 0.3;
-    margin: 0 12px;
-  }
-  
-  .cosmic-time .mystery-counter {
-    display: flex;
-    gap: 4px;
-    font-variant-numeric: tabular-nums;
-  }
-  
-  .cosmic-time .rule-num {
+  .mystery-counter .rule-num {
     opacity: 0.15;
     transition: opacity 0.3s ease, color 0.3s ease, text-shadow 0.3s ease;
   }
   
-  .cosmic-time .rule-num.completed {
+  .mystery-counter .rule-num.completed {
     opacity: 0.8;
     color: rgba(255, 255, 255, 0.9);
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
@@ -264,9 +268,8 @@
   <div class="cosmic-time">
     <span class="symbol">Ω</span>
     <span class="number" id="cosmicClock">0000000000.00</span>
-    <span class="divider">|</span>
-    <span class="mystery-counter" id="mysteryCounter"></span>
   </div>
+  <div class="mystery-counter" id="mysteryCounter"></div>
   <div class="cursor"></div>
   <div class="align-flash"></div>
   <div class="hidden-shape">
