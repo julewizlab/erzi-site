@@ -43,6 +43,16 @@
     font-variant-numeric: tabular-nums;
   }
   
+  .cosmic-time .divider {
+    opacity: 0.3;
+    margin: 0 12px;
+  }
+  
+  .cosmic-time .mystery-counter {
+    font-variant-numeric: tabular-nums;
+    opacity: 0.5;
+  }
+  
   /* 自定义光标 */
   .cursor {
     position: fixed;
@@ -242,6 +252,8 @@
   <div class="cosmic-time">
     <span class="symbol">Ω</span>
     <span class="number" id="cosmicClock">0000000000.00</span>
+    <span class="divider">|</span>
+    <span class="mystery-counter" id="mysteryCounter">0/15</span>
   </div>
   <div class="cursor"></div>
   <div class="align-flash"></div>
@@ -280,15 +292,40 @@
       awakenedParticle: null,
       rhythmHistory: [],
       lastRhythmTime: 0,
-      // 新增隐蔽规则状态
       silenceStart: Date.now(),
       edgeTrail: [],
       lastMoveTime: 0,
       centerGazeStart: 0,
       breathSyncClicks: [],
       sPoints: [],
-      triplePauseClicks: []
+      triplePauseClicks: [],
+      // 规则完成状态
+      completedRules: JSON.parse(localStorage.getItem('completedRules') || '{}')
     };
+    
+    // 所有规则ID（共15个）
+    const ALL_RULES = [
+      'combo', 'rhythm', 'circle', 'corners', 'longpress', 'awaken',
+      'silence', 'edge', 'diagonal', 'gaze', 'breathsync', 'scurve', 'triplepause',
+      'cosmic', 'randompulse'
+    ];
+    
+    function completeRule(ruleId) {
+      if (!gameState.completedRules[ruleId]) {
+        gameState.completedRules[ruleId] = true;
+        localStorage.setItem('completedRules', JSON.stringify(gameState.completedRules));
+        updateMysteryCounter();
+      }
+    }
+    
+    function updateMysteryCounter() {
+      const completed = Object.keys(gameState.completedRules).length;
+      const total = ALL_RULES.length;
+      document.getElementById('mysteryCounter').textContent = `${completed}/${total}`;
+    }
+    
+    // 初始化计数器
+    updateMysteryCounter();
     
     // ============ 颜色更新 ============
     function updateColors() {
@@ -518,6 +555,7 @@
     }
     
     function triggerComboBurst(x, y) {
+      completeRule('combo');
       ringRotationSpeed = 8;
       setTimeout(() => ringRotationSpeed = 2, 2000);
       
@@ -560,6 +598,7 @@
     }
     
     function triggerRhythmEffect() {
+      completeRule('rhythm');
       // 粒子聚拢到中心
       particles.forEach(p => {
         p.attractionPoint = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
@@ -597,6 +636,7 @@
     }
     
     function triggerVortex(x, y) {
+      completeRule('circle');
       for (let i = 0; i < 5; i++) {
         setTimeout(() => {
           const vortex = document.createElement('div');
@@ -652,6 +692,7 @@
     }
     
     function triggerHiddenShape() {
+      completeRule('corners');
       const shape = document.querySelector('.hidden-shape');
       shape.classList.add('visible');
       setTimeout(() => shape.classList.remove('visible'), 2000);
@@ -674,6 +715,7 @@
     }
     
     function triggerSlowTime() {
+      completeRule('longpress');
       document.body.classList.add('slow-time');
       timeScale = 0.3;
       setTimeout(() => {
@@ -691,6 +733,7 @@
           if (p.clickCount >= 3 && !p.isAwakened) {
             p.isAwakened = true;
             p.el.classList.add('awakened');
+            completeRule('awaken');
             setTimeout(() => {
               p.isAwakened = false;
               p.el.classList.remove('awakened');
@@ -706,6 +749,7 @@
     
     // 规则7: 沉默守护者 - 不点击5秒，粒子慢慢变亮
     let silenceBrightness = 0.4;
+    let silenceCompleted = false;
     function checkSilence() {
       const now = Date.now();
       const silenceDuration = now - gameState.lastClickTime;
@@ -716,8 +760,14 @@
           const h = (hue + p.hueOffset) % 360;
           p.el.style.background = getColor(h, 60, 60, silenceBrightness);
         });
+        // 达到最大亮度时完成
+        if (silenceBrightness >= 0.9 && !silenceCompleted) {
+          completeRule('silence');
+          silenceCompleted = true;
+        }
       } else {
         silenceBrightness = 0.4;
+        silenceCompleted = false;
       }
     }
     
@@ -746,6 +796,7 @@
     }
     
     function triggerEdgeGlow() {
+      completeRule('edge');
       // 四边微微发光
       const glow = document.createElement('div');
       glow.style.cssText = `
@@ -800,6 +851,7 @@
     }
     
     function triggerDiagonalPause() {
+      completeRule('diagonal');
       // 光环暂停旋转3秒
       const originalSpeed = ringRotationSpeed;
       ringRotationSpeed = 0;
@@ -825,6 +877,7 @@
     }
     
     function triggerParticleVanish() {
+      completeRule('gaze');
       // 粒子短暂消失
       particles.forEach(p => {
         p.el.style.opacity = '0';
@@ -857,6 +910,7 @@
     }
     
     function triggerBreathSync() {
+      completeRule('breathsync');
       // 所有粒子颜色统一
       particles.forEach(p => {
         p.hueOffset = 0;
@@ -893,6 +947,7 @@
     }
     
     function triggerSWave() {
+      completeRule('scurve');
       // 光环产生波浪效果
       rings.forEach((ring, i) => {
         ring.el.style.transition = 'transform 0.5s ease';
@@ -929,6 +984,7 @@
     }
     
     function triggerTriplePause() {
+      completeRule('triplepause');
       // 中心光点脉冲3次
       const core = document.querySelector('.core');
       let count = 0;
@@ -987,6 +1043,7 @@
     // ============ 随机脉冲 ============
     function randomPulse() {
       if (Math.random() < 0.01) {
+        completeRule('randompulse');
         const pulse = document.createElement('div');
         pulse.className = 'pulse';
         const x = Math.random() * window.innerWidth;
@@ -1049,6 +1106,7 @@
     }
     
     function triggerCosmicResonance() {
+      completeRule('cosmic');
       // 宇宙时间数字变亮
       const timeEl = document.querySelector('.cosmic-time');
       timeEl.style.color = 'rgba(255, 255, 255, 0.6)';
