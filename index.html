@@ -588,25 +588,32 @@
       }
     }
     
-    // 规则2: 节奏系统
+    // 规则2: 节奏系统 - 连续3次点击间隔相近（稳定节奏）
     function checkRhythm() {
       const now = Date.now();
       const timeSinceLast = now - gameState.lastRhythmTime;
       gameState.lastRhythmTime = now;
       
-      if (timeSinceLast > 100 && timeSinceLast < 500) {
-        gameState.rhythmHistory.push(timeSinceLast < 250 ? 'fast' : 'slow');
+      // 间隔在200-600ms之间认为是有效点击
+      if (timeSinceLast > 200 && timeSinceLast < 600) {
+        gameState.rhythmHistory.push(timeSinceLast);
         if (gameState.rhythmHistory.length > 5) {
           gameState.rhythmHistory.shift();
         }
         
-        // 检查 "快-快-慢" 模式
-        if (gameState.rhythmHistory.length >= 3 &&
-            gameState.rhythmHistory.slice(-3).join('-') === 'fast-fast-slow') {
-          triggerRhythmEffect();
-          gameState.rhythmHistory = [];
+        // 检查最近3次点击间隔相近（误差<40%）
+        if (gameState.rhythmHistory.length >= 3) {
+          const last3 = gameState.rhythmHistory.slice(-3);
+          const avg = last3.reduce((a, b) => a + b) / 3;
+          const allClose = last3.every(g => Math.abs(g - avg) < avg * 0.4);
+          
+          if (allClose) {
+            triggerRhythmEffect();
+            gameState.rhythmHistory = [];
+          }
         }
-      } else {
+      } else if (timeSinceLast > 1000) {
+        // 超过1秒未点击，重置
         gameState.rhythmHistory = [];
       }
     }
@@ -903,20 +910,20 @@
       }, 800);
     }
     
-    // 规则11: 呼吸同步 - 4秒一次点击，连续3次
+    // 规则11: 呼吸同步 - 3-5秒间隔点击，连续3次
     function checkBreathSync() {
       const now = Date.now();
       gameState.breathSyncClicks.push(now);
       
-      // 只保留最近15秒
-      gameState.breathSyncClicks = gameState.breathSyncClicks.filter(t => now - t < 15000);
+      // 只保留最近20秒
+      gameState.breathSyncClicks = gameState.breathSyncClicks.filter(t => now - t < 20000);
       
       if (gameState.breathSyncClicks.length >= 3) {
         const last3 = gameState.breathSyncClicks.slice(-3);
         const gaps = [last3[1] - last3[0], last3[2] - last3[1]];
         
-        // 两个间隔都在3.5-4.5秒之间，且差值小于0.5秒
-        if (gaps.every(g => g > 3500 && g < 4500) && Math.abs(gaps[0] - gaps[1]) < 500) {
+        // 两个间隔都在3-5秒之间，且差值小于1.5秒（允许较大偏差）
+        if (gaps.every(g => g > 3000 && g < 5000) && Math.abs(gaps[0] - gaps[1]) < 1500) {
           triggerBreathSync();
           gameState.breathSyncClicks = [];
         }
@@ -1109,9 +1116,9 @@
       
       document.getElementById('cosmicClock').textContent = display;
       
-      // 规则14: 宇宙共振时刻 - 每1000秒（最后3位为000）
+      // 规则14: 宇宙共振时刻 - 每100秒（最后2位为00）
       const intSeconds = Math.floor(cosmicSeconds);
-      if (intSeconds % 1000 === 0 && intSeconds !== lastResonanceCheck) {
+      if (intSeconds % 100 === 0 && intSeconds !== lastResonanceCheck) {
         lastResonanceCheck = intSeconds;
         triggerCosmicResonance();
       }
