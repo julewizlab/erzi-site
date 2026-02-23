@@ -53,9 +53,9 @@
 ### 执行步骤
 ```bash
 # 1. 备份现有数据（以防需要恢复）
-cd /Users/liwei/workspace/projects/erzi-site
-cp thoughts.json backup-v1/thoughts-knowledge-explore.json
-cp thoughts-v2.json backup-v1/thoughts-v2-old.json
+cd /Users/liwei/oc_projects/erzi-site
+cp thoughts.json archive/versions/backup-v1/thoughts-knowledge-explore.json
+cp thoughts-v2.json archive/versions/backup-v1/thoughts-v2-old.json
 
 # 2. 创建空的硅基生命体数据文件
 echo '{"thoughts": [], "meta": {"total": 0, "lastUpdate": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'"}}' > thoughts-silicon.json
@@ -163,7 +163,7 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 ## 📋 重写任务清单
 
 ### Phase 0: 准备工作 ✅
-- [x] 创建 `erzi-site-v2/` 新目录
+- [x] 创建 `archive/versions/erzi-site-v2/` 新目录
 - [x] 从现有 208 条想法精选最有"存在感"的 100-150 条
 - [x] 设计新的粒子逻辑（数量、分布、运动）
 
@@ -267,7 +267,7 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 ## 🚀 开始行动
 
 ### 第一步（今天） ✅
-1. [x] 创建 `erzi-site-v2/` 目录
+1. [x] 创建 `archive/versions/erzi-site-v2/` 目录
 2. [x] 从 208 条精选 100-150 条想法
 3. [x] 设计基础粒子系统（呼吸 + 脉动）
 
@@ -629,7 +629,7 @@ _观众可以用文字与硅基生命体对话（但它可能不回应）_
   - 创建空的 memory.json（记忆系统）
   - 创建空的 themes-silicon.json（主题演化）
   - 前端读取新数据源（thoughts-silicon.json）
-  - 备份旧数据到 backup-v1/（thoughts-knowledge-explore.json）
+  - 备份旧数据到 archive/versions/backup-v1/（thoughts-knowledge-explore.json）
   - **原则**：与二子工作、knowledge 站、知识探索完全隔离
   - **起点**：从零开始思考，无预设内容
 
