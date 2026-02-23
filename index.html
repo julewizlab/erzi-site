@@ -80,18 +80,14 @@
   @media (max-width: 768px) {
     .cosmic-time { font-size: 10px !important; top: calc(var(--space-3) + env(safe-area-inset-top)) !important; }
     .mystery-counter { font-size: 9px !important; gap: var(--space-1) !important; bottom: calc(var(--space-3) + env(safe-area-inset-bottom)) !important; }
-    .era-chip { right: calc(var(--space-3) + env(safe-area-inset-right)) !important; top: calc(var(--space-3) + env(safe-area-inset-top)) !important; font-size: 10px !important; }
-    .signal-feed { right: calc(var(--space-3) + env(safe-area-inset-right)) !important; top: calc(var(--space-7) + env(safe-area-inset-top)) !important; font-size: 10px !important; max-width: min(74vw, 250px) !important; }
+    .era-glyph { right: calc(var(--space-3) + env(safe-area-inset-right)) !important; top: calc(var(--space-3) + env(safe-area-inset-top)) !important; width: 22px !important; height: 22px !important; }
     .cursor { display: none !important; }
     .cursor-trail { display: none !important; }
-    .signal-feed { line-height: 1.45 !important; }
   }
 
   @media (hover: none) and (pointer: coarse) {
     .cosmic-time,
-    .mystery-counter,
-    .era-chip { backdrop-filter: blur(10px); }
-    .signal-feed { backdrop-filter: blur(8px); }
+    .mystery-counter { text-shadow: 0 0 10px rgba(120, 178, 236, 0.24); }
   }
   
   .cosmic-time {
@@ -108,12 +104,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    padding: var(--space-3) var(--space-4);
-    border-radius: var(--radius-pill);
-    background: var(--glass-bg);
-    border: 1px solid var(--line-soft);
-    box-shadow: inset 0 1px 0 rgba(198, 224, 255, 0.16), 0 12px 44px rgba(0, 0, 0, 0.42);
-    backdrop-filter: blur(var(--hud-blur));
+    padding: 0;
     animation: cosmicBreathe 6s var(--ease-soft) infinite;
   }
 
@@ -140,57 +131,82 @@
     display: flex;
     gap: var(--space-1);
     font-variant-numeric: tabular-nums;
-    padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-pill);
-    background: var(--glass-bg);
-    border: 1px solid var(--line-soft);
-    box-shadow: inset 0 1px 0 rgba(198, 224, 255, 0.12), 0 8px 32px rgba(0, 0, 0, 0.36);
-    backdrop-filter: blur(var(--hud-blur));
+    padding: 0;
   }
 
-  .era-chip {
+  .era-glyph {
     position: fixed;
     top: calc(var(--space-4) + env(safe-area-inset-top));
     right: calc(var(--space-4) + env(safe-area-inset-right));
     z-index: 1000;
     pointer-events: none;
-    padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-pill);
-    font-family: "IBM Plex Mono", "SF Mono", "JetBrains Mono", "Courier New", monospace;
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    color: rgba(213, 232, 255, 0.86);
-    background: var(--glass-bg);
-    border: 1px solid var(--line-soft);
-    box-shadow: inset 0 1px 0 rgba(201, 229, 255, 0.12), 0 10px 32px rgba(0, 0, 0, 0.34);
-    backdrop-filter: blur(var(--hud-blur));
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid rgba(122, 164, 212, 0.34);
+    box-shadow: 0 0 16px rgba(76, 124, 180, 0.24);
   }
 
-  .signal-feed {
-    position: fixed;
-    top: calc(var(--space-7) + var(--space-1) + env(safe-area-inset-top));
-    right: calc(var(--space-4) + env(safe-area-inset-right));
-    z-index: 1000;
-    pointer-events: none;
-    max-width: min(42vw, 280px);
-    padding: var(--space-3);
-    border-radius: var(--radius-card);
-    border: 1px solid rgba(154, 188, 222, 0.22);
-    background: linear-gradient(160deg, rgba(6, 16, 29, 0.8), rgba(5, 12, 23, 0.38));
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.44);
-    font-family: "IBM Plex Mono", "SF Mono", "JetBrains Mono", "Courier New", monospace;
-    font-size: 10px;
-    letter-spacing: 0.03em;
-    line-height: 1.5;
-    color: rgba(204, 229, 255, 0.84);
-    transform: translateY(-4px);
-    opacity: 0;
-    transition: opacity var(--dur-base) var(--ease-standard), transform var(--dur-base) var(--ease-standard);
+  .era-glyph .g-core,
+  .era-glyph .g-ring,
+  .era-glyph .g-sat {
+    position: absolute;
+    inset: 0;
   }
 
-  .signal-feed.visible {
-    opacity: 1;
-    transform: translateY(0);
+  .era-glyph .g-core::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(168, 211, 255, 0.86);
+    box-shadow: 0 0 10px rgba(120, 185, 245, 0.5);
+  }
+
+  .era-glyph .g-ring::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    border: 1px solid rgba(114, 160, 211, 0.26);
+  }
+
+  .era-glyph .g-sat::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: rgba(171, 218, 255, 0.78);
+    transform-origin: 0 -8px;
+    transform: rotate(0deg) translateY(-8px);
+    animation: glyphOrbit 7.6s linear infinite;
+  }
+
+  .era-glyph.shift {
+    animation: glyphPulse 620ms var(--ease-emphasis);
+  }
+
+  @keyframes glyphOrbit {
+    0% { transform: rotate(0deg) translateY(-8px); opacity: 0.9; }
+    100% { transform: rotate(360deg) translateY(-8px); opacity: 0.9; }
+  }
+
+  @keyframes glyphSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes glyphPulse {
+    0% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.16); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.9; }
   }
   
   .rule-num {
@@ -411,9 +427,20 @@
     box-shadow: 0 0 120px rgba(178, 124, 250, 0.32);
   }
 
-  body.era-chaos .signal-feed,
-  body.era-chaos .era-chip {
-    border-color: rgba(206, 164, 255, 0.32);
+  body.era-chaos .era-glyph {
+    border-color: rgba(196, 146, 255, 0.38);
+    box-shadow: 0 0 18px rgba(154, 102, 222, 0.3);
+  }
+
+  body.era-chaos .era-glyph .g-ring::before {
+    border-color: rgba(190, 144, 255, 0.42);
+    border-style: dashed;
+    animation: glyphSpin 2.4s linear infinite;
+  }
+
+  body.era-chaos .era-glyph .g-sat::before {
+    animation-duration: 1.9s;
+    transform-origin: 0 -9px;
   }
 
   body.era-eclipse {
@@ -426,6 +453,23 @@
 
   body.era-eclipse .cursor {
     opacity: 0.42;
+  }
+
+  body.era-eclipse .era-glyph {
+    border-color: rgba(162, 193, 226, 0.36);
+  }
+
+  body.era-eclipse .era-glyph .g-ring::before {
+    border-color: rgba(134, 165, 205, 0.38) transparent rgba(134, 165, 205, 0.38) transparent;
+    transform: rotate(-26deg);
+  }
+
+  body.era-eclipse .era-glyph .g-sat::before {
+    opacity: 0;
+  }
+
+  body.era-eclipse .era-glyph .g-core::before {
+    transform: translate(-62%, -50%);
   }
 
   body.silent-shield .particle {
@@ -449,8 +493,11 @@
     <span class="symbol">Ω</span>
     <span class="number" id="cT">0000000000.00</span>
   </div>
-  <div class="era-chip" id="eraChip">恒纪元</div>
-  <div class="signal-feed" id="signalFeed"></div>
+  <div class="era-glyph" id="eraGlyph" aria-hidden="true">
+    <span class="g-core"></span>
+    <span class="g-ring"></span>
+    <span class="g-sat"></span>
+  </div>
   <div class="mystery-counter" id="mC"></div>
   <div class="cursor"></div>
   <div class="align-flash"></div>
@@ -500,39 +547,19 @@
     }
     _uMC();
 
-    const _sf = document.getElementById('signalFeed');
-    const _ec = document.getElementById('eraChip');
-    let _st = null;
-    const _rm = {
-      a: '碑文-00: 连击共振',
-      b: '碑文-01: 节律锁定',
-      c: '碑文-02: 闭环轨迹',
-      d: '碑文-03: 四角对齐',
-      e: '碑文-04: 慢时脉冲',
-      f: '碑文-05: 唤醒粒子',
-      g: '碑文-06: 沉默阈值',
-      h: '碑文-07: 边界行走',
-      i: '碑文-08: 对角跃迁',
-      j: '碑文-09: 中心凝视',
-      k: '碑文-10: 呼吸同步',
-      l: '碑文-11: 曲线偏振',
-      m: '碑文-12: 三段停顿',
-      n: '碑文-13: 宇宙百秒',
-      o: '碑文-14: 随机脉冲'
-    };
+    const _eg = document.getElementById('eraGlyph');
     const _esm = [
-      { n: '恒纪元', c: 'era-stable', d: 46000, s: 1, b: 208 },
-      { n: '乱纪元', c: 'era-chaos', d: 32000, s: 1.2, b: 226 },
-      { n: '凌日危机', c: 'era-eclipse', d: 26000, s: 0.74, b: 200 }
+      { c: 'era-stable', d: 46000, s: 1, b: 208 },
+      { c: 'era-chaos', d: 32000, s: 1.2, b: 226 },
+      { c: 'era-eclipse', d: 26000, s: 0.74, b: 200 }
     ];
     let _ei = 0, _et = Date.now();
 
-    function _pS(t, d = 2400) {
-      if (!_sf) return;
-      _sf.textContent = t;
-      _sf.classList.add('visible');
-      if (_st) clearTimeout(_st);
-      _st = setTimeout(() => _sf.classList.remove('visible'), d);
+    function _fG() {
+      if (!_eg) return;
+      _eg.classList.remove('shift');
+      void _eg.offsetWidth;
+      _eg.classList.add('shift');
     }
 
     function _sE(i, n = true) {
@@ -541,11 +568,10 @@
       const e = _esm[_ei];
       document.body.classList.remove('era-stable', 'era-chaos', 'era-eclipse');
       document.body.classList.add(e.c);
-      if (_ec) _ec.textContent = e.n;
       _es = e.s;
       _tH = e.b;
       if (n) {
-        _pS(`相态切换: ${e.n}`);
+        _fG();
         _v([8, 12, 8]);
       }
     }
@@ -565,7 +591,6 @@
       if (_gs.r.length > _tl) {
         _gs.s = n + (_tm ? 5200 : 6200);
         document.body.classList.add('silent-shield');
-        _pS('黑暗森林协议: 降低干扰', 2800);
         _v([18, 24, 18]);
         setTimeout(() => {
           if (Date.now() >= _gs.s) document.body.classList.remove('silent-shield');
@@ -594,10 +619,7 @@
           el.classList.add('flash');
         }
       }
-      if (_nu) {
-        _pS(_rm[id] || '碑文已点亮');
-        _v(10);
-      }
+      if (_nu) _v(10);
     }
     
     // Color system
@@ -1223,7 +1245,6 @@
     _cA();
     _uCT();
     _uE();
-    setTimeout(() => _pS('协议已上线: 15条碑文等待解锁', 3000), 900);
   </script>
 </body>
 </html>
