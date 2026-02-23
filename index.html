@@ -11,17 +11,17 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --bg-0: #03070f;
-    --bg-1: #081527;
-    --bg-2: #0d2239;
-    --ink-soft: rgba(214, 233, 255, 0.72);
-    --ink-muted: rgba(194, 215, 242, 0.44);
+    --bg-0: #010309;
+    --bg-1: #040b16;
+    --bg-2: #081221;
+    --ink-soft: rgba(206, 226, 248, 0.68);
+    --ink-muted: rgba(182, 204, 232, 0.4);
     --line-soft: rgba(160, 191, 227, 0.22);
     --line-strong: rgba(170, 206, 244, 0.46);
     --glass-bg: linear-gradient(
       140deg,
-      rgba(10, 25, 44, 0.52) 0%,
-      rgba(8, 18, 32, 0.26) 100%
+      rgba(9, 21, 38, 0.44) 0%,
+      rgba(6, 14, 26, 0.24) 100%
     );
     --core-h: 210;
     --space-1: 4px;
@@ -44,11 +44,7 @@
   
   body {
     position: relative;
-    background:
-      radial-gradient(1200px 700px at 15% 10%, rgba(120, 168, 222, 0.14) 0%, transparent 60%),
-      radial-gradient(900px 640px at 80% 15%, rgba(78, 116, 178, 0.1) 0%, transparent 62%),
-      radial-gradient(1100px 800px at 50% 105%, rgba(60, 99, 147, 0.18) 0%, transparent 58%),
-      linear-gradient(160deg, var(--bg-0) 0%, var(--bg-1) 46%, var(--bg-2) 100%);
+    background: #02050b;
     min-height: 100vh;
     min-height: -webkit-fill-available;
     overflow: hidden;
@@ -73,22 +69,11 @@
   }
 
   body::before {
-    background:
-      radial-gradient(circle at 18% 30%, rgba(163, 212, 255, 0.08) 0%, transparent 48%),
-      radial-gradient(circle at 78% 62%, rgba(135, 168, 223, 0.06) 0%, transparent 45%),
-      radial-gradient(circle at 55% 48%, rgba(203, 229, 255, 0.03) 0%, transparent 60%);
-    filter: blur(24px);
-    opacity: 0.82;
+    display: none;
   }
 
   body::after {
-    background-image:
-      radial-gradient(rgba(233, 243, 255, 0.16) 0.55px, transparent 0.55px),
-      radial-gradient(rgba(177, 211, 255, 0.13) 0.7px, transparent 0.7px);
-    background-size: 3px 3px, 5px 5px;
-    background-position: 0 0, 1px 2px;
-    mix-blend-mode: screen;
-    opacity: 0.07;
+    display: none;
   }
   
   /* 移动端适配 */
@@ -190,8 +175,8 @@
     max-width: min(42vw, 280px);
     padding: var(--space-3);
     border-radius: var(--radius-card);
-    border: 1px solid rgba(174, 206, 238, 0.26);
-    background: linear-gradient(160deg, rgba(8, 20, 35, 0.78), rgba(7, 16, 30, 0.34));
+    border: 1px solid rgba(154, 188, 222, 0.22);
+    background: linear-gradient(160deg, rgba(6, 16, 29, 0.8), rgba(5, 12, 23, 0.38));
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.44);
     font-family: "IBM Plex Mono", "SF Mono", "JetBrains Mono", "Courier New", monospace;
     font-size: 10px;
@@ -272,7 +257,7 @@
     border-radius: 50%;
     filter: blur(4px);
     animation: breathe 5.2s var(--ease-soft) infinite;
-    box-shadow: 0 0 100px rgba(123, 176, 241, 0.28);
+    box-shadow: 0 0 84px rgba(92, 142, 206, 0.24);
   }
   
   .ring {
