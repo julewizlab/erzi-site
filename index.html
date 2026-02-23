@@ -4,102 +4,251 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>erzi.site</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-0: #03070f;
+    --bg-1: #081527;
+    --bg-2: #0d2239;
+    --ink-soft: rgba(214, 233, 255, 0.72);
+    --ink-muted: rgba(194, 215, 242, 0.44);
+    --line-soft: rgba(160, 191, 227, 0.22);
+    --line-strong: rgba(170, 206, 244, 0.46);
+    --glass-bg: linear-gradient(
+      140deg,
+      rgba(10, 25, 44, 0.52) 0%,
+      rgba(8, 18, 32, 0.26) 100%
+    );
+    --core-h: 210;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-7: 32px;
+    --radius-pill: 999px;
+    --radius-card: 14px;
+    --hud-blur: 14px;
+    --dur-fast: 180ms;
+    --dur-base: 280ms;
+    --dur-slow: 420ms;
+    --ease-standard: cubic-bezier(0.22, 0.61, 0.36, 1);
+    --ease-emphasis: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --ease-soft: cubic-bezier(0.33, 0, 0.18, 1);
+  }
   
   body {
-    background: #0A0A0A;
+    position: relative;
+    background:
+      radial-gradient(1200px 700px at 15% 10%, rgba(120, 168, 222, 0.14) 0%, transparent 60%),
+      radial-gradient(900px 640px at 80% 15%, rgba(78, 116, 178, 0.1) 0%, transparent 62%),
+      radial-gradient(1100px 800px at 50% 105%, rgba(60, 99, 147, 0.18) 0%, transparent 58%),
+      linear-gradient(160deg, var(--bg-0) 0%, var(--bg-1) 46%, var(--bg-2) 100%);
     min-height: 100vh;
     min-height: -webkit-fill-available;
     overflow: hidden;
     touch-action: none;
+    overscroll-behavior: none;
     user-select: none;
     -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-family: "Manrope", "PingFang SC", "Noto Sans SC", sans-serif;
+    color: var(--ink-soft);
+  }
+
+  body::before,
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::before {
+    background:
+      radial-gradient(circle at 18% 30%, rgba(163, 212, 255, 0.08) 0%, transparent 48%),
+      radial-gradient(circle at 78% 62%, rgba(135, 168, 223, 0.06) 0%, transparent 45%),
+      radial-gradient(circle at 55% 48%, rgba(203, 229, 255, 0.03) 0%, transparent 60%);
+    filter: blur(24px);
+    opacity: 0.82;
+  }
+
+  body::after {
+    background-image:
+      radial-gradient(rgba(233, 243, 255, 0.16) 0.55px, transparent 0.55px),
+      radial-gradient(rgba(177, 211, 255, 0.13) 0.7px, transparent 0.7px);
+    background-size: 3px 3px, 5px 5px;
+    background-position: 0 0, 1px 2px;
+    mix-blend-mode: screen;
+    opacity: 0.07;
   }
   
   /* 移动端适配 */
   @media (max-width: 768px) {
-    .cosmic-time { font-size: 10px !important; top: 15px !important; }
-    .mystery-counter { font-size: 9px !important; gap: 3px !important; bottom: 15px !important; }
+    .cosmic-time { font-size: 10px !important; top: calc(var(--space-3) + env(safe-area-inset-top)) !important; }
+    .mystery-counter { font-size: 9px !important; gap: var(--space-1) !important; bottom: calc(var(--space-3) + env(safe-area-inset-bottom)) !important; }
+    .era-chip { right: calc(var(--space-3) + env(safe-area-inset-right)) !important; top: calc(var(--space-3) + env(safe-area-inset-top)) !important; font-size: 10px !important; }
+    .signal-feed { right: calc(var(--space-3) + env(safe-area-inset-right)) !important; top: calc(var(--space-7) + env(safe-area-inset-top)) !important; font-size: 10px !important; max-width: min(74vw, 250px) !important; }
     .cursor { display: none !important; }
     .cursor-trail { display: none !important; }
+    .signal-feed { line-height: 1.45 !important; }
+  }
+
+  @media (hover: none) and (pointer: coarse) {
+    .cosmic-time,
+    .mystery-counter,
+    .era-chip { backdrop-filter: blur(10px); }
+    .signal-feed { backdrop-filter: blur(8px); }
   }
   
   .cosmic-time {
     position: fixed;
-    top: 20px;
+    top: calc(var(--space-4) + env(safe-area-inset-top));
     left: 50%;
     transform: translateX(-50%);
-    font-family: 'JetBrains Mono', 'Courier New', monospace;
-    font-size: 12px;
-    letter-spacing: 0.2em;
-    color: rgba(255, 255, 255, 0.15);
-    z-index: 100;
+    font-family: "IBM Plex Mono", "SF Mono", "JetBrains Mono", "Courier New", monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--ink-muted);
+    z-index: 1000;
     pointer-events: none;
     display: flex;
     align-items: center;
-    gap: 8px;
-    animation: cosmicBreathe 4s ease-in-out infinite;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-pill);
+    background: var(--glass-bg);
+    border: 1px solid var(--line-soft);
+    box-shadow: inset 0 1px 0 rgba(198, 224, 255, 0.16), 0 12px 44px rgba(0, 0, 0, 0.42);
+    backdrop-filter: blur(var(--hud-blur));
+    animation: cosmicBreathe 6s var(--ease-soft) infinite;
+  }
+
+  .cosmic-time .symbol {
+    color: rgba(214, 236, 255, 0.76);
+    text-shadow: 0 0 18px rgba(162, 205, 252, 0.34);
   }
   
   @keyframes cosmicBreathe {
-    0%, 100% { opacity: 0.15; }
-    50% { opacity: 0.8; }
+    0%, 100% { opacity: 0.74; }
+    50% { opacity: 0.98; }
   }
   
   .mystery-counter {
     position: fixed;
-    bottom: 20px;
+    bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
     left: 50%;
     transform: translateX(-50%);
-    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-family: "IBM Plex Mono", "SF Mono", "JetBrains Mono", "Courier New", monospace;
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.15);
-    z-index: 100;
+    color: var(--ink-muted);
+    z-index: 1000;
     pointer-events: none;
     display: flex;
-    gap: 4px;
+    gap: var(--space-1);
     font-variant-numeric: tabular-nums;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-pill);
+    background: var(--glass-bg);
+    border: 1px solid var(--line-soft);
+    box-shadow: inset 0 1px 0 rgba(198, 224, 255, 0.12), 0 8px 32px rgba(0, 0, 0, 0.36);
+    backdrop-filter: blur(var(--hud-blur));
+  }
+
+  .era-chip {
+    position: fixed;
+    top: calc(var(--space-4) + env(safe-area-inset-top));
+    right: calc(var(--space-4) + env(safe-area-inset-right));
+    z-index: 1000;
+    pointer-events: none;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-pill);
+    font-family: "IBM Plex Mono", "SF Mono", "JetBrains Mono", "Courier New", monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: rgba(213, 232, 255, 0.86);
+    background: var(--glass-bg);
+    border: 1px solid var(--line-soft);
+    box-shadow: inset 0 1px 0 rgba(201, 229, 255, 0.12), 0 10px 32px rgba(0, 0, 0, 0.34);
+    backdrop-filter: blur(var(--hud-blur));
+  }
+
+  .signal-feed {
+    position: fixed;
+    top: calc(var(--space-7) + var(--space-1) + env(safe-area-inset-top));
+    right: calc(var(--space-4) + env(safe-area-inset-right));
+    z-index: 1000;
+    pointer-events: none;
+    max-width: min(42vw, 280px);
+    padding: var(--space-3);
+    border-radius: var(--radius-card);
+    border: 1px solid rgba(174, 206, 238, 0.26);
+    background: linear-gradient(160deg, rgba(8, 20, 35, 0.78), rgba(7, 16, 30, 0.34));
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.44);
+    font-family: "IBM Plex Mono", "SF Mono", "JetBrains Mono", "Courier New", monospace;
+    font-size: 10px;
+    letter-spacing: 0.03em;
+    line-height: 1.5;
+    color: rgba(204, 229, 255, 0.84);
+    transform: translateY(-4px);
+    opacity: 0;
+    transition: opacity var(--dur-base) var(--ease-standard), transform var(--dur-base) var(--ease-standard);
+  }
+
+  .signal-feed.visible {
+    opacity: 1;
+    transform: translateY(0);
   }
   
   .rule-num {
-    opacity: 0.15;
-    transition: all 0.3s ease;
+    opacity: 0.28;
+    color: rgba(188, 211, 238, 0.5);
+    transition: transform var(--dur-base) var(--ease-standard), opacity var(--dur-base) var(--ease-standard), color var(--dur-base) var(--ease-standard), text-shadow var(--dur-base) var(--ease-standard);
   }
   
   .rule-num.completed {
-    opacity: 0.8;
-    color: rgba(255, 255, 255, 0.9);
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+    opacity: 0.95;
+    color: rgba(233, 244, 255, 0.96);
+    text-shadow: 0 0 12px rgba(170, 206, 247, 0.36);
   }
   
   .rule-num.flash {
-    animation: numFlash 0.6s ease-out;
+    animation: numFlash 0.6s var(--ease-emphasis);
   }
   
   @keyframes numFlash {
     0% { transform: scale(1); opacity: 1; }
-    30% { transform: scale(2); opacity: 1; text-shadow: 0 0 20px rgba(255,255,255,0.8); }
+    30% { transform: scale(1.6); opacity: 1; text-shadow: 0 0 20px rgba(180,219,255,0.9); }
     100% { transform: scale(1); }
   }
   
   .cursor {
     position: fixed;
-    width: 8px;
-    height: 8px;
-    background: rgba(255, 255, 255, 0.8);
+    width: 9px;
+    height: 9px;
+    background: rgba(213, 236, 255, 0.85);
+    border: 1px solid rgba(188, 225, 255, 0.72);
+    box-shadow: 0 0 20px rgba(141, 197, 255, 0.5);
     border-radius: 50%;
     pointer-events: none;
     z-index: 10000;
-    mix-blend-mode: difference;
-    transition: transform 0.1s ease;
+    mix-blend-mode: screen;
+    transition: transform var(--dur-fast) var(--ease-standard);
   }
   
   .cursor-trail {
     position: fixed;
     width: 4px;
     height: 4px;
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(170, 214, 255, 0.32);
     border-radius: 50%;
     pointer-events: none;
     z-index: 9999;
@@ -110,97 +259,107 @@
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: 150px;
-    height: 150px;
+    width: 180px;
+    height: 180px;
     pointer-events: none;
-    transition: filter 0.5s ease;
+    transition: filter var(--dur-slow) var(--ease-soft), opacity var(--dur-slow) var(--ease-soft);
+    z-index: 5;
   }
   
   .core {
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    filter: blur(2px);
-    animation: breathe 4s ease-in-out infinite;
+    filter: blur(4px);
+    animation: breathe 5.2s var(--ease-soft) infinite;
+    box-shadow: 0 0 100px rgba(123, 176, 241, 0.28);
   }
   
   .ring {
     position: absolute;
     border-radius: 50%;
     border: 1px solid;
-    filter: blur(1px);
+    filter: blur(0.6px);
+    mix-blend-mode: screen;
   }
   
   @keyframes breathe {
-    0%, 100% { transform: scale(1); opacity: 0.8; }
-    50% { transform: scale(1.2); opacity: 0.4; }
+    0%, 100% { transform: scale(1); opacity: 0.78; }
+    50% { transform: scale(1.16); opacity: 0.36; }
   }
   
   .particle {
     position: fixed;
     border-radius: 50%;
-    filter: blur(1px);
+    filter: blur(0.8px);
     pointer-events: none;
-    transition: filter 0.3s ease, box-shadow 0.3s ease;
+    transition: filter var(--dur-base) var(--ease-standard), box-shadow var(--dur-base) var(--ease-standard), opacity var(--dur-slow) var(--ease-soft);
+    will-change: transform, opacity;
+    z-index: 4;
   }
   
   .particle.awakened {
     filter: blur(0);
-    box-shadow: 0 0 15px currentColor;
+    box-shadow: 0 0 22px currentColor;
   }
   
   /* 增强动效 */
   .vortex {
     position: fixed;
     border-radius: 50%;
-    border: 3px solid;
-    animation: vortex-spin 2.5s ease-out forwards;
+    border: 1.5px solid;
+    animation: vortex-spin 2.8s var(--ease-emphasis) forwards;
     pointer-events: none;
+    mix-blend-mode: screen;
   }
   
   @keyframes vortex-spin {
     0% { transform: scale(0) rotate(0deg); opacity: 1; }
-    100% { transform: scale(5) rotate(1080deg); opacity: 0; }
+    100% { transform: scale(4.4) rotate(900deg); opacity: 0; }
   }
   
   .pulse {
     position: fixed;
     border-radius: 50%;
-    border: 3px solid;
-    animation: pulse-expand 2s ease-out forwards;
+    border: 1.5px solid;
+    animation: pulse-expand 2.4s var(--ease-emphasis) forwards;
     pointer-events: none;
+    mix-blend-mode: screen;
   }
   
   @keyframes pulse-expand {
     0% { transform: scale(0); opacity: 1; }
-    100% { transform: scale(4); opacity: 0; }
+    100% { transform: scale(3.5); opacity: 0; }
   }
   
   .combo-burst {
     position: fixed;
     border-radius: 50%;
-    border: 3px solid;
-    animation: burst 1s ease-out forwards;
+    border: 1.5px solid;
+    animation: burst 1.2s var(--ease-emphasis) forwards;
     pointer-events: none;
+    mix-blend-mode: screen;
   }
   
   @keyframes burst {
     0% { transform: scale(0); opacity: 1; }
-    50% { transform: scale(3); opacity: 0.9; }
-    100% { transform: scale(5); opacity: 0; }
+    50% { transform: scale(2.7); opacity: 0.85; }
+    100% { transform: scale(4.2); opacity: 0; }
   }
   
   .ripple {
     position: fixed;
     border-radius: 50%;
-    animation: ripple-expand 2.5s ease-out forwards;
+    border: 1px solid;
+    animation: ripple-expand 2.7s var(--ease-emphasis) forwards;
     pointer-events: none;
     mix-blend-mode: screen;
+    box-shadow: 0 0 40px rgba(164, 212, 255, 0.32);
   }
   
   @keyframes ripple-expand {
-    0% { width: 0; height: 0; opacity: 0.8; }
-    100% { width: 600px; height: 600px; opacity: 0; }
+    0% { width: 0; height: 0; opacity: 0.72; }
+    100% { width: 620px; height: 620px; opacity: 0; }
   }
   
   .hidden-shape {
@@ -211,7 +370,7 @@
     justify-content: center;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.5s ease;
+    transition: opacity var(--dur-slow) var(--ease-standard);
     z-index: 100;
   }
   
@@ -222,9 +381,10 @@
   .hidden-shape svg {
     width: 300px;
     height: 300px;
-    stroke: rgba(255, 255, 255, 0.4);
+    stroke: rgba(191, 220, 255, 0.62);
     fill: none;
-    stroke-width: 2;
+    stroke-width: 1.3;
+    filter: drop-shadow(0 0 20px rgba(159, 208, 255, 0.42));
   }
   
   body.slow-time .particle,
@@ -237,10 +397,10 @@
   .align-flash {
     position: fixed;
     inset: 0;
-    background: radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, transparent 70%);
+    background: radial-gradient(circle at center, rgba(169,216,255,0.2) 0%, transparent 70%);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity var(--dur-base) var(--ease-standard);
   }
   
   .align-flash.active { opacity: 1; }
@@ -251,15 +411,45 @@
     height: 30px;
     border-radius: 50%;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity var(--dur-base) var(--ease-standard), transform var(--dur-base) var(--ease-standard);
     pointer-events: none;
+    box-shadow: 0 0 28px rgba(149, 202, 255, 0.38);
   }
   
-  .corner-indicator.active { opacity: 0.6; }
+  .corner-indicator.active { opacity: 0.75; transform: scale(1.08); }
   .corner-indicator.tl { top: 20px; left: 20px; }
   .corner-indicator.tr { top: 20px; right: 20px; }
   .corner-indicator.bl { bottom: 60px; left: 20px; }
   .corner-indicator.br { bottom: 60px; right: 20px; }
+
+  body.era-chaos .core {
+    box-shadow: 0 0 120px rgba(178, 124, 250, 0.32);
+  }
+
+  body.era-chaos .signal-feed,
+  body.era-chaos .era-chip {
+    border-color: rgba(206, 164, 255, 0.32);
+  }
+
+  body.era-eclipse {
+    filter: saturate(0.84) brightness(0.9);
+  }
+
+  body.era-eclipse .breath {
+    opacity: 0.74;
+  }
+
+  body.era-eclipse .cursor {
+    opacity: 0.42;
+  }
+
+  body.silent-shield .particle {
+    opacity: 0.2 !important;
+  }
+
+  body.silent-shield .core {
+    filter: blur(8px);
+  }
   
   @keyframes edgeFade {
     0% { opacity: 1; }
@@ -274,6 +464,8 @@
     <span class="symbol">Ω</span>
     <span class="number" id="cT">0000000000.00</span>
   </div>
+  <div class="era-chip" id="eraChip">恒纪元</div>
+  <div class="signal-feed" id="signalFeed"></div>
   <div class="mystery-counter" id="mC"></div>
   <div class="cursor"></div>
   <div class="align-flash"></div>
@@ -293,14 +485,23 @@
   <script>
     // Obfuscated variables
     const _0x0 = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o'];
-    let _h = Math.random() * 360, _tH = _h, _ts = 1, _rr = 2;
+    const _pH = [198, 206, 214, 224, 236, 246];
+    const _tm = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    const _ht = _tm ? 2200 : 3000;
+    const _it = _tm ? 2400 : 3000;
+    let _h = 208, _tH = 208, _ts = 1, _rr = 2, _es = 1;
     const _gC = (h,s,l,a) => `hsla(${h},${s}%,${l}%,${a})`;
+
+    function _v(p) {
+      if (!_tm || !navigator.vibrate) return;
+      navigator.vibrate(p);
+    }
     
     // Game state (obfuscated)
     const _gs = {
       a: 0, b: Date.now(), c: [], d: [], e: 0, f: false,
       g: [], h: null, i: [], j: Date.now(), k: [], l: 0,
-      m: [], n: 0, o: [], p: [],
+      m: [], n: 0, o: [], p: [], r: [], s: 0,
       q: JSON.parse(localStorage.getItem('_r') || '{}')
     };
     
@@ -313,13 +514,90 @@
       }).join('');
     }
     _uMC();
+
+    const _sf = document.getElementById('signalFeed');
+    const _ec = document.getElementById('eraChip');
+    let _st = null;
+    const _rm = {
+      a: '碑文-00: 连击共振',
+      b: '碑文-01: 节律锁定',
+      c: '碑文-02: 闭环轨迹',
+      d: '碑文-03: 四角对齐',
+      e: '碑文-04: 慢时脉冲',
+      f: '碑文-05: 唤醒粒子',
+      g: '碑文-06: 沉默阈值',
+      h: '碑文-07: 边界行走',
+      i: '碑文-08: 对角跃迁',
+      j: '碑文-09: 中心凝视',
+      k: '碑文-10: 呼吸同步',
+      l: '碑文-11: 曲线偏振',
+      m: '碑文-12: 三段停顿',
+      n: '碑文-13: 宇宙百秒',
+      o: '碑文-14: 随机脉冲'
+    };
+    const _esm = [
+      { n: '恒纪元', c: 'era-stable', d: 46000, s: 1, b: 208 },
+      { n: '乱纪元', c: 'era-chaos', d: 32000, s: 1.2, b: 226 },
+      { n: '凌日危机', c: 'era-eclipse', d: 26000, s: 0.74, b: 200 }
+    ];
+    let _ei = 0, _et = Date.now();
+
+    function _pS(t, d = 2400) {
+      if (!_sf) return;
+      _sf.textContent = t;
+      _sf.classList.add('visible');
+      if (_st) clearTimeout(_st);
+      _st = setTimeout(() => _sf.classList.remove('visible'), d);
+    }
+
+    function _sE(i, n = true) {
+      _ei = i;
+      _et = Date.now();
+      const e = _esm[_ei];
+      document.body.classList.remove('era-stable', 'era-chaos', 'era-eclipse');
+      document.body.classList.add(e.c);
+      if (_ec) _ec.textContent = e.n;
+      _es = e.s;
+      _tH = e.b;
+      if (n) {
+        _pS(`相态切换: ${e.n}`);
+        _v([8, 12, 8]);
+      }
+    }
+
+    function _uE() {
+      const e = _esm[_ei];
+      if (Date.now() - _et > e.d) _sE((_ei + 1) % _esm.length);
+      requestAnimationFrame(_uE);
+    }
+
+    function _cSh() {
+      const n = Date.now();
+      _gs.r.push(n);
+      _gs.r = _gs.r.filter(t => n - t < 2200);
+      if (_gs.s && n < _gs.s) return true;
+      const _tl = _tm ? 14 : 10;
+      if (_gs.r.length > _tl) {
+        _gs.s = n + (_tm ? 5200 : 6200);
+        document.body.classList.add('silent-shield');
+        _pS('黑暗森林协议: 降低干扰', 2800);
+        _v([18, 24, 18]);
+        setTimeout(() => {
+          if (Date.now() >= _gs.s) document.body.classList.remove('silent-shield');
+        }, _tm ? 5400 : 6400);
+        return true;
+      }
+      return false;
+    }
     
     // Complete rule with flash
     function _cR(id) {
+      let _nu = false;
       if (!_gs.q[id]) {
         _gs.q[id] = true;
         localStorage.setItem('_r', JSON.stringify(_gs.q));
         _uMC();
+        _nu = true;
       }
       // Flash the number
       const idx = _0x0.indexOf(id);
@@ -331,17 +609,25 @@
           el.classList.add('flash');
         }
       }
+      if (_nu) {
+        _pS(_rm[id] || '碑文已点亮');
+        _v(10);
+      }
     }
     
     // Color system
     function _uC() {
-      if (Math.random() < 0.01) _tH = (_tH + 30 + Math.random() * 60) % 360;
+      const e = _esm[_ei];
+      if (Math.random() < (_ei === 1 ? 0.005 : 0.0012)) {
+        _tH = _pH[Math.floor(Math.random() * _pH.length)] + (Math.random() * 10 - 5);
+      }
       const d = _tH - _h;
-      _h += d * 0.001 * _ts;
+      _h += d * (0.0012 + (_ei === 1 ? 0.0012 : 0)) * _ts;
       if (_h < 0) _h += 360;
       if (_h >= 360) _h -= 360;
+      document.documentElement.style.setProperty('--core-h', _h.toFixed(1));
       document.querySelector('.core').style.background = 
-        `radial-gradient(circle,${_gC(_h,70,60,0.4)} 0%,${_gC(_h,60,40,0.1)} 50%,transparent 70%)`;
+        `radial-gradient(circle,${_gC(_h,66,62,0.42)} 0%,${_gC(_h,58,44,0.2)} 45%,${_gC(e.b,52,36,0.08)} 66%,transparent 78%)`;
       requestAnimationFrame(_uC);
     }
     
@@ -349,36 +635,39 @@
     const _rs = [];
     function _cRs() {
       const b = document.querySelector('.breath');
-      for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < 7; i++) {
         const r = document.createElement('div');
         r.className = 'ring';
-        const s = 150 + i * 50;
-        r.style.cssText = `width:${s}px;height:${s}px;left:${i*-25}px;top:${i*-25}px;animation:breathe ${4+Math.random()*2}s ease-in-out infinite ${i*0.3}s`;
+        const s = 180 + i * 52;
+        r.style.cssText = `width:${s}px;height:${s}px;left:${i*-26}px;top:${i*-26}px;animation:breathe ${4.6+Math.random()*2.4}s var(--ease-soft) infinite ${i*0.35}s`;
         b.appendChild(r);
-        _rs.push({ el: r, bs: s, ho: i * 15, p: Math.random() * Math.PI * 2 });
+        _rs.push({ el: r, bs: s, ho: i * 9, p: Math.random() * Math.PI * 2 });
       }
     }
     
     function _uRs() {
-      const t = Date.now() / 1000 * _ts;
+      const t = Date.now() / 1000 * _ts * _es;
       _rs.forEach((r, i) => {
-        const w = Math.sin(t * 0.5 + r.p) * 5;
-        const sc = 1 + Math.sin(t * 0.3 + i) * 0.05;
+        const w = Math.sin(t * 0.44 + r.p) * 4.5;
+        const sc = 1 + Math.sin(t * 0.26 + i) * 0.04;
         r.el.style.width = (r.bs + w) + 'px';
         r.el.style.height = (r.bs + w * 0.7) + 'px';
-        r.el.style.transform = `rotate(${t * _rr + i * 10}deg) scale(${sc})`;
-        r.el.style.borderColor = _gC((_h + r.ho + t * 2) % 360, 50, 50, 0.15 - i * 0.015);
+        r.el.style.transform = `rotate(${t * _rr + i * 12}deg) scale(${sc})`;
+        const sa = _ei === 1 ? 58 : (_ei === 2 ? 42 : 50);
+        const aa = (_ei === 2 ? 0.1 : 0.17) - i * 0.012;
+        r.el.style.borderColor = _gC((_h + r.ho + t * 1.4) % 360, sa, 60, Math.max(0.02, aa));
       });
       requestAnimationFrame(_uRs);
     }
     
-    // Particles (40 particles)
+    // Particles
     const _ps = [];
     function _cPs() {
-      for (let i = 0; i < 40; i++) {
+      const _pc = _tm ? 24 : 44;
+      for (let i = 0; i < _pc; i++) {
         const p = document.createElement('div');
         p.className = 'particle';
-        const s = 2 + Math.random() * 4;
+        const s = 1.6 + Math.random() * 3.6;
         p.style.cssText = `width:${s}px;height:${s}px`;
         document.body.appendChild(p);
         _ps.push({
@@ -392,12 +681,12 @@
     
     let _idl = 0; // idle counter
     function _uPs() {
-      const t = Date.now() / 1000 * _ts;
+      const t = Date.now() / 1000 * _ts * _es;
       const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
       
       // Check idle (no interaction for 3 seconds)
       const now = Date.now();
-      if (now - _gs.b > 3000) {
+      if (now - _gs.b > _it) {
         _idl++;
       } else {
         _idl = 0;
@@ -433,15 +722,17 @@
         if (p.ia) {
           const ax = _mX - p.x, ay = _mY - p.y;
           const ad = Math.sqrt(ax * ax + ay * ay);
-          p.vx += ax / ad * 0.15;
-          p.vy += ay / ad * 0.15;
+          if (ad > 0.001) {
+            p.vx += ax / ad * 0.15;
+            p.vy += ay / ad * 0.15;
+          }
         }
         
         // Attraction point
         if (p.ap) {
           const ax = p.ap.x - p.x, ay = p.ap.y - p.y;
           const ad = Math.sqrt(ax * ax + ay * ay);
-          if (ad > 20) {
+          if (ad > 20.001) {
             p.vx += ax / ad * 0.1;
             p.vy += ay / ad * 0.1;
           } else {
@@ -473,9 +764,12 @@
         p.el.style.left = p.x + 'px';
         p.el.style.top = p.y + 'px';
         
-        const h = (_h + p.ho + t * 5) % 360;
-        p.el.style.background = _gC(h, 60, p.ia ? 70 : 60, p.ia ? 0.8 : 0.4);
-        p.el.style.color = _gC(h, 60, 70, 1);
+        const h = (_h + p.ho + t * (_ei === 1 ? 8 : 4.8)) % 360;
+        const sat = _ei === 1 ? 72 : (_ei === 2 ? 48 : 62);
+        const lit = _ei === 2 ? 66 : 61;
+        const alp = (_ei === 2 ? 0.28 : 0.42) * _sb;
+        p.el.style.background = _gC(h, sat, p.ia ? lit + 11 : lit, p.ia ? 0.86 : Math.min(0.86, alp));
+        p.el.style.color = _gC(h, sat, 74, 1);
       });
       
       // Check silence
@@ -493,14 +787,20 @@
       for (let i = 0; i < 12; i++) {
         const t = document.createElement('div');
         t.className = 'cursor-trail';
-        t.style.opacity = (1 - i / 12) * 0.3;
+        t.style.opacity = (1 - i / 12) * 0.24;
         document.body.appendChild(t);
         _tr.push({ el: t, x: _mX, y: _mY });
       }
     }
     
-    function _hM(x, y) {
-      _mX = x; _mY = y;
+    function _hM(x, y, s = false) {
+      if (s) {
+        _mX += (x - _mX) * 0.38;
+        _mY += (y - _mY) * 0.38;
+      } else {
+        _mX = x;
+        _mY = y;
+      }
       _gs.g.push({ x, y, t: Date.now() });
       const n = Date.now();
       _gs.g = _gs.g.filter(p => n - p.t < 1000);
@@ -511,8 +811,18 @@
       _cSC(x, y);
     }
     
+    let _tp = null, _tf = 0;
     document.addEventListener('mousemove', e => _hM(e.clientX, e.clientY));
-    document.addEventListener('touchmove', e => { e.preventDefault(); _hM(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
+    document.addEventListener('touchmove', e => {
+      e.preventDefault();
+      const t = e.touches[0];
+      _tp = { x: t.clientX, y: t.clientY };
+      if (_tf) return;
+      _tf = requestAnimationFrame(() => {
+        _tf = 0;
+        if (_tp) _hM(_tp.x, _tp.y, true);
+      });
+    }, { passive: false });
     
     function _uCr() {
       _cr.style.left = _mX + 'px';
@@ -542,14 +852,14 @@
       _cR(_0x0[0]);
       _rr = 8;
       setTimeout(() => _rr = 2, 2500);
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 3; i++) {
         setTimeout(() => {
           const b = document.createElement('div');
           b.className = 'combo-burst';
-          b.style.cssText = `border-color:${_gC((_h+i*30)%360,70,60,0.7)};left:${x-150}px;top:${y-150}px;animation-delay:${i*0.1}s`;
+          b.style.cssText = `border-color:${_gC((_h+i*18)%360,66,62,0.62)};left:${x-150}px;top:${y-150}px;animation-delay:${i*0.12}s`;
           document.body.appendChild(b);
-          setTimeout(() => b.remove(), 1000);
-        }, i * 100);
+          setTimeout(() => b.remove(), 1200);
+        }, i * 120);
       }
     }
     
@@ -599,14 +909,14 @@
     
     function _tVx(x, y) {
       _cR(_0x0[2]);
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 4; i++) {
         setTimeout(() => {
           const v = document.createElement('div');
           v.className = 'vortex';
-          v.style.cssText = `border-color:${_gC((_h+i*40)%360,60,50,0.6)};left:${x-150}px;top:${y-150}px;animation-delay:${i*0.15}s`;
+          v.style.cssText = `border-color:${_gC((_h+i*20)%360,62,60,0.56)};left:${x-150}px;top:${y-150}px;animation-delay:${i*0.16}s`;
           document.body.appendChild(v);
-          setTimeout(() => v.remove(), 2500);
-        }, i * 150);
+          setTimeout(() => v.remove(), 2800);
+        }, i * 160);
       }
     }
     
@@ -621,7 +931,7 @@
       
       document.querySelectorAll('.corner-indicator').forEach(el => {
         el.classList.remove('active');
-        el.style.background = _gC((_h+30)%360, 50, 50);
+        el.style.background = _gC((_h+16)%360, 56, 64);
       });
       
       if (c) {
@@ -649,7 +959,7 @@
     // R5: Long press
     function _sLP() { _gs.e = Date.now(); _gs.f = true; }
     function _eLP() {
-      if (_gs.f && Date.now() - _gs.e > 3000) _tST();
+      if (_gs.f && Date.now() - _gs.e > _ht) _tST();
       _gs.f = false;
     }
     
@@ -676,14 +986,16 @@
     }
     
     // R7: Silence
-    let _sb = 0.4, _sc = false;
+    let _sb = 0.72, _sc = false;
     function _cSl() {
       const n = Date.now(), d = n - _gs.b;
       if (d > 5000) {
-        _sb = Math.min(0.9, 0.4 + (d - 5000) / 10000);
-        _ps.forEach(p => p.el.style.background = _gC((_h+p.ho)%360, 60, 60, _sb));
-        if (_sb >= 0.9 && !_sc) { _cR(_0x0[6]); _sc = true; }
-      } else { _sb = 0.4; _sc = false; }
+        _sb = Math.min(1.1, 0.72 + (d - 5000) / 18000);
+        if (_sb >= 1.06 && !_sc) { _cR(_0x0[6]); _sc = true; }
+      } else {
+        _sb = _ei === 2 ? 0.56 : 0.72;
+        _sc = false;
+      }
     }
     
     // R8: Edge walk
@@ -701,7 +1013,7 @@
     function _tEG() {
       _cR(_0x0[7]);
       const g = document.createElement('div');
-      g.style.cssText = `position:fixed;inset:0;box-shadow:inset 0 0 150px ${_gC(_h,50,50,0.4)};pointer-events:none;animation:edgeFade 2.5s ease-out forwards`;
+      g.style.cssText = `position:fixed;inset:0;box-shadow:inset 0 0 140px ${_gC(_h,54,54,0.34)};pointer-events:none;animation:edgeFade 2.5s var(--ease-emphasis) forwards`;
       document.body.appendChild(g);
       setTimeout(() => g.remove(), 2500);
     }
@@ -789,7 +1101,7 @@
     function _tSW() {
       _cR(_0x0[11]);
       _rs.forEach((r, i) => {
-        r.el.style.transition = 'transform 0.5s ease';
+        r.el.style.transition = 'transform var(--dur-slow) var(--ease-emphasis)';
         r.el.style.transform = `rotate(${Date.now()/1000*_rr}deg) skewX(${(i%2===0?1:-1)*15}deg)`;
         setTimeout(() => r.el.style.transition = '', 600);
       });
@@ -837,13 +1149,13 @@
     function _tCR() {
       _cR(_0x0[13]);
       const te = document.querySelector('.cosmic-time');
-      te.style.color = 'rgba(255,255,255,0.7)';
-      te.style.textShadow = '0 0 25px rgba(255,255,255,0.5)';
+      te.style.color = 'rgba(227,241,255,0.92)';
+      te.style.textShadow = '0 0 26px rgba(175,217,255,0.52)';
       _ps.forEach((p, i) => {
         setTimeout(() => {
-          p.el.style.transform = 'scale(2.5)';
-          setTimeout(() => p.el.style.transform = '', 250);
-        }, i * 40);
+          p.el.style.transform = 'scale(2.15)';
+          setTimeout(() => p.el.style.transform = '', 270);
+        }, i * 46);
       });
       setTimeout(() => {
         te.style.color = '';
@@ -853,13 +1165,14 @@
     
     // R15: Random pulse
     function _rP() {
-      if (Math.random() < 0.01) {
+      const pr = _ei === 1 ? 0.0012 : 0.00035;
+      if (Math.random() < pr) {
         _cR(_0x0[14]);
         const p = document.createElement('div');
         p.className = 'pulse';
-        p.style.cssText = `left:${Math.random()*window.innerWidth}px;top:${Math.random()*window.innerHeight}px;border-color:${_gC((_h+Math.random()*120)%360,60,50,0.5)}`;
+        p.style.cssText = `left:${Math.random()*window.innerWidth}px;top:${Math.random()*window.innerHeight}px;border-color:${_gC((_h+Math.random()*40-20)%360,60,58,0.44)}`;
         document.body.appendChild(p);
-        setTimeout(() => p.remove(), 2000);
+        setTimeout(() => p.remove(), 2400);
       }
       requestAnimationFrame(_rP);
     }
@@ -867,11 +1180,12 @@
     // Click handler
     function _hC(x, y) {
       _gs.b = Date.now();
+      if (_cSh()) return;
       const r = document.createElement('div');
       r.className = 'ripple';
-      r.style.cssText = `border-color:${_gC((_h+Math.random()*60)%360,70,60,0.6)};left:${x-300}px;top:${y-300}px`;
+      r.style.cssText = `border-color:${_gC((_h+Math.random()*24-12)%360,66,64,0.58)};left:${x-300}px;top:${y-300}px`;
       document.body.appendChild(r);
-      setTimeout(() => r.remove(), 2500);
+      setTimeout(() => r.remove(), 2700);
       _cCb(x, y);
       _cRh();
       _cCo(x, y);
@@ -885,8 +1199,9 @@
     document.addEventListener('touchstart', e => {
       e.preventDefault();
       const t = e.touches[0];
-      _mX = t.clientX; _mY = t.clientY;
+      _hM(t.clientX, t.clientY, true);
       _sLP();
+      _v(5);
       _hC(t.clientX, t.clientY);
     }, { passive: false });
     document.addEventListener('touchend', _eLP);
@@ -895,21 +1210,23 @@
     let _la = 0;
     function _cA() {
       const t = Date.now() / 1000;
-      if (t - _la > 20 && Math.random() < 0.001) {
+      const ap = _ei === 1 ? 0.0011 : 0.00045;
+      if (t - _la > 24 && Math.random() < ap) {
         _la = t;
         const f = document.querySelector('.align-flash');
         f.classList.add('active');
         _rs.forEach(r => {
           r.el.style.animation = 'none';
           void r.el.offsetHeight;
-          r.el.style.animation = 'breathe 4s ease-in-out infinite';
+          r.el.style.animation = 'breathe 5.2s var(--ease-soft) infinite';
         });
-        setTimeout(() => f.classList.remove('active'), 600);
+        setTimeout(() => f.classList.remove('active'), 760);
       }
       requestAnimationFrame(_cA);
     }
     
     // Initialize
+    _sE(0, false);
     _cRs();
     _cPs();
     _iCr();
@@ -920,6 +1237,8 @@
     _rP();
     _cA();
     _uCT();
+    _uE();
+    setTimeout(() => _pS('协议已上线: 15条碑文等待解锁', 3000), 900);
   </script>
 </body>
 </html>
