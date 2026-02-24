@@ -267,6 +267,27 @@
     z-index: 5;
   }
   
+  /* 三体太阳（背景层） */
+  .trisolar-sun {
+    position: fixed;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.12;
+    filter: blur(20px);
+    mix-blend-mode: screen;
+    transition: opacity 2s var(--ease-soft);
+  }
+  
+  .trisolar-sun.trail {
+    width: 40px;
+    height: 40px;
+    opacity: 0.06;
+    filter: blur(25px);
+  }
+  
   .core {
     position: absolute;
     inset: 0;
@@ -510,6 +531,12 @@
   <div class="corner-indicator tr"></div>
   <div class="corner-indicator bl"></div>
   <div class="corner-indicator br"></div>
+  
+  <!-- 三体太阳（背景） -->
+  <div class="trisolar-sun" id="sun1"></div>
+  <div class="trisolar-sun" id="sun2"></div>
+  <div class="trisolar-sun" id="sun3"></div>
+  
   <div class="breath">
     <div class="core"></div>
   </div>
@@ -565,6 +592,74 @@
       }).join('');
     }
     _uMC();
+
+    // 三体太阳系统
+    const _suns = [
+      { el: null, x: 0.3, y: 0.5, vx: 0.0008, vy: 0.0005, mass: 1, hue: 30 },
+      { el: null, x: 0.5, y: 0.35, vx: -0.0006, vy: 0.0009, mass: 1.2, hue: 200 },
+      { el: null, x: 0.7, y: 0.55, vx: 0.0007, vy: -0.0007, mass: 0.9, hue: 280 }
+    ];
+    
+    function _iSs() {
+      _suns[0].el = document.getElementById('sun1');
+      _suns[1].el = document.getElementById('sun2');
+      _suns[2].el = document.getElementById('sun3');
+    }
+    
+    // 简化的三体引力模拟
+    function _uSs() {
+      const G = 0.0000008; // 引力常数（简化）
+      const dt = 1;
+      
+      // 计算每个太阳受到的引力
+      _suns.forEach((sun, i) => {
+        let ax = 0, ay = 0;
+        
+        _suns.forEach((other, j) => {
+          if (i !== j) {
+            const dx = other.x - sun.x;
+            const dy = other.y - sun.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            // 避免除以零
+            if (dist > 0.01) {
+              const force = G * other.mass / (dist * dist);
+              ax += dx / dist * force;
+              ay += dy / dist * force;
+            }
+          }
+        });
+        
+        // 更新速度
+        sun.vx += ax * dt;
+        sun.vy += ay * dt;
+        
+        // 阻尼（防止速度过大）
+        sun.vx *= 0.9995;
+        sun.vy *= 0.9995;
+      });
+      
+      // 更新位置
+      _suns.forEach(sun => {
+        sun.x += sun.vx * dt;
+        sun.y += sun.vy * dt;
+        
+        // 边界反弹（软边界）
+        if (sun.x < 0.1) { sun.x = 0.1; sun.vx *= -0.5; }
+        if (sun.x > 0.9) { sun.x = 0.9; sun.vx *= -0.5; }
+        if (sun.y < 0.1) { sun.y = 0.1; sun.vy *= -0.5; }
+        if (sun.y > 0.9) { sun.y = 0.9; sun.vy *= -0.5; }
+        
+        // 更新 DOM 位置
+        if (sun.el) {
+          sun.el.style.left = (sun.x * window.innerWidth - 30) + 'px';
+          sun.el.style.top = (sun.y * window.innerHeight - 30) + 'px';
+          sun.el.style.background = `radial-gradient(circle, hsla(${sun.hue}, 80%, 70%, 0.9) 0%, hsla(${sun.hue}, 70%, 50%, 0) 70%)`;
+        }
+      });
+      
+      requestAnimationFrame(_uSs);
+    }
 
     const _eg = document.getElementById('eraGlyph');
     const _esm = [
@@ -1309,12 +1404,14 @@
     
     // Initialize
     _sE(0, false);
+    _iSs();
     _cRs();
     _cPs();
     _iCr();
     _uC();
     _uRs();
     _uPs();
+    _uSs();
     _uCr();
     _rP();
     _cA();
