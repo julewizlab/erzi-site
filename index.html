@@ -193,6 +193,23 @@
     animation: glyphPulse 620ms var(--ease-emphasis);
   }
 
+  .era-glyph.era-warning {
+    animation: eraWarningFlash 400ms var(--ease-emphasis) infinite;
+  }
+
+  @keyframes eraWarningFlash {
+    0%, 100% { 
+      transform: scale(1); 
+      border-color: rgba(122, 164, 212, 0.34);
+      box-shadow: 0 0 16px rgba(76, 124, 180, 0.24);
+    }
+    50% { 
+      transform: scale(1.08); 
+      border-color: rgba(180, 210, 255, 0.62);
+      box-shadow: 0 0 24px rgba(140, 185, 240, 0.48);
+    }
+  }
+
   @keyframes glyphOrbit {
     0% { transform: rotate(0deg) translateY(-8px); opacity: 0.9; }
     100% { transform: rotate(360deg) translateY(-8px); opacity: 0.9; }
@@ -534,7 +551,26 @@
       a: 0, b: Date.now(), c: [], d: [], e: 0, f: false,
       g: [], h: null, i: [], j: Date.now(), k: [], l: 0,
       m: [], n: 0, o: [], p: [], r: [], s: 0,
-      q: JSON.parse(localStorage.getItem('_r') || '{}')
+      q: JSON.parse(localStorage.getItem('_r') || '{}'),
+      // P1: 可发现性提示
+      hint: { active: false, shape: null, timer: 0, particles: [] }
+    };
+
+    // P1: 提示形状定义
+    const _hs = {
+      triangle: [
+        { x: 0.5, y: 0.3 },
+        { x: 0.35, y: 0.65 },
+        { x: 0.65, y: 0.65 }
+      ],
+      circle: Array.from({length: 8}, (_, i) => ({
+        x: 0.5 + Math.cos(i * Math.PI / 4) * 0.2,
+        y: 0.5 + Math.sin(i * Math.PI / 4) * 0.2
+      })),
+      line: [
+        { x: 0.3, y: 0.5 },
+        { x: 0.7, y: 0.5 }
+      ]
     };
     
     // Initialize counter
@@ -578,7 +614,24 @@
 
     function _uE() {
       const e = _esm[_ei];
-      if (Date.now() - _et > e.d) _sE((_ei + 1) % _esm.length);
+      const elapsed = Date.now() - _et;
+      const remaining = e.d - elapsed;
+      
+      // P3: 纪元过渡提示（切换前 3 秒）
+      if (remaining < 3000 && remaining > 0) {
+        if (!_eg.classList.contains('era-warning')) {
+          _eg.classList.add('era-warning');
+        }
+        // 不规则闪烁
+        if (Math.random() < 0.15) {
+          _eg.style.opacity = 0.3 + Math.random() * 0.7;
+        }
+      } else {
+        _eg.classList.remove('era-warning');
+        _eg.style.opacity = '';
+      }
+      
+      if (elapsed > e.d) _sE((_ei + 1) % _esm.length);
       requestAnimationFrame(_uE);
     }
 
@@ -601,6 +654,13 @@
     }
     
     // Complete rule with flash
+    // P2: 规则重要性分级（0=小，1=中，2=大）
+    const _ri = {
+      'a': 0, 'b': 1, 'c': 1, 'd': 1, 'e': 2,
+      'f': 2, 'g': 0, 'h': 0, 'i': 1, 'j': 1,
+      'k': 0, 'l': 1, 'm': 0, 'n': 2, 'o': 0
+    };
+    
     function _cR(id) {
       let _nu = false;
       if (!_gs.q[id]) {
@@ -619,7 +679,19 @@
           el.classList.add('flash');
         }
       }
-      if (_nu) _v(10);
+      
+      // P2: 根据重要性调整震动强度
+      if (_nu && _tm) {
+        const importance = _ri[id] || 1;
+        const vibrations = [
+          [5],           // 小规则：轻微震动
+          [10],          // 中规则：中等震动
+          [15, 20, 15]   // 大规则：强烈震动
+        ];
+        _v(vibrations[importance]);
+      } else if (_nu) {
+        _v(10); // 桌面端保持原样
+      }
     }
     
     // Color system
@@ -697,6 +769,30 @@
         _idl++;
       } else {
         _idl = 0;
+        _gs.hint.active = false;
+      }
+      
+      // P1: 可发现性提示（10 秒空闲后触发）
+      if (_idl > 600 && !_gs.hint.active) {
+        _gs.hint.active = true;
+        _gs.hint.timer = now;
+        const shapes = Object.keys(_hs);
+        _gs.hint.shape = shapes[Math.floor(Math.random() * shapes.length)];
+        // 分配粒子到形状点
+        const pts = _hs[_gs.hint.shape];
+        _ps.forEach((p, i) => {
+          const target = pts[i % pts.length];
+          p.hintTarget = {
+            x: target.x * window.innerWidth,
+            y: target.y * window.innerHeight
+          };
+        });
+      }
+      
+      // P1: 15 秒后恢复自由运动
+      if (_gs.hint.active && now - _gs.hint.timer > 15000) {
+        _gs.hint.active = false;
+        _ps.forEach(p => p.hintTarget = null);
       }
       
       _ps.forEach(p => {
@@ -707,7 +803,7 @@
         p.vy += wy * 0.01;
         
         // If idle, enter random wandering mode
-        if (_idl > 0 && !p.ia) {
+        if (_idl > 0 && !p.ia && !_gs.hint.active) {
           p.wm = true;
           // Random direction changes
           if (Math.random() < 0.02) {
@@ -722,6 +818,17 @@
           if (d > 100) {
             p.vx += dx / d * 0.005;
             p.vy += dy / d * 0.005;
+          }
+        }
+        
+        // P1: 提示形状吸引力（优先级高于中心吸引力）
+        if (p.hintTarget && _gs.hint.active) {
+          const hx = p.hintTarget.x - p.x;
+          const hy = p.hintTarget.y - p.y;
+          const hd = Math.sqrt(hx * hx + hy * hy);
+          if (hd > 20) {
+            p.vx += hx / hd * 0.02; // 缓慢吸引
+            p.vy += hy / hd * 0.02;
           }
         }
         
