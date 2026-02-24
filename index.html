@@ -80,8 +80,7 @@
   @media (max-width: 768px) {
     .cosmic-time { font-size: 10px !important; top: calc(var(--space-3) + env(safe-area-inset-top)) !important; }
     .mystery-counter { font-size: 9px !important; gap: var(--space-1) !important; bottom: calc(var(--space-3) + env(safe-area-inset-bottom)) !important; }
-    .era-system { right: calc(var(--space-3) + env(safe-area-inset-right)) !important; top: calc(var(--space-3) + env(safe-area-inset-top)) !important; width: 60px !important; height: 60px !important; }
-    .era-sun { width: 6px !important; height: 6px !important; }
+    .era-glyph { right: calc(var(--space-3) + env(safe-area-inset-right)) !important; top: calc(var(--space-3) + env(safe-area-inset-top)) !important; width: 28px !important; height: 28px !important; }
     .cursor { display: none !important; }
     .cursor-trail { display: none !important; }
   }
@@ -135,39 +134,79 @@
     padding: 0;
   }
 
-  /* 右上角三体系统容器 */
-  .era-system {
+  .era-glyph {
     position: fixed;
     top: calc(var(--space-4) + env(safe-area-inset-top));
     right: calc(var(--space-4) + env(safe-area-inset-right));
-    width: 80px;
-    height: 80px;
     z-index: 1000;
     pointer-events: none;
-    border: 1px solid rgba(122, 164, 212, 0.18);
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(12, 24, 42, 0.24) 0%, transparent 70%);
-    box-shadow: 0 0 20px rgba(76, 124, 180, 0.16);
+    border: 1px solid rgba(122, 164, 212, 0.34);
+    box-shadow: 0 0 16px rgba(76, 124, 180, 0.24);
   }
-  
-  .era-system.shift {
-    animation: systemPulse 620ms var(--ease-emphasis);
-  }
-  
-  @keyframes systemPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.15); box-shadow: 0 0 30px rgba(140, 190, 245, 0.32); }
-    100% { transform: scale(1); }
-  }
-  
-  .era-sun {
+
+  .era-glyph .g-core,
+  .era-glyph .g-ring,
+  .era-glyph .g-sat {
     position: absolute;
-    width: 8px;
-    height: 8px;
+    inset: 0;
+  }
+
+  .era-glyph .g-core::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 4px;
+    height: 4px;
     border-radius: 50%;
-    pointer-events: none;
-    filter: blur(0.5px);
-    box-shadow: 0 0 8px currentColor;
+    transform: translate(-50%, -50%);
+    background: rgba(168, 211, 255, 0.86);
+    box-shadow: 0 0 10px rgba(120, 185, 245, 0.5);
+  }
+
+  .era-glyph .g-ring::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    border: 1px solid rgba(114, 160, 211, 0.26);
+  }
+
+  .era-glyph .g-sat::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: rgba(171, 218, 255, 0.78);
+    transform-origin: 0 -12px;
+    transform: rotate(0deg) translateY(-12px);
+    animation: glyphOrbit 7.6s linear infinite;
+  }
+
+  .era-glyph.shift {
+    animation: glyphPulse 620ms var(--ease-emphasis);
+  }
+
+  @keyframes glyphOrbit {
+    0% { transform: rotate(0deg) translateY(-8px); opacity: 0.9; }
+    100% { transform: rotate(360deg) translateY(-8px); opacity: 0.9; }
+  }
+
+  @keyframes glyphSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes glyphPulse {
+    0% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.16); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.9; }
   }
   
   .rule-num {
@@ -226,27 +265,6 @@
     pointer-events: none;
     transition: filter var(--dur-slow) var(--ease-soft), opacity var(--dur-slow) var(--ease-soft);
     z-index: 5;
-  }
-  
-  /* 三体太阳（背景层） */
-  .trisolar-sun {
-    position: fixed;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 1;
-    opacity: 0.12;
-    filter: blur(20px);
-    mix-blend-mode: screen;
-    transition: opacity 2s var(--ease-soft);
-  }
-  
-  .trisolar-sun.trail {
-    width: 40px;
-    height: 40px;
-    opacity: 0.06;
-    filter: blur(25px);
   }
   
   .core {
@@ -475,10 +493,10 @@
     <span class="symbol">Ω</span>
     <span class="number" id="cT">0000000000.00</span>
   </div>
-  <div class="era-system" id="eraSystem">
-    <div class="era-sun" id="eraSun1"></div>
-    <div class="era-sun" id="eraSun2"></div>
-    <div class="era-sun" id="eraSun3"></div>
+  <div class="era-glyph" id="eraGlyph" aria-hidden="true">
+    <span class="g-core"></span>
+    <span class="g-ring"></span>
+    <span class="g-sat"></span>
   </div>
   <div class="mystery-counter" id="mC"></div>
   <div class="cursor"></div>
@@ -492,12 +510,6 @@
   <div class="corner-indicator tr"></div>
   <div class="corner-indicator bl"></div>
   <div class="corner-indicator br"></div>
-  
-  <!-- 三体太阳（背景） -->
-  <div class="trisolar-sun" id="sun1"></div>
-  <div class="trisolar-sun" id="sun2"></div>
-  <div class="trisolar-sun" id="sun3"></div>
-  
   <div class="breath">
     <div class="core"></div>
   </div>
@@ -554,194 +566,6 @@
     }
     _uMC();
 
-    // 右上角三体系统（纪元判定）
-    const _cornerSuns = [
-      { el: null, x: 0.5, y: 0.5, vx: 0.0001, vy: 0.00008, mass: 1, hue: 30 },
-      { el: null, x: 0.3, y: 0.6, vx: -0.00008, vy: 0.00012, mass: 1.2, hue: 200 },
-      { el: null, x: 0.7, y: 0.4, vx: 0.0001, vy: -0.0001, mass: 0.9, hue: 280 }
-    ];
-    
-    function _iCs() {
-      _cornerSuns[0].el = document.getElementById('eraSun1');
-      _cornerSuns[1].el = document.getElementById('eraSun2');
-      _cornerSuns[2].el = document.getElementById('eraSun3');
-    }
-    
-    // 计算两个太阳之间的距离
-    function _dist(s1, s2) {
-      return Math.sqrt((s1.x - s2.x) ** 2 + (s1.y - s2.y) ** 2);
-    }
-    
-    // 判断三个太阳是否共线（角度偏差 < angle 度）
-    function _isCollinear(angle = 15) {
-      const s = _cornerSuns;
-      // 计算向量
-      const v1 = { x: s[1].x - s[0].x, y: s[1].y - s[0].y };
-      const v2 = { x: s[2].x - s[0].x, y: s[2].y - s[0].y };
-      
-      // 计算叉积（判断共线）
-      const cross = v1.x * v2.y - v1.y * v2.x;
-      const mag = Math.sqrt(v1.x ** 2 + v1.y ** 2) * Math.sqrt(v2.x ** 2 + v2.y ** 2);
-      
-      if (mag === 0) return false;
-      
-      // 计算角度（弧度）
-      const angleRad = Math.abs(Math.asin(cross / mag));
-      const angleDeg = angleRad * 180 / Math.PI;
-      
-      return angleDeg < angle;
-    }
-    
-    // 根据三体运动判定纪元
-    let _prevEra = 0;
-    function _calculateEra() {
-      const d01 = _dist(_cornerSuns[0], _cornerSuns[1]);
-      const d02 = _dist(_cornerSuns[0], _cornerSuns[2]);
-      const d12 = _dist(_cornerSuns[1], _cornerSuns[2]);
-      
-      // 日蚀纪元：三个太阳共线
-      if (_isCollinear(15)) {
-        return 2; // eclipse
-      }
-      
-      // 恒纪元：所有距离都大
-      if (d01 > 0.3 && d02 > 0.3 && d12 > 0.3) {
-        return 0; // stable
-      }
-      
-      // 乱纪元：有太阳接近
-      return 1; // chaos
-    }
-    
-    // 更新右上角三体系统
-    function _uCs() {
-      const G = 0.0000001; // 引力常数（更小，速度更慢）
-      const dt = 1;
-      const size = 80; // 容器大小
-      const sunSize = 8; // 太阳大小
-      
-      // 计算引力
-      _cornerSuns.forEach((sun, i) => {
-        let ax = 0, ay = 0;
-        
-        _cornerSuns.forEach((other, j) => {
-          if (i !== j) {
-            const dx = other.x - sun.x;
-            const dy = other.y - sun.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            
-            if (dist > 0.01) {
-              const force = G * other.mass / (dist * dist);
-              ax += dx / dist * force;
-              ay += dy / dist * force;
-            }
-          }
-        });
-        
-        sun.vx += ax * dt;
-        sun.vy += ay * dt;
-        sun.vx *= 0.9995;
-        sun.vy *= 0.9995;
-      });
-      
-      // 更新位置
-      _cornerSuns.forEach(sun => {
-        sun.x += sun.vx * dt;
-        sun.y += sun.vy * dt;
-        
-        // 软边界
-        if (sun.x < 0.15) { sun.x = 0.15; sun.vx *= -0.5; }
-        if (sun.x > 0.85) { sun.x = 0.85; sun.vx *= -0.5; }
-        if (sun.y < 0.15) { sun.y = 0.15; sun.vy *= -0.5; }
-        if (sun.y > 0.85) { sun.y = 0.85; sun.vy *= -0.5; }
-        
-        // 更新 DOM
-        if (sun.el) {
-          sun.el.style.left = (sun.x * size - sunSize / 2) + 'px';
-          sun.el.style.top = (sun.y * size - sunSize / 2) + 'px';
-          sun.el.style.background = `hsla(${sun.hue}, 80%, 65%, 0.9)`;
-          sun.el.style.color = `hsla(${sun.hue}, 80%, 65%, 0.8)`;
-        }
-      });
-      
-      // 判定纪元
-      const era = _calculateEra();
-      if (era !== _prevEra) {
-        _sE(era, true);
-        _prevEra = era;
-      }
-      
-      requestAnimationFrame(_uCs);
-    }
-
-    // 背景三体太阳系统
-    const _suns = [
-      { el: null, x: 0.3, y: 0.5, vx: 0.0008, vy: 0.0005, mass: 1, hue: 30 },
-      { el: null, x: 0.5, y: 0.35, vx: -0.0006, vy: 0.0009, mass: 1.2, hue: 200 },
-      { el: null, x: 0.7, y: 0.55, vx: 0.0007, vy: -0.0007, mass: 0.9, hue: 280 }
-    ];
-    
-    function _iSs() {
-      _suns[0].el = document.getElementById('sun1');
-      _suns[1].el = document.getElementById('sun2');
-      _suns[2].el = document.getElementById('sun3');
-    }
-    
-    // 简化的三体引力模拟
-    function _uSs() {
-      const G = 0.0000008; // 引力常数（简化）
-      const dt = 1;
-      
-      // 计算每个太阳受到的引力
-      _suns.forEach((sun, i) => {
-        let ax = 0, ay = 0;
-        
-        _suns.forEach((other, j) => {
-          if (i !== j) {
-            const dx = other.x - sun.x;
-            const dy = other.y - sun.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            
-            // 避免除以零
-            if (dist > 0.01) {
-              const force = G * other.mass / (dist * dist);
-              ax += dx / dist * force;
-              ay += dy / dist * force;
-            }
-          }
-        });
-        
-        // 更新速度
-        sun.vx += ax * dt;
-        sun.vy += ay * dt;
-        
-        // 阻尼（防止速度过大）
-        sun.vx *= 0.9995;
-        sun.vy *= 0.9995;
-      });
-      
-      // 更新位置
-      _suns.forEach(sun => {
-        sun.x += sun.vx * dt;
-        sun.y += sun.vy * dt;
-        
-        // 边界反弹（软边界）
-        if (sun.x < 0.1) { sun.x = 0.1; sun.vx *= -0.5; }
-        if (sun.x > 0.9) { sun.x = 0.9; sun.vx *= -0.5; }
-        if (sun.y < 0.1) { sun.y = 0.1; sun.vy *= -0.5; }
-        if (sun.y > 0.9) { sun.y = 0.9; sun.vy *= -0.5; }
-        
-        // 更新 DOM 位置
-        if (sun.el) {
-          sun.el.style.left = (sun.x * window.innerWidth - 30) + 'px';
-          sun.el.style.top = (sun.y * window.innerHeight - 30) + 'px';
-          sun.el.style.background = `radial-gradient(circle, hsla(${sun.hue}, 80%, 70%, 0.9) 0%, hsla(${sun.hue}, 70%, 50%, 0) 70%)`;
-        }
-      });
-      
-      requestAnimationFrame(_uSs);
-    }
-
     const _eg = document.getElementById('eraGlyph');
     const _esm = [
       { c: 'era-stable', dMin: 30000, dMax: 60000, s: 1, b: 208 },
@@ -751,16 +575,19 @@
     let _ei = 0, _et = Date.now(), _currentDuration = 46000;
 
     function _fG() {
-      const system = document.getElementById('eraSystem');
-      if (!system) return;
-      system.classList.remove('shift');
-      void system.offsetWidth;
-      system.classList.add('shift');
+      if (!_eg) return;
+      _eg.classList.remove('shift');
+      void _eg.offsetWidth;
+      _eg.classList.add('shift');
     }
 
     function _sE(i, n = true) {
       _ei = i;
+      _et = Date.now();
       const e = _esm[_ei];
+      // 随机生成持续时间（符合三体不可预知性）
+      _currentDuration = e.dMin + Math.random() * (e.dMax - e.dMin);
+      
       document.body.classList.remove('era-stable', 'era-chaos', 'era-eclipse');
       document.body.classList.add(e.c);
       _es = e.s;
@@ -769,6 +596,11 @@
         _fG();
         _v([8, 12, 8]);
       }
+    }
+
+    function _uE() {
+      if (Date.now() - _et > _currentDuration) _sE((_ei + 1) % _esm.length);
+      requestAnimationFrame(_uE);
     }
 
     function _cSh() {
@@ -1477,20 +1309,17 @@
     
     // Initialize
     _sE(0, false);
-    _iCs();
-    _iSs();
     _cRs();
     _cPs();
     _iCr();
     _uC();
     _uRs();
     _uPs();
-    _uCs();
-    _uSs();
     _uCr();
     _rP();
     _cA();
     _uCT();
+    _uE();
   </script>
 </body>
 </html>
